@@ -4262,6 +4262,27 @@ func note_city_arrival(lines: Array[String]) -> bool:
 	write_journal(" ".join(lines))
 	return true
 
+## Geçiş belgeleri (Y-C31): belge -> son geçerli gün. Kayıtta.
+var passes: Dictionary = {}
+
+func pass_valid(pass_id: String) -> bool:
+	return int(passes.get(pass_id, -1)) >= total_days_elapsed
+
+## Bu yolculuk belgeyi istiyor ve kervanda geçerli belge yok.
+func pass_needed(pass_id: String) -> bool:
+	if not is_journey_active() or pass_valid(pass_id):
+		return false
+	return PassCatalog.required_on(pass_id, journey_origin_id, journey_destination_id)
+
+## Belgeyi verir; gün 0 ise yalnız bu yolculuk için. Deftere yazılır.
+func grant_pass(pass_id: String, days: int) -> void:
+	if not PassCatalog.PASSES.has(pass_id):
+		return
+	var span := days if days > 0 else journey_days_remaining + 1
+	passes[pass_id] = total_days_elapsed + span
+	write_journal(TranslationServer.translate("UI_PASS_GRANTED") % [
+		TranslationServer.translate(PassCatalog.name_key(pass_id)), span])
+
 ## Dünya sırrının duyulan ipuçları (Y-E04). Kayıtta; ipucu bir kez duyulur.
 var secret_clues: Array = []
 ## Bu yol gününde duyulan ipucu, ekranın günlüğe dökmesi için (kayda girmez).
@@ -7369,6 +7390,7 @@ func to_save_dict() -> Dictionary:
 		"plague_news": plague_news.duplicate(true),
 		"journal": journal.duplicate(true),
 		"secret_clues": secret_clues.duplicate(),
+		"passes": passes.duplicate(),
 		"city_morale": city_morale.duplicate(),
 		"journeys_completed": journeys_completed,
 		"best_forage_find": best_forage_find,
@@ -7531,6 +7553,7 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	plague_news = (data.get("plague_news", {}) as Dictionary).duplicate(true)
 	journal = (data.get("journal", []) as Array).duplicate(true)
 	secret_clues = (data.get("secret_clues", []) as Array).duplicate()
+	passes = (data.get("passes", {}) as Dictionary).duplicate()
 	city_morale = (data.get("city_morale", {}) as Dictionary).duplicate()
 
 	# Vagonlar önce senkron edilir - kargo yalnızca vagonlar gerçek
@@ -7918,6 +7941,9 @@ func build_event_context() -> Dictionary:
 	var period := SideriaCalendar.period(total_days_elapsed)
 	if not period.is_empty():
 		context["takvim_" + period] = 1.0
+	for pass_id in PassCatalog.PASSES:
+		if pass_needed(pass_id):
+			context["pass_needed_" + String(pass_id)] = 1.0
 	return context
 
 ## --- Lonca özel görevleri (bkz. Faz 17 PR-4) ---

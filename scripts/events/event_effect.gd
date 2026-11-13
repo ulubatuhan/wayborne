@@ -142,6 +142,9 @@ enum Type {
 	# Bugünkü sözler bayrak: vadesi, tanığı ve bozulunca yayılması yok
 	# (teşhis A15). Söz bu dünyada bir sicildir (lore §12.4).
 	SOZ,
+	# Geçiş belgesi verir (Y-C31). text_value = belge (PassCatalog), amount =
+	# geçerli gün; 0 yalnız bu yolculuk. Belge deftere yazılır.
+	PASS_GRANT,
 }
 
 @export var type: Type = Type.GOLD

@@ -1645,6 +1645,11 @@
               "amount": 5,
               "text": "",
               "type": "STRESS"
+            },
+            {
+              "amount": -30,
+              "text": "kin|yoldas|kisa|yuz",
+              "type": "IZ_BIRAK"
             }
           ],
           "label": "Söz ver, oyala",
@@ -1663,7 +1668,13 @@
             "difficulty": 0,
             "stat": "CHARISMA"
           },
-          "effects": [],
+          "effects": [
+            {
+              "amount": -40,
+              "text": "kin|yoldas|kisa|yuz",
+              "type": "IZ_BIRAK"
+            }
+          ],
           "label": "Otoriteni göster",
           "locked": "",
           "outcomes": [
@@ -1876,6 +1887,11 @@
               "amount": 3,
               "text": "",
               "type": "REPUTATION"
+            },
+            {
+              "amount": 40,
+              "text": "minnet|kisi|kisa|teklif",
+              "type": "IZ_BIRAK"
             }
           ],
           "label": "Sahibini ara",
@@ -3150,7 +3166,13 @@
           "requirements": []
         },
         {
-          "effects": [],
+          "effects": [
+            {
+              "amount": 30,
+              "text": "minnet|bolge|kisa|kapi",
+              "type": "IZ_BIRAK"
+            }
+          ],
           "label": "Selam ver, ateşlerine otur",
           "locked": "",
           "outcomes": [
@@ -3237,7 +3259,13 @@
             "difficulty": 0,
             "stat": "INTELLECT"
           },
-          "effects": [],
+          "effects": [
+            {
+              "amount": 30,
+              "text": "minnet|bolge|kisa|teklif",
+              "type": "IZ_BIRAK"
+            }
+          ],
           "label": "Defterleri iste, hakemlik yap",
           "locked": "",
           "outcomes": [
@@ -3724,6 +3752,11 @@
               "amount": 0,
               "text": "amulet_wayfarer_stone",
               "type": "GRANT_EQUIPMENT"
+            },
+            {
+              "amount": 30,
+              "text": "kutsal|yol|kisa|yuz",
+              "type": "IZ_BIRAK"
             }
           ],
           "label": "Dur, dua et",
@@ -3736,7 +3769,13 @@
             "difficulty": 0,
             "stat": "FAITH"
           },
-          "effects": [],
+          "effects": [
+            {
+              "amount": -50,
+              "text": "kutsal|bolge|kisa|ret",
+              "type": "IZ_BIRAK"
+            }
+          ],
           "label": "Adakları al",
           "locked": "",
           "outcomes": [
@@ -4737,6 +4776,11 @@
               "amount": -30,
               "text": "",
               "type": "GOLD"
+            },
+            {
+              "amount": 30,
+              "text": "minnet|kisi|kisa|teklif",
+              "type": "IZ_BIRAK"
             }
           ],
           "label": "Cesaretine para ver (30 altın)",
@@ -5799,6 +5843,11 @@
               "amount": -4,
               "text": "",
               "type": "MORALE"
+            },
+            {
+              "amount": -30,
+              "text": "kin|yoldas|kisa|yuz",
+              "type": "IZ_BIRAK"
             }
           ],
           "label": "Araştır - kim aldığını bul",
@@ -6269,7 +6318,13 @@
             "difficulty": 0,
             "stat": "CHARISMA"
           },
-          "effects": [],
+          "effects": [
+            {
+              "amount": 30,
+              "text": "minnet|kisi|kisa|teklif",
+              "type": "IZ_BIRAK"
+            }
+          ],
           "label": "Teklifi kabul et, alışveriş yap",
           "locked": "",
           "outcomes": [
@@ -7146,6 +7201,11 @@
               "amount": 2,
               "text": "kardeslik",
               "type": "FACTION"
+            },
+            {
+              "amount": -30,
+              "text": "soylenti|bolge|kisa|dusman",
+              "type": "IZ_BIRAK"
             }
           ],
           "label": "Haracı öde (140 GG)",
@@ -12876,6 +12936,579 @@
         {
           "effects": [
             {
+              "amount": -6,
+              "text": "",
+              "type": "PROVISIONS"
+            },
+            {
+              "amount": 360,
+              "text": "tamga",
+              "type": "PASS_GRANT"
+            },
+            {
+              "amount": 30,
+              "text": "minnet|bolge|kisa|kapi",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "Un ver (6 erzak), bir yıllık tamga al",
+          "locked": "Verecek un yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "provisions",
+              "op": "GREATER_EQUAL",
+              "value": 6
+            }
+          ]
+        },
+        {
+          "effects": [
+            {
+              "amount": -60,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": 120,
+              "text": "tamga",
+              "type": "PASS_GRANT"
+            }
+          ],
+          "label": "Gümüşle öde (60 GG), dört aylık tamga",
+          "locked": "Kesede 60 GG yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "gold",
+              "op": "GREATER_EQUAL",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "CHARISMA"
+          },
+          "effects": [],
+          "label": "Bir boyun adını an, kefil iste",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 60,
+                  "text": "tamga",
+                  "type": "PASS_GRANT"
+                },
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "MORALE"
+                }
+              ],
+              "label": "{who} bir boyun adını ve o boydan bir tanıdığı anıyor; adam keçeye damgayı basıyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 1,
+                  "text": "",
+                  "type": "TRAVEL_DAYS"
+                },
+                {
+                  "amount": 60,
+                  "text": "tamga",
+                  "type": "PASS_GRANT"
+                }
+              ],
+              "label": "{who} anılan adı adama tanıtamıyor; adam kervanı bir gün kapıda bekletiyor, sonra tamgayı veriyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 2,
+                  "text": "",
+                  "type": "TRAVEL_DAYS"
+                },
+                {
+                  "amount": 10,
+                  "text": "",
+                  "type": "DANGER"
+                },
+                {
+                  "amount": -30,
+                  "text": "soylenti|bolge|kisa|kapi",
+                  "type": "IZ_BIRAK"
+                }
+              ],
+              "label": "{who} yanlış boyu anıyor. Kapı kapanıyor; kervan bozkırın kenarından dolaşmak zorunda.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "pass_needed_tamga",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 1,
+      "id": "evt_pass_tamga",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Orbeyan Kervansarayı'nın keçe kapısında Kutlay Ana'nın adamı bekliyor. Gokyurt'a izinsiz girilmez: izin bir tamgadır, boyun damgası keçeye basılır ve kervan onu çadırının direğine asar. Tamgayı veren boy kervanın sözünden sorumludur. Un getiren kervanın tamgası bir yıl geçer.",
+      "title": "Orbeyan'ın Tamgası",
+      "triggered_only": false,
+      "weight": 6
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": -80,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": 3,
+              "text": "",
+              "type": "STRESS"
+            }
+          ],
+          "label": "İki katını öde (80 GG)",
+          "locked": "Kesede 80 GG yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "gold",
+              "op": "GREATER_EQUAL",
+              "value": 80
+            }
+          ]
+        },
+        {
+          "effects": [
+            {
+              "amount": 1,
+              "text": "",
+              "type": "TRAVEL_DAYS"
+            },
+            {
+              "amount": -20,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": 90,
+              "text": "boynuz_fis",
+              "type": "PASS_GRANT"
+            }
+          ],
+          "label": "Öküz Kâtibi'ne dön, fişi al (bir gün, 20 GG)",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "CHARISMA"
+          },
+          "effects": [],
+          "label": "Fişin yolda kaybolduğunu söyle",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 2,
+                  "text": "",
+                  "type": "MORALE"
+                },
+                {
+                  "amount": 0,
+                  "text": "boynuz_fis",
+                  "type": "PASS_GRANT"
+                }
+              ],
+              "label": "{who} fişin rengini ve kâtibin el yazısını anlatıyor; muhafız inanıp geçiriyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -40,
+                  "text": "",
+                  "type": "GOLD"
+                }
+              ],
+              "label": "Muhafız {who} anlattığına yarı inanıyor; iki katın yarısını alıyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -80,
+                  "text": "",
+                  "type": "GOLD"
+                },
+                {
+                  "amount": 5,
+                  "text": "",
+                  "type": "TRADE_STAIN"
+                }
+              ],
+              "label": "Muhafız {who} yalanını baronun defterine yazdırıyor; iki katı da alıyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "pass_needed_boynuz_fis",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 1,
+      "id": "evt_pass_horn_tally",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "İki Bayrak Kulesi'nin önünde baronun muhafızı elini uzatıyor: boynuz fiş. Ezmerak kapısındaki Öküz Kâtibi kervanın ticaretini yazar ve fişi verir; fişsiz çıkan kervan Golcavar yolunda iki katını öder. Muhafız iki katın ne kadar olduğunu söylemiyor, gülüyor.",
+      "title": "Boynuz Fiş",
+      "triggered_only": false,
+      "weight": 6
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": -5,
+              "text": "",
+              "type": "PROVISIONS"
+            },
+            {
+              "amount": 0,
+              "text": "bedel_tasi",
+              "type": "PASS_GRANT"
+            }
+          ],
+          "label": "Taşa un koy (5 erzak)",
+          "locked": "Konacak un yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "provisions",
+              "op": "GREATER_EQUAL",
+              "value": 5
+            }
+          ]
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "PERCEPTION"
+          },
+          "effects": [],
+          "label": "Gece taşı gözle, gelenle konuş",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -3,
+                  "text": "",
+                  "type": "PROVISIONS"
+                },
+                {
+                  "amount": 0,
+                  "text": "bedel_tasi",
+                  "type": "PASS_GRANT"
+                }
+              ],
+              "label": "{who} gece gelen dağlıyı görüyor ve onunla konuşuyor; dağlı daha azına razı oluyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -5,
+                  "text": "",
+                  "type": "PROVISIONS"
+                },
+                {
+                  "amount": 0,
+                  "text": "bedel_tasi",
+                  "type": "PASS_GRANT"
+                }
+              ],
+              "label": "{who} bekliyor ama kimseyi görmüyor; sabah taşın üstündeki un bile eksik.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 0,
+                  "text": "bandit",
+                  "type": "TRIGGER_COMBAT"
+                }
+              ],
+              "label": "Dağlılar {who} gözetlediğini görüyor; gözetlenmek onlar için hakarettir.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 2,
+              "text": "",
+              "type": "TRAVEL_DAYS"
+            },
+            {
+              "amount": 10,
+              "text": "",
+              "type": "DANGER"
+            },
+            {
+              "amount": -40,
+              "text": "kin|bolge|kisa|dusman",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "Taşa bir şey koyma",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "pass_needed_bedel_tasi",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 1,
+      "id": "evt_pass_toll_stone",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Yolun başında yassı bir taş. Kervan bedelini taşın üstüne koyar, kabile gece alır; bedel konmazsa yol sabah kapanır. Taşın üstünde bir önceki kervanın bıraktığı bir avuç gümüş duruyor, alınmamış. Kıtlıkta dağlı parayı değil unu ister.",
+      "title": "Bedel Taşı",
+      "triggered_only": false,
+      "weight": 6
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": -25,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": 360,
+              "text": "zil",
+              "type": "PASS_GRANT"
+            }
+          ],
+          "label": "Zil al (25 GG)",
+          "locked": "Kesede 25 GG yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "gold",
+              "op": "GREATER_EQUAL",
+              "value": 25
+            }
+          ]
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "AGILITY"
+          },
+          "effects": [],
+          "label": "Zilsiz, sessizce yürü",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} kervanı ana yoldan uzak tutuyor; kimse zilsiz geçtiğinizi fark etmiyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 4,
+                  "text": "",
+                  "type": "TRADE_STAIN"
+                },
+                {
+                  "amount": -2,
+                  "text": "",
+                  "type": "REPUTATION"
+                }
+              ],
+              "label": "Bir okuyucu zilsiz arabayı görüyor ve {who} adını soruyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 0,
+                  "text": "guard",
+                  "type": "TRIGGER_COMBAT"
+                }
+              ],
+              "label": "Kilise muhafızları zilsiz kervanı izinsiz sayıyor ve {who} karşısında yolu kesiyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 2,
+              "text": "",
+              "type": "TRAVEL_DAYS"
+            }
+          ],
+          "label": "Geri dön, başka yoldan dolaş (iki gün)",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "pass_needed_zil",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 1,
+      "id": "evt_pass_bell",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Orvahel yoluna giren her kervan vagonuna bir zil takar ki geldiği bilinsin. Zil Vorgat'ta dökülür, Orvahel kapısında kutsanır; inanmayan da takar, çünkü zil inancı değil geldiğini söyler. Yol başında bir satıcı küçük tunç ziller sallıyor.",
+      "title": "Yolun Zili",
+      "triggered_only": false,
+      "weight": 6
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
               "amount": -4,
               "text": "",
               "type": "PROVISIONS"
@@ -13998,6 +14631,11 @@
               "amount": -240,
               "text": "",
               "type": "GOLD"
+            },
+            {
+              "amount": -30,
+              "text": "soylenti|bolge|kisa|dusman",
+              "type": "IZ_BIRAK"
             }
           ],
           "label": "Öde (240 GG)",
@@ -14120,6 +14758,11 @@
               "amount": -10,
               "text": "",
               "type": "DANGER"
+            },
+            {
+              "amount": 40,
+              "text": "minnet|bolge|uzun|teklif",
+              "type": "IZ_BIRAK"
             }
           ],
           "label": "Kervansarayı geri al (savaş)",
@@ -14239,6 +14882,11 @@
               "amount": 0,
               "text": "serai_duvenmor",
               "type": "BAN_LOCATION"
+            },
+            {
+              "amount": -60,
+              "text": "kin|sehir|uzun|ret",
+              "type": "IZ_BIRAK"
             }
           ],
           "label": "İçeride kılıcını çek (Duvenmor'a bir daha giremezsin)",
@@ -15390,6 +16038,11 @@
               "amount": 2,
               "text": "",
               "type": "REPUTATION"
+            },
+            {
+              "amount": 40,
+              "text": "minnet|sehir|kisa|kapi",
+              "type": "IZ_BIRAK"
             }
           ],
           "label": "Yükten ver (12 erzak)",
@@ -15409,6 +16062,11 @@
               "amount": -60,
               "text": "",
               "type": "GOLD"
+            },
+            {
+              "amount": -30,
+              "text": "soylenti|sehir|kisa|fiyat",
+              "type": "IZ_BIRAK"
             }
           ],
           "label": "Kethüdaya kese ver (60 GG)",
@@ -16015,6 +16673,11 @@
               "amount": -5,
               "text": "",
               "type": "DANGER"
+            },
+            {
+              "amount": 30,
+              "text": "minnet|bolge|kisa|kapi",
+              "type": "IZ_BIRAK"
             }
           ],
           "label": "En dayanıklınız garnizonla nöbet tutsun",
@@ -17834,6 +18497,11 @@
               "amount": -8,
               "text": "",
               "type": "MORALE"
+            },
+            {
+              "amount": -30,
+              "text": "soylenti|bolge|kisa|dusman",
+              "type": "IZ_BIRAK"
             }
           ],
           "label": "İstedikleri unu ver",

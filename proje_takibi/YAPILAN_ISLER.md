@@ -2,7 +2,7 @@
 
 Bitmiş ve doğrulanmış (testi ya da kullanıcı onayı geçmiş) görevler. Kod dalı: `wayborne`, `yerel/yapilacaklar-p05-p06` (önceki tur `yerel/yapilacaklar-p01-p04`). Push edilmedi.
 
-Toplam: **208** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **209** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
 
@@ -1439,6 +1439,23 @@ Toplam: **208** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler
   - **Ne:** Duvenmor'un içinde kılıç çekilmez; çeken kervan bir daha giremez. Tetikleyici bir yol düşmanlığının kervansarayda sürmesi (rakip kervan, intikamcı tüccar).
   - **Kullanıcı notu:** "Tarafsız zemin: Onay."
   - **Kabul:** Yasak kaydı kayıtta tutulur ve giriş kilitli, nedeniyle görünür.
+
+</details>
+
+### Y-C31 · Geçiş belgesi
+
+- **Durum:** bitti · **Öncelik:** P2 · **Paket:** P07 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
+- **Bağımlı:** Y-E06
+- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-11-01: geçiş belgelerinin adları ve sahipleri defter III'te; cevap gelince yapılır. | 2026-11-13 (kullanıcı: 'kendin yapabilirsin'): dört belge tek sistem (PassCatalog): Orbeyan tamgası, Ezmerak boynuz fişi, Ayazkaya bedel taşı, Orvahel yolunun zili; adlar ve sahipleri SIDERIA §10.1/10.3/10.5/10.9'dan. Belge yola bağlı ve süreli (GameSession.passes, kayıtta), alınınca deftere yazılır; belgesizken kendi kartı açılır ve bedel orada ödenir (PASS_GRANT etkisi). Test: test_passes (süre, bitiş, belgesiz kart, kayıt).
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-C31 Geçiş belgesi**
+  - **Öncelik:** P2 · **Dalga:** 2 · **Bağımlı:** Y-E06 · **Kim:** C
+  - **Ne:** Orbeyan tamgası, Ezmerak boynuz fişi, Ayazkaya bedel taşı ve Avuçiçi zili tek sistem: yolun sahibi güce ödenir, karşılığında süreli belge alınır, deftere yazılır. Lore taslakları defter III'te onay bekliyor.
+  - **Kullanıcı notu:** "Geçiş belgesi: Onay."
+  - **Kabul:** Belgesiz geçişin bedeli ve belgenin süresi test edilir.
 
 </details>
 

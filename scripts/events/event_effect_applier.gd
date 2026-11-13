@@ -226,6 +226,9 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 			_apply_soul(effect, session, result)
 		EventEffect.Type.SOZ:
 			_apply_promise(effect, session, result)
+		EventEffect.Type.PASS_GRANT:
+			session.grant_pass(effect.text_value, effect.amount)
+			result.lines.append(_t("EFF_PASS_GRANTED") % _t(PassCatalog.name_key(effect.text_value)))
 		EventEffect.Type.CHAIN_ADVANCE:
 			var parts := effect.text_value.split("|")
 			if parts.size() >= 2:

@@ -527,6 +527,10 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_cal_pilgrim_road())
 	_road_events.append(_cal_fair_news())
 	_road_events.append(_cal_stone_night())
+	_road_events.append(_pass_tamga())
+	_road_events.append(_pass_horn_tally())
+	_road_events.append(_pass_toll_stone())
+	_road_events.append(_pass_bell())
 	_road_events.append(_wandering_players())
 	_road_events.append(_penitent_procession())
 	_road_events.append(_hidden_guide())
@@ -3578,6 +3582,70 @@ static func _cal_stone_night() -> GameEvent:
 			"EVT_CAL_STONES_COUNT_MID", _effects([_fx(EventEffect.Type.STRESS, -2)]),
 			"EVT_CAL_STONES_COUNT_BAD", _effects([_fx(EventEffect.Type.STRESS, 6), _fx(EventEffect.Type.IZ_BIRAK, -30, "kutsal|yol|kisa|fiyat")])),
 		_choice("EVT_CAL_STONES_OPT_GO", _effects([_fx(EventEffect.Type.STRESS, 8), _fx(EventEffect.Type.MORALE, -4)])),
+	])
+	return event
+
+## Y-C31 geçiş belgesi · Y-C31: Orbeyan tamgası; un getiren kervanınki bir yıl geçer (SIDERIA §10.1).
+static func _pass_tamga() -> GameEvent:
+	var event := _event("evt_pass_tamga", "EVT_PASS_TAMGA_TITLE", "EVT_PASS_TAMGA_TEXT", 6.0)
+	event.cooldown_days = 1
+	event.max_per_journey = 1
+	event.conditions = _conditions([_c("pass_needed_tamga", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_gated_choice("EVT_PASS_TAMGA_OPT_FLOUR", "EVT_PASS_TAMGA_OPT_FLOUR_LOCKED", _conditions([_c("provisions", EventCondition.Op.GREATER_EQUAL, 6)]), _effects([_fx(EventEffect.Type.PROVISIONS, -6), _fx(EventEffect.Type.PASS_GRANT, 360, "tamga"), _fx(EventEffect.Type.IZ_BIRAK, 30, "minnet|bolge|kisa|kapi")])),
+		_gated_choice("EVT_PASS_TAMGA_OPT_SILVER", "EVT_PASS_TAMGA_OPT_SILVER_LOCKED", _conditions([_c("gold", EventCondition.Op.GREATER_EQUAL, 60)]), _effects([_fx(EventEffect.Type.GOLD, -60), _fx(EventEffect.Type.PASS_GRANT, 120, "tamga")])),
+		_check_choice("EVT_PASS_TAMGA_OPT_KIN", CharacterStats.Kind.CHARISMA, SkillCheck.Source.LEADER,
+			"EVT_PASS_TAMGA_KIN_OK", _effects([_fx(EventEffect.Type.PASS_GRANT, 60, "tamga"), _fx(EventEffect.Type.MORALE, 3)]),
+			"EVT_PASS_TAMGA_KIN_MID", _effects([_fx(EventEffect.Type.TRAVEL_DAYS, 1), _fx(EventEffect.Type.PASS_GRANT, 60, "tamga")]),
+			"EVT_PASS_TAMGA_KIN_BAD", _effects([_fx(EventEffect.Type.TRAVEL_DAYS, 2), _fx(EventEffect.Type.DANGER, 10), _fx(EventEffect.Type.IZ_BIRAK, -30, "soylenti|bolge|kisa|kapi")])),
+	])
+	return event
+
+## Y-C31 geçiş belgesi · Y-C31: Ezmerak boynuz fişi; fişsiz çıkan iki katını öder (SIDERIA §10.3).
+static func _pass_horn_tally() -> GameEvent:
+	var event := _event("evt_pass_horn_tally", "EVT_PASS_HORN_TITLE", "EVT_PASS_HORN_TEXT", 6.0)
+	event.cooldown_days = 1
+	event.max_per_journey = 1
+	event.conditions = _conditions([_c("pass_needed_boynuz_fis", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_gated_choice("EVT_PASS_HORN_OPT_DOUBLE", "EVT_PASS_HORN_OPT_DOUBLE_LOCKED", _conditions([_c("gold", EventCondition.Op.GREATER_EQUAL, 80)]), _effects([_fx(EventEffect.Type.GOLD, -80), _fx(EventEffect.Type.STRESS, 3)])),
+		_choice("EVT_PASS_HORN_OPT_BACK", _effects([_fx(EventEffect.Type.TRAVEL_DAYS, 1), _fx(EventEffect.Type.GOLD, -20), _fx(EventEffect.Type.PASS_GRANT, 90, "boynuz_fis")])),
+		_check_choice("EVT_PASS_HORN_OPT_LOST", CharacterStats.Kind.CHARISMA, SkillCheck.Source.LEADER,
+			"EVT_PASS_HORN_LOST_OK", _effects([_fx(EventEffect.Type.MORALE, 2), _fx(EventEffect.Type.PASS_GRANT, 0, "boynuz_fis")]),
+			"EVT_PASS_HORN_LOST_MID", _effects([_fx(EventEffect.Type.GOLD, -40)]),
+			"EVT_PASS_HORN_LOST_BAD", _effects([_fx(EventEffect.Type.GOLD, -80), _fx(EventEffect.Type.TRADE_STAIN, 5)])),
+	])
+	return event
+
+## Y-C31 geçiş belgesi · Y-C31: Ayazkaya bedel taşı; bedel konmazsa yol sabah kapanır, kıtlıkta un istenir (SIDERIA §10.5).
+static func _pass_toll_stone() -> GameEvent:
+	var event := _event("evt_pass_toll_stone", "EVT_PASS_STONE_TITLE", "EVT_PASS_STONE_TEXT", 6.0)
+	event.cooldown_days = 1
+	event.max_per_journey = 1
+	event.conditions = _conditions([_c("pass_needed_bedel_tasi", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_gated_choice("EVT_PASS_STONE_OPT_FLOUR", "EVT_PASS_STONE_OPT_FLOUR_LOCKED", _conditions([_c("provisions", EventCondition.Op.GREATER_EQUAL, 5)]), _effects([_fx(EventEffect.Type.PROVISIONS, -5), _fx(EventEffect.Type.PASS_GRANT, 0, "bedel_tasi")])),
+		_check_choice("EVT_PASS_STONE_OPT_WATCH", CharacterStats.Kind.PERCEPTION, SkillCheck.Source.PARTY_BEST,
+			"EVT_PASS_STONE_WATCH_OK", _effects([_fx(EventEffect.Type.PROVISIONS, -3), _fx(EventEffect.Type.PASS_GRANT, 0, "bedel_tasi")]),
+			"EVT_PASS_STONE_WATCH_MID", _effects([_fx(EventEffect.Type.PROVISIONS, -5), _fx(EventEffect.Type.PASS_GRANT, 0, "bedel_tasi")]),
+			"EVT_PASS_STONE_WATCH_BAD", _effects([_fx(EventEffect.Type.TRIGGER_COMBAT, 0, "bandit")])),
+		_choice("EVT_PASS_STONE_OPT_NOTHING", _effects([_fx(EventEffect.Type.TRAVEL_DAYS, 2), _fx(EventEffect.Type.DANGER, 10), _fx(EventEffect.Type.IZ_BIRAK, -40, "kin|bolge|kisa|dusman")])),
+	])
+	return event
+
+## Y-C31 geçiş belgesi · Y-C31: Orvahel yolunun zili; inanmayan da takar, zil geldiğini söyler (SIDERIA §10.9).
+static func _pass_bell() -> GameEvent:
+	var event := _event("evt_pass_bell", "EVT_PASS_BELL_TITLE", "EVT_PASS_BELL_TEXT", 6.0)
+	event.cooldown_days = 1
+	event.max_per_journey = 1
+	event.conditions = _conditions([_c("pass_needed_zil", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_gated_choice("EVT_PASS_BELL_OPT_BUY", "EVT_PASS_BELL_OPT_BUY_LOCKED", _conditions([_c("gold", EventCondition.Op.GREATER_EQUAL, 25)]), _effects([_fx(EventEffect.Type.GOLD, -25), _fx(EventEffect.Type.PASS_GRANT, 360, "zil")])),
+		_check_choice("EVT_PASS_BELL_OPT_QUIET", CharacterStats.Kind.AGILITY, SkillCheck.Source.PARTY_BEST,
+			"EVT_PASS_BELL_QUIET_OK", _effects([_fx(EventEffect.Type.STRESS, 3)]),
+			"EVT_PASS_BELL_QUIET_MID", _effects([_fx(EventEffect.Type.TRADE_STAIN, 4), _fx(EventEffect.Type.REPUTATION, -2)]),
+			"EVT_PASS_BELL_QUIET_BAD", _effects([_fx(EventEffect.Type.TRIGGER_COMBAT, 0, "guard")])),
+		_choice("EVT_PASS_BELL_OPT_ROUND", _effects([_fx(EventEffect.Type.TRAVEL_DAYS, 2)])),
 	])
 	return event
 

@@ -122,6 +122,11 @@ NOTES = {
     "evt_reg_silent_hour": "Avuçiçi: okuma saatinde yol susar. Şarkı sürerse kilise bunu unutmaz.",
     "evt_comp_letter_home": "Yoldaş kartı: evden gelen mektup. Kalmasını istemek kırgınlık bırakabilir; gitmesine izin vermek bir kişi eksiltir.",
     "evt_comp_night_confession": "Yoldaş kartı: nöbette itiraf. Sırrı tutmak minnet, ötekilere söylemek kervanın güveni.",
+    # --- Geçiş belgeleri (Y-C31) ---
+    "evt_pass_tamga": "Geçiş belgesi: Orbeyan tamgası. Un getiren bir yıllık, gümüş getiren dört aylık tamga alır; kefilsiz kapı kapanır.",
+    "evt_pass_horn_tally": "Geçiş belgesi: Ezmerak'ın boynuz fişi. Fişsiz çıkan iki katını öder; geri dönüp fişi almak bir gün yer.",
+    "evt_pass_toll_stone": "Geçiş belgesi: Ayazkaya'nın bedel taşı. Kıtlıkta dağlı un ister; bedel konmazsa yol sabah kapanır.",
+    "evt_pass_bell": "Geçiş belgesi: Orvahel yolunun zili. İnanmayan da takar; zilsiz kervan izinsiz sayılır.",
     # --- Takvim (Y-E08) ---
     "evt_cal_pilgrim_road": "Takvim kartı: Hac Yürüyüşü. Kafilenin önüne geçmenin bedeli bir somun ya da bir günlük yürüyüş.",
     "evt_cal_fair_news": "Takvim kartı: Orsolune Panayırı. Aracı yükü yolda ister; fiyatı dinlemek bilgi oyunudur.",

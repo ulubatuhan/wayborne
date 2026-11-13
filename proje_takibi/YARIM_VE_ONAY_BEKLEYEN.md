@@ -54,7 +54,7 @@ tek soru; cevabın gelince sırayla yapılır.
 
 
 
-Toplam: **43** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **42** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
 
@@ -174,23 +174,6 @@ Toplam: **43** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Kullanıcı notu:** "Kıtada kıtlığı tetikleyen bir olay olmalı. Bu büyülü devasa bir olay olabilir, mevsimler değişiklikler olabilir ama tüm kıta bundan etkilenmeli. Temelinde tüm savaşlar bu kıtlıktan sebep olarak çıkmalı. Kıtlık sebebiyle ticaret tarafı limite edilmeli, oyunun odağı ticaret yapmak değil kervanı gerçekten bir noktadan diğerine başarılı bir şekilde götürebilmek olmalı. Belki şehirlerin de morali, mentali tutulmalı arkaplanda ve kervanı oraya iletebilirsek bu statlara katkıda bulunuruz. bu statların seviyesi de o şehirde olan olayları ve bize yaklaşımlarını etkiler. Sonuç olarak o kıtlığı ve yokluğu oyunda cabasıya hissetmeliyiz! Yaptığımız hiçbir şey kolay olmamalı ve mekanikler+ortam bu hissi aktarmalı bize."
   - **Karar gerekenler:** kıtlığın sebebi ve başlangıcı (lore); kıtlık sabit mi, dalgalı mı, oyun boyunca kötüleşiyor mu; şehir moralinin kaç ekseni olacağı; ölçüm (simulate_career'da kârın düşüşü, sefer başı ölüm ve açlık).
   - **Kabul:** Dünyada bir kıtlık durumu ve kökü; savaş haberleri ona bağlı; pazarda kıtlık katmanı (`price_layers` yeni katman); şehir başına kayıtlı moral değeri, ulaştırmayla değişiyor, olay ağırlıklarını ve karşılamayı etkiliyor; simülatörde ticaret payı düştü, ulaştırma geliri öne geçti; ekran görüntüsüyle şehir hâli görünüyor.
-
-</details>
-
-### Y-C31 · Geçiş belgesi
-
-- **Durum:** lore bekliyor · **Öncelik:** P2 · **Paket:** P07 · **Kim:** Claude tek başına
-- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
-- **Bağımlı:** Y-E06
-- **Son not:** 2026-10-31 kullanıcı: fikir listesi cevabı. | 2026-11-01: geçiş belgelerinin adları ve sahipleri defter III'te; cevap gelince yapılır.
-
-<details><summary>Görev metni</summary>
-
-- [ ] **Y-C31 Geçiş belgesi**
-  - **Öncelik:** P2 · **Dalga:** 2 · **Bağımlı:** Y-E06 · **Kim:** C
-  - **Ne:** Orbeyan tamgası, Ezmerak boynuz fişi, Ayazkaya bedel taşı ve Avuçiçi zili tek sistem: yolun sahibi güce ödenir, karşılığında süreli belge alınır, deftere yazılır. Lore taslakları defter III'te onay bekliyor.
-  - **Kullanıcı notu:** "Geçiş belgesi: Onay."
-  - **Kabul:** Belgesiz geçişin bedeli ve belgenin süresi test edilir.
 
 </details>
 

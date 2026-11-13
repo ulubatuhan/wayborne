@@ -1628,3 +1628,8 @@
 "CAL_TAS_GECESI","Taş Gecesi","Night of Stones","","","","","","","","",""
 "UI_SCRIBE_LINE","Kâtip: %s","Scribe: %s","","","","","","","","",""
 "UI_CLUE_HEARD","Ateş başında duyulan: %s","Heard by the fire: %s","","","","","","","","",""
+"PASS_TAMGA","Orbeyan tamgası","Orbeyan tamga","","","","","","","","",""
+"PASS_BOYNUZ_FIS","Boynuz fiş","Horn tally","","","","","","","","",""
+"PASS_BEDEL_TASI","Bedel taşı","Toll stone","","","","","","","","",""
+"PASS_ZIL","Yol zili","Road bell","","","","","","","","",""
+"UI_PASS_GRANTED","Geçiş belgesi alındı: %s, %d gün geçer.","Pass obtained: %s, good for %d days.","","","","","","","","",""
