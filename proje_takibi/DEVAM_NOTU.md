@@ -739,5 +739,12 @@ Hâlâ kullanıcıda: Y-C31 geçiş belgesinin adları (SIDERIA'da yok), Y-A07 z
 - Kullanıcı Y-R01/Y-R02'yi ve planı onayladı (2026-11-13).
 - Y-E02 bitti (191d403): on zincir (7 başka şehrin yolunda, 3 varisin döneminde), `CHAIN_OPENERS` +
   `evt_chain_*`; Codex dökümü yenilendi. Türkçe çekim kuralı: ek özel ada yapışmaz ({who}'in yok).
-- Sıradaki: Y-E08 takvim. SIDERIA §2.3'te yalnız yılbaşı var (İlk Ot / Yol Günü / Sayfa Günü, 360 gün);
-  bayram, fuar ve hac günleri [Karar] olarak yazılacak, sonra oyuna (olay ağırlığı, pazar, kafile).
+- Kullanıcı: "Planlanan tüm işleri yap, onay isteme" (2026-11-13). Hepsi bitti:
+  - Y-E01 (13ae25c, 1cc3e42): 22 bölge/yoldaş/zincir kartı, bağlamda `region_<id>`, çekilebilir 120/120.
+  - Y-E08 (ac6accb): `SideriaCalendar`, SIDERIA §2.3a beş dönem, `takvim_<id>`, saat satırında dönem adı, 3 kart.
+  - Y-I03 (13d88f9): `ScribeLines`, 36 kâtip satırı yol günlüğünde; ses yeri hazır, kayıt listesi docs/ses/.
+  - Y-E04 (2976366): docs/lore/SIR.md + 18 ipucu (`WorldSecret`), kırk seferde ~10,5 duyuluyor.
+  - Codex (8a97711): 112 otomatik sayfanın tasarım notu (`docs/codex/codex_event_notes.py`).
+  - Y-R01 2. parti (0dd79f2): iz bırakan 87/141, dönüş 19-26 (hedef 12-22), FADE_SCALE 0,85.
+- Açık kalan (kullanıcıda): ana hikâye, Y-C31 belge adları, Y-A07 zindan onayı, kâtip kayıtları (AI ses), satış
+  kararları K-01..K-10, 2. bölümdeki ekranda deneme listesi. Yapısal açık: iz sönen payı ~%65 (hedef %25-40).
