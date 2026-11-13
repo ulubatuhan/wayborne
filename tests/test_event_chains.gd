@@ -12,6 +12,7 @@ func run(t) -> void:
 	_test_named_city(t)
 	_test_heir(t)
 	_test_save(t)
+	_test_ten_chains_open_and_close(t)
 
 func _journey(session: GameSession, destination_id: String) -> void:
 	var destination := WorldMapData.get_location_by_id(destination_id)
@@ -70,3 +71,49 @@ func _test_save(t) -> void:
 	reloaded.load_from_dict(session.to_save_dict())
 	t.eq(reloaded.get_chain_stage("oath"), 2, "zincir kayıtta")
 	t.eq(int((reloaded.event_chains["oath"] as Dictionary)["after_day"]), 5, "zincirin günü kayıtta")
+
+## On zincirin her biri: açılışı kataloğda gerçek bir seçeneğe ya da sonuca
+## düşüyor, karşılık kartı olgun zincirle çekilebilir ve her yolu zinciri kapatır.
+func _test_ten_chains_open_and_close(t) -> void:
+	var keys := {}
+	for event in EventCatalog.get_road_events():
+		for choice in event.choices:
+			keys[choice.text_key] = true
+			for outcome in choice.outcomes:
+				keys[outcome.text_key] = true
+	var chains := {}
+	for key in EventCatalog.CHAIN_OPENERS:
+		t.ok(keys.has(key), "zincir açılışı kataloğda: %s" % key)
+		var spec: Array = EventCatalog.CHAIN_OPENERS[key]
+		chains[String(spec[1]).get_slice("|", 0)] = String(spec[1]).get_slice("|", 2)
+	t.ge(chains.size(), 10, "en az on zincir")
+	var heir := 0
+	for chain_id in chains:
+		if chains[chain_id] == "heir":
+			heir += 1
+	t.ge(heir, 3, "en az üç zincir varisin döneminde döner")
+	for event in EventCatalog.get_road_events():
+		var ripe_key := ""
+		for condition in event.conditions:
+			if condition.key.begins_with("chain_") and condition.key.ends_with("_ripe"):
+				ripe_key = condition.key
+		if ripe_key.is_empty() or not event.event_id.begins_with("evt_chain_"):
+			continue
+		var chain_id := ripe_key.trim_prefix("chain_").trim_suffix("_ripe")
+		t.ok(chains.has(chain_id), "karşılık kartının bir açılışı var: %s" % event.event_id)
+		var closing := "%s|%d" % [chain_id, GameSession.CHAIN_DONE]
+		for choice in event.choices:
+			var paths: Array = []
+			if choice.outcomes.is_empty():
+				paths.append(choice.effects)
+			for outcome in choice.outcomes:
+				var merged: Array[EventEffect] = []
+				merged.append_array(choice.effects)
+				merged.append_array(outcome.effects)
+				paths.append(merged)
+			for path in paths:
+				var closes := false
+				for effect in (path as Array[EventEffect]):
+					if effect.type == EventEffect.Type.CHAIN_ADVANCE and effect.text_value == closing:
+						closes = true
+				t.ok(closes, "her yol zinciri kapatır: %s / %s" % [event.event_id, choice.text_key])

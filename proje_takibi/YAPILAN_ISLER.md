@@ -2,7 +2,15 @@
 
 Bitmiş ve doğrulanmış (testi ya da kullanıcı onayı geçmiş) görevler. Kod dalı: `wayborne`, `yerel/yapilacaklar-p05-p06` (önceki tur `yerel/yapilacaklar-p01-p04`). Push edilmedi.
 
-Toplam: **203** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **204** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+
+## Paket P00
+
+### Y-R02 · Yankı varyantlarını seçeneğe göre yaz
+
+- **Durum:** bitti · **Öncelik:** P1 · **Paket:** P00 · **Kim:** kullanıcının işi
+- **Ayrıntı ve geçmiş:** [referans/gorevler/19_ahlak_ruh_iz.md](referans/gorevler/19_ahlak_ruh_iz.md)
+- **Son not:** H9'da 22 kartın her birine bir yankı cümlesi yazıldı (gövdenin sonuna). §D-A4 ayrıca cevaba göre varyant istiyor (<id>_YANKI_<secim>); bedel kayması zaten cevaba bakıyor, metin henüz bakmıyor. | 2026-11-13: 22 kartın 66 cevabına ayrı yankı cümlesi (tr+en, EventCatalog.ECHO_CHOICE_LINE_KEYS; tabloda olmayan cevap genel cümleye düşer). Ekran: screenshot_named_cards.gd ECHO_CARD/ECHO_CHOICE. Metinler kullanıcı onayı bekliyor. | 2026-11-13: kullanıcı metinleri onayladı.
 
 ## Paket P01
 

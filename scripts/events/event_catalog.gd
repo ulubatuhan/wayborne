@@ -148,6 +148,40 @@ static func _add_trace(effects: Array[EventEffect], spec: Array) -> void:
 			return
 	effects.append(EventEffect.make(EventEffect.Type.IZ_BIRAK, int(spec[0]), String(spec[1])))
 
+## --- Uzun zincirlerin açılışları (görev Y-E02) ---
+##
+## Bir karar bir zinciri açar; karşılığı başka bir şehrin yolunda ya da varisin
+## döneminde kendi kartıyla gelir (`advance_chain`, `chain_<id>_ripe`). Değer: [en az gün,
+## "zincir|aşama|nerede"]. Anahtar seçenek ya da sonuç: zincir yalnız o yol seçilince açılır.
+const CHAIN_OPENERS: Dictionary = {
+	"EVT_STOWAWAY_SHELTER_GRATEFUL": [10, "letter|1|other_city"],
+	"EVT_STARVING_OPT_TAKE": [20, "sibling|1|other_city"],
+	"EVT_PENITENT_OPT_BREAD": [0, "bread|1|heir"],
+	"EVT_GRAVE_OPT_TEND": [0, "stones|1|heir"],
+	"EVT_DESERTER_OPT_HIDE": [25, "deserter|1|other_city"],
+	"EVT_CUSTOMS_OPT_BRIBE": [15, "clerk|1|other_city"],
+	"EVT_WANDERER_FEED_PLAIN": [0, "crust|1|heir"],
+	"EVT_WANDERER_FEED_KIN": [0, "crust|1|heir"],
+	"EVT_UNTOUCHED_SICK_OK": [30, "village|1|other_city"],
+	"EVT_PLAYERS_OPT_SHARE": [12, "song|1|other_city"],
+	"EVT_MILITARY_CONVOY_CRATE_OK": [20, "crate|1|other_city"],
+}
+
+static func _apply_chain_openers() -> void:
+	for event in _road_events:
+		for choice in event.choices:
+			_add_chain_opener(choice.effects, CHAIN_OPENERS.get(choice.text_key, []))
+			for outcome in choice.outcomes:
+				_add_chain_opener(outcome.effects, CHAIN_OPENERS.get(outcome.text_key, []))
+
+static func _add_chain_opener(effects: Array[EventEffect], spec: Array) -> void:
+	if spec.is_empty():
+		return
+	for effect in effects:
+		if effect.type == EventEffect.Type.CHAIN_ADVANCE and effect.text_value == String(spec[1]):
+			return
+	effects.append(EventEffect.make(EventEffect.Type.CHAIN_ADVANCE, int(spec[0]), String(spec[1])))
+
 ## Tabloyu kataloğa işler. Aynı etki iki kez eklenmesin diye tür+hedef
 ## çifti kontrol ediliyor: `get_road_events()` önbelleklense de, bir
 ## testin kataloğu yeniden kurması bu adımı iki kez çalıştırabilir.
@@ -408,6 +442,16 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_road_warden())
 	_road_events.append(_taken_captive())
 	_road_events.append(_captive_strangers())
+	_road_events.append(_chain_sealed_letter())
+	_road_events.append(_chain_sibling())
+	_road_events.append(_chain_fathers_bread())
+	_road_events.append(_chain_fathers_stones())
+	_road_events.append(_chain_deserter_gate())
+	_road_events.append(_chain_clerk_brother())
+	_road_events.append(_chain_wanderer_crust())
+	_road_events.append(_chain_visited_village())
+	_road_events.append(_chain_song())
+	_road_events.append(_chain_crate_owner())
 	_road_events.append(_wandering_players())
 	_road_events.append(_penitent_procession())
 	_road_events.append(_hidden_guide())
@@ -453,6 +497,7 @@ static func get_road_events() -> Array[GameEvent]:
 	_apply_career_threats()
 	_apply_promised_effects()
 	_apply_choice_traces()
+	_apply_chain_openers()
 	return _road_events
 
 ## `event_id` ile tek bir olayı bulur - doğrudan sunulan (havuzdan
@@ -2932,6 +2977,156 @@ static func _captive_strangers() -> GameEvent:
 			_conditions([_c("provisions", EventCondition.Op.GREATER_EQUAL, 3)]),
 			_effects([_fx(EventEffect.Type.PROVISIONS, -3), _fx(EventEffect.Type.MORALE, 3), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "captive|-1")])),
 		_choice("EVT_STRANGERS_OPT_SEND", _effects([_fx(EventEffect.Type.STRESS, 2), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "captive|-1")])),
+	])
+	return event
+
+## Y-E02 zinciri "letter": açılış EVT_STOWAWAY_SHELTER_GRATEFUL; karşılık başka bir şehrin yolunda.
+static func _chain_sealed_letter() -> GameEvent:
+	var event := _event("evt_chain_sealed_letter", "EVT_CH_LETTER_TITLE", "EVT_CH_LETTER_TEXT", 4.0)
+	event.cooldown_days = 1
+	event.conditions = _conditions([_c("chain_letter_ripe", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_choice("EVT_CH_LETTER_OPT_GIVE", _effects([_fx(EventEffect.Type.GOLD, 40), _fx(EventEffect.Type.REPUTATION, 2), _fx(EventEffect.Type.IZ_BIRAK, 40, "minnet|kisi|kisa|yuz"), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "letter|-1")])),
+		_check_choice("EVT_CH_LETTER_OPT_READ", CharacterStats.Kind.INTELLECT, SkillCheck.Source.LEADER,
+			"EVT_CH_LETTER_READ_OK", _effects([_fx(EventEffect.Type.PROVISIONS, 8), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "letter|-1")]),
+			"EVT_CH_LETTER_READ_MID", _effects([_fx(EventEffect.Type.TRADE_STAIN, 4), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "letter|-1")]),
+			"EVT_CH_LETTER_READ_BAD", _effects([_fx(EventEffect.Type.GOLD, -40), _fx(EventEffect.Type.STRESS, 6), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "letter|-1")])),
+		_choice("EVT_CH_LETTER_OPT_BURN", _effects([_fx(EventEffect.Type.STRESS, -2), _fx(EventEffect.Type.IZ_BIRAK, -50, "kin|kisi|uzun|dusman"), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "letter|-1")])),
+	])
+	return event
+
+## Y-E02 zinciri "sibling": açılış EVT_STARVING_OPT_TAKE; karşılık başka bir şehrin yolunda.
+static func _chain_sibling() -> GameEvent:
+	var event := _event("evt_chain_sibling", "EVT_CH_SIBLING_TITLE", "EVT_CH_SIBLING_TEXT", 4.0)
+	event.cooldown_days = 1
+	event.conditions = _conditions([_c("chain_sibling_ripe", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_gated_choice("EVT_CH_SIBLING_OPT_TAKE", "EVT_CH_SIBLING_OPT_TAKE_LOCKED", _conditions([_c("party_slots_free", EventCondition.Op.GREATER_EQUAL, 1)]), _effects([_fx(EventEffect.Type.TRIGGER_RECRUIT, 0), _fx(EventEffect.Type.MORALE, 3), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "sibling|-1")])),
+		_gated_choice("EVT_CH_SIBLING_OPT_FEED", "EVT_CH_SIBLING_OPT_FEED_LOCKED", _conditions([_c("provisions", EventCondition.Op.GREATER_EQUAL, 5)]), _effects([_fx(EventEffect.Type.PROVISIONS, -5), _fx(EventEffect.Type.IZ_BIRAK, 40, "minnet|bolge|kisa|aday"), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "sibling|-1")])),
+		_check_choice("EVT_CH_SIBLING_OPT_TELL", CharacterStats.Kind.WISDOM, SkillCheck.Source.LEADER,
+			"EVT_CH_SIBLING_TELL_OK", _effects([_fx(EventEffect.Type.MORALE, 4), _fx(EventEffect.Type.IZ_BIRAK, 30, "minnet|bolge|kisa|yuz"), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "sibling|-1")]),
+			"EVT_CH_SIBLING_TELL_MID", _effects([_fx(EventEffect.Type.STRESS, 3), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "sibling|-1")]),
+			"EVT_CH_SIBLING_TELL_BAD", _effects([_fx(EventEffect.Type.STRESS, 6), _fx(EventEffect.Type.IZ_BIRAK, -30, "soylenti|bolge|kisa|fiyat"), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "sibling|-1")])),
+	])
+	return event
+
+## Y-E02 zinciri "bread": açılış EVT_PENITENT_OPT_BREAD; karşılık varisin döneminde.
+static func _chain_fathers_bread() -> GameEvent:
+	var event := _event("evt_chain_fathers_bread", "EVT_CH_BREAD_TITLE", "EVT_CH_BREAD_TEXT", 4.0)
+	event.cooldown_days = 1
+	event.conditions = _conditions([_c("chain_bread_ripe", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_choice("EVT_CH_BREAD_OPT_PRAY", _effects([_fx(EventEffect.Type.STRESS, -8), _fx(EventEffect.Type.MORALE, 4), _fx(EventEffect.Type.IZ_BIRAK, 40, "minnet|bolge|uzun|kapi"), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "bread|-1")])),
+		_choice("EVT_CH_BREAD_OPT_CLAIM", _effects([_fx(EventEffect.Type.PROVISIONS, 6), _fx(EventEffect.Type.REPUTATION, -2), _fx(EventEffect.Type.IZ_BIRAK, -40, "kin|bolge|uzun|ret"), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "bread|-1")])),
+		_check_choice("EVT_CH_BREAD_OPT_READ", CharacterStats.Kind.FAITH, SkillCheck.Source.LEADER,
+			"EVT_CH_BREAD_READ_OK", _effects([_fx(EventEffect.Type.DANGER, -8), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "bread|-1")]),
+			"EVT_CH_BREAD_READ_MID", _effects([_fx(EventEffect.Type.STRESS, -3), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "bread|-1")]),
+			"EVT_CH_BREAD_READ_BAD", _effects([_fx(EventEffect.Type.STRESS, 3), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "bread|-1")])),
+	])
+	return event
+
+## Y-E02 zinciri "stones": açılış EVT_GRAVE_OPT_TEND; karşılık varisin döneminde.
+static func _chain_fathers_stones() -> GameEvent:
+	var event := _event("evt_chain_fathers_stones", "EVT_CH_STONES_TITLE", "EVT_CH_STONES_TEXT", 4.0)
+	event.cooldown_days = 1
+	event.conditions = _conditions([_c("chain_stones_ripe", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_choice("EVT_CH_STONES_OPT_ADD", _effects([_fx(EventEffect.Type.STRESS, -6), _fx(EventEffect.Type.IZ_BIRAK, 40, "kutsal|yol|uzun|yuz"), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "stones|-1")])),
+		_check_choice("EVT_CH_STONES_OPT_KNOT", CharacterStats.Kind.WISDOM, SkillCheck.Source.PARTY_BEST,
+			"EVT_CH_STONES_KNOT_OK", _effects([_fx(EventEffect.Type.PROVISIONS, 4), _fx(EventEffect.Type.DANGER, -5), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "stones|-1")]),
+			"EVT_CH_STONES_KNOT_MID", _effects([_fx(EventEffect.Type.STRESS, 2), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "stones|-1")]),
+			"EVT_CH_STONES_KNOT_BAD", _effects([_fx(EventEffect.Type.MORALE, -5), _fx(EventEffect.Type.IZ_BIRAK, -30, "soylenti|bolge|kisa|fiyat"), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "stones|-1")])),
+		_choice("EVT_CH_STONES_OPT_PASS", _effects([_fx(EventEffect.Type.STRESS, 4), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "stones|-1")])),
+	])
+	return event
+
+## Y-E02 zinciri "deserter": açılış EVT_DESERTER_OPT_HIDE; karşılık başka bir şehrin yolunda.
+static func _chain_deserter_gate() -> GameEvent:
+	var event := _event("evt_chain_deserter_gate", "EVT_CH_GATE_TITLE", "EVT_CH_GATE_TEXT", 4.0)
+	event.cooldown_days = 1
+	event.conditions = _conditions([_c("chain_deserter_ripe", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_choice("EVT_CH_GATE_OPT_WAIT", _effects([_fx(EventEffect.Type.GOLD, 30), _fx(EventEffect.Type.IZ_BIRAK, 30, "minnet|bolge|kisa|yuz"), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "deserter|-1")])),
+		_check_choice("EVT_CH_GATE_OPT_ASK", CharacterStats.Kind.CHARISMA, SkillCheck.Source.LEADER,
+			"EVT_CH_GATE_ASK_OK", _effects([_fx(EventEffect.Type.DANGER, -10), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "deserter|-1")]),
+			"EVT_CH_GATE_ASK_MID", _effects([_fx(EventEffect.Type.MORALE, 3), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "deserter|-1")]),
+			"EVT_CH_GATE_ASK_BAD", _effects([_fx(EventEffect.Type.STRESS, 6), _fx(EventEffect.Type.IZ_BIRAK, -50, "kin|bolge|uzun|dusman"), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "deserter|-1")])),
+		_choice("EVT_CH_GATE_OPT_BETRAY", _effects([_fx(EventEffect.Type.GOLD, 60), _fx(EventEffect.Type.REPUTATION, 2), _fx(EventEffect.Type.STRESS, 6), _fx(EventEffect.Type.IZ_BIRAK, -70, "kin|bolge|uzun|dusman"), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "deserter|-1")])),
+	])
+	return event
+
+## Y-E02 zinciri "clerk": açılış EVT_CUSTOMS_OPT_BRIBE; karşılık başka bir şehrin yolunda.
+static func _chain_clerk_brother() -> GameEvent:
+	var event := _event("evt_chain_clerk_brother", "EVT_CH_CLERK_TITLE", "EVT_CH_CLERK_TEXT", 4.0)
+	event.cooldown_days = 1
+	event.conditions = _conditions([_c("chain_clerk_ripe", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_gated_choice("EVT_CH_CLERK_OPT_PAY", "EVT_CH_CLERK_OPT_PAY_LOCKED", _conditions([_c("gold", EventCondition.Op.GREATER_EQUAL, 80)]), _effects([_fx(EventEffect.Type.GOLD, -80), _fx(EventEffect.Type.IZ_BIRAK, 30, "minnet|kisi|kisa|yuz"), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "clerk|-1")])),
+		_check_choice("EVT_CH_CLERK_OPT_ARGUE", CharacterStats.Kind.CHARISMA, SkillCheck.Source.LEADER,
+			"EVT_CH_CLERK_ARGUE_OK", _effects([_fx(EventEffect.Type.REPUTATION, 1), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "clerk|-1")]),
+			"EVT_CH_CLERK_ARGUE_MID", _effects([_fx(EventEffect.Type.GOLD, -40), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "clerk|-1")]),
+			"EVT_CH_CLERK_ARGUE_BAD", _effects([_fx(EventEffect.Type.GOLD, -40), _fx(EventEffect.Type.TRADE_STAIN, 6), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "clerk|-1")])),
+		_choice("EVT_CH_CLERK_OPT_GUILD", _effects([_fx(EventEffect.Type.REPUTATION, 2), _fx(EventEffect.Type.TRAVEL_DAYS, 1), _fx(EventEffect.Type.IZ_BIRAK, -60, "kin|sehir|uzun|ret"), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "clerk|-1")])),
+	])
+	return event
+
+## Y-E02 zinciri "crust": açılış EVT_WANDERER_FEED_PLAIN, EVT_WANDERER_FEED_KIN; karşılık varisin döneminde.
+static func _chain_wanderer_crust() -> GameEvent:
+	var event := _event("evt_chain_wanderer_crust", "EVT_CH_CRUST_TITLE", "EVT_CH_CRUST_TEXT", 4.0)
+	event.cooldown_days = 1
+	event.conditions = _conditions([_c("chain_crust_ripe", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_choice("EVT_CH_CRUST_OPT_LISTEN", _effects([_fx(EventEffect.Type.DANGER, -8), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "crust|-1")])),
+		_gated_choice("EVT_CH_CRUST_OPT_FEED", "EVT_CH_CRUST_OPT_FEED_LOCKED", _conditions([_c("provisions", EventCondition.Op.GREATER_EQUAL, 3)]), _effects([_fx(EventEffect.Type.PROVISIONS, -3), _fx(EventEffect.Type.MORALE, 4), _fx(EventEffect.Type.IZ_BIRAK, 40, "minnet|bolge|kisa|aday"), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "crust|-1")])),
+		_check_choice("EVT_CH_CRUST_OPT_ASK", CharacterStats.Kind.WISDOM, SkillCheck.Source.LEADER,
+			"EVT_CH_CRUST_ASK_OK", _effects([_fx(EventEffect.Type.STRESS, -6), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "crust|-1")]),
+			"EVT_CH_CRUST_ASK_MID", _effects([_fx(EventEffect.Type.STRESS, -2), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "crust|-1")]),
+			"EVT_CH_CRUST_ASK_BAD", _effects([_fx(EventEffect.Type.STRESS, 6), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "crust|-1")])),
+	])
+	return event
+
+## Y-E02 zinciri "village": açılış EVT_UNTOUCHED_SICK_OK; karşılık başka bir şehrin yolunda.
+static func _chain_visited_village() -> GameEvent:
+	var event := _event("evt_chain_visited_village", "EVT_CH_VILLAGE_TITLE", "EVT_CH_VILLAGE_TEXT", 4.0)
+	event.cooldown_days = 1
+	event.conditions = _conditions([_c("chain_village_ripe", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_gated_choice("EVT_CH_VILLAGE_OPT_MEDICINE", "EVT_CH_VILLAGE_OPT_MEDICINE_LOCKED", _conditions([_c("gold", EventCondition.Op.GREATER_EQUAL, 60)]), _effects([_fx(EventEffect.Type.GOLD, -60), _fx(EventEffect.Type.REPUTATION, 2), _fx(EventEffect.Type.IZ_BIRAK, 50, "minnet|bolge|uzun|kapi"), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "village|-1")])),
+		_check_choice("EVT_CH_VILLAGE_OPT_SPEAK", CharacterStats.Kind.CHARISMA, SkillCheck.Source.LEADER,
+			"EVT_CH_VILLAGE_SPEAK_OK", _effects([_fx(EventEffect.Type.STRESS, 2), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "village|-1")]),
+			"EVT_CH_VILLAGE_SPEAK_MID", _effects([_fx(EventEffect.Type.REPUTATION, -2), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "village|-1")]),
+			"EVT_CH_VILLAGE_SPEAK_BAD", _effects([_fx(EventEffect.Type.TRAVEL_DAYS, 1), _fx(EventEffect.Type.REPUTATION, -3), _fx(EventEffect.Type.IZ_BIRAK, -50, "kin|bolge|uzun|ret"), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "village|-1")])),
+		_choice("EVT_CH_VILLAGE_OPT_SILENT", _effects([_fx(EventEffect.Type.STRESS, 5), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "village|-1")])),
+	])
+	return event
+
+## Y-E02 zinciri "song": açılış EVT_PLAYERS_OPT_SHARE; karşılık başka bir şehrin yolunda.
+static func _chain_song() -> GameEvent:
+	var event := _event("evt_chain_song", "EVT_CH_SONG_TITLE", "EVT_CH_SONG_TEXT", 4.0)
+	event.cooldown_days = 1
+	event.conditions = _conditions([_c("chain_song_ripe", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_choice("EVT_CH_SONG_OPT_LISTEN", _effects([_fx(EventEffect.Type.MORALE, 6), _fx(EventEffect.Type.STRESS, -4), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "song|-1")])),
+		_gated_choice("EVT_CH_SONG_OPT_PAY", "EVT_CH_SONG_OPT_PAY_LOCKED", _conditions([_c("gold", EventCondition.Op.GREATER_EQUAL, 20)]), _effects([_fx(EventEffect.Type.GOLD, -20), _fx(EventEffect.Type.REPUTATION, 2), _fx(EventEffect.Type.IZ_BIRAK, 40, "minnet|bolge|kisa|teklif"), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "song|-1")])),
+		_check_choice("EVT_CH_SONG_OPT_JOIN", CharacterStats.Kind.CHARISMA, SkillCheck.Source.PARTY_BEST,
+			"EVT_CH_SONG_JOIN_OK", _effects([_fx(EventEffect.Type.MORALE, 8), _fx(EventEffect.Type.REPUTATION, 2), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "song|-1")]),
+			"EVT_CH_SONG_JOIN_MID", _effects([_fx(EventEffect.Type.MORALE, 3), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "song|-1")]),
+			"EVT_CH_SONG_JOIN_BAD", _effects([_fx(EventEffect.Type.STRESS, 5), _fx(EventEffect.Type.MORALE, -3), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "song|-1")])),
+	])
+	return event
+
+## Y-E02 zinciri "crate": açılış EVT_MILITARY_CONVOY_CRATE_OK; karşılık başka bir şehrin yolunda.
+static func _chain_crate_owner() -> GameEvent:
+	var event := _event("evt_chain_crate_owner", "EVT_CH_CRATE_TITLE", "EVT_CH_CRATE_TEXT", 4.0)
+	event.cooldown_days = 1
+	event.conditions = _conditions([_c("chain_crate_ripe", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_choice("EVT_CH_CRATE_OPT_RETURN", _effects([_fx(EventEffect.Type.GOLD, -40), _fx(EventEffect.Type.REPUTATION, 2), _fx(EventEffect.Type.STRESS, -2), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "crate|-1")])),
+		_check_choice("EVT_CH_CRATE_OPT_DENY", CharacterStats.Kind.CHARISMA, SkillCheck.Source.LEADER,
+			"EVT_CH_CRATE_DENY_OK", _effects([_fx(EventEffect.Type.STRESS, 3), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "crate|-1")]),
+			"EVT_CH_CRATE_DENY_MID", _effects([_fx(EventEffect.Type.GOLD, -40), _fx(EventEffect.Type.TRADE_STAIN, 4), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "crate|-1")]),
+			"EVT_CH_CRATE_DENY_BAD", _effects([_fx(EventEffect.Type.TRIGGER_COMBAT, 0, "guard"), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "crate|-1")])),
+		_choice("EVT_CH_CRATE_OPT_SEARCH", _effects([_fx(EventEffect.Type.TRAVEL_DAYS, 1), _fx(EventEffect.Type.GOLD, -50), _fx(EventEffect.Type.REPUTATION, 1), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "crate|-1")])),
 	])
 	return event
 

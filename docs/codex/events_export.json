@@ -768,6 +768,11 @@
               "amount": -2,
               "text": "",
               "type": "REPUTATION"
+            },
+            {
+              "amount": 15,
+              "text": "clerk|1|other_city",
+              "type": "CHAIN_ADVANCE"
             }
           ],
           "label": "Rüşvet ver (80 GG)",
@@ -1250,6 +1255,16 @@
                   "amount": 0,
                   "text": "evt_stowaway_repay",
                   "type": "UNLOCK_EVENT"
+                },
+                {
+                  "amount": 50,
+                  "text": "minnet|kisi|kisa|yuz",
+                  "type": "IZ_BIRAK"
+                },
+                {
+                  "amount": 10,
+                  "text": "letter|1|other_city",
+                  "type": "CHAIN_ADVANCE"
                 }
               ],
               "label": "{who} kimseye bir şey demeden onu vagona aldı. Gözlerindeki bakış borcunu unutmayacağını söylüyor.",
@@ -1296,6 +1311,11 @@
                   "amount": 0,
                   "text": "evt_wanderer_revenge",
                   "type": "UNLOCK_EVENT"
+                },
+                {
+                  "amount": -80,
+                  "text": "kin|bolge|uzun|dusman",
+                  "type": "IZ_BIRAK"
                 }
               ],
               "label": "Devriyeye teslim ettiniz. Götürülürken döndü, baktı; {who} o bakışı bir daha unutmayacak.",
@@ -1318,6 +1338,11 @@
                   "amount": -6,
                   "text": "",
                   "type": "MORALE"
+                },
+                {
+                  "amount": -80,
+                  "text": "kin|bolge|uzun|dusman",
+                  "type": "IZ_BIRAK"
                 }
               ],
               "label": "{town} devriyesine teslim ettiniz. Kese doldu ama kadro bir süre yüzünüze bakmadı.",
@@ -1919,6 +1944,16 @@
                   "amount": 3,
                   "text": "",
                   "type": "REPUTATION"
+                },
+                {
+                  "amount": 40,
+                  "text": "minnet|bolge|kisa|aday",
+                  "type": "IZ_BIRAK"
+                },
+                {
+                  "amount": 0,
+                  "text": "crust|1|heir",
+                  "type": "CHAIN_ADVANCE"
                 }
               ],
               "label": "{who} yemeği paylaşınca ağzından kendi boyunun türküsü döküldü. Kervan uzun süre sonra ilk kez güldü.",
@@ -1959,6 +1994,16 @@
                   "amount": 5,
                   "text": "",
                   "type": "MORALE"
+                },
+                {
+                  "amount": 40,
+                  "text": "minnet|bolge|kisa|aday",
+                  "type": "IZ_BIRAK"
+                },
+                {
+                  "amount": 0,
+                  "text": "crust|1|heir",
+                  "type": "CHAIN_ADVANCE"
                 }
               ],
               "label": "Karnını doyurdu, yoluna gitti. {who} iyi bir şey yaptığınızı söyledi.",
@@ -2007,6 +2052,11 @@
                   "amount": -2,
                   "text": "",
                   "type": "MORALE"
+                },
+                {
+                  "amount": -25,
+                  "text": "soylenti|bolge|kisa|fiyat",
+                  "type": "IZ_BIRAK"
                 }
               ],
               "label": "Omuz silkip yoluna döndü. Kervan sessizce {town} yoluna devam etti.",
@@ -3769,6 +3819,11 @@
               "amount": 0,
               "text": "evt_pilgrim_blessing",
               "type": "UNLOCK_EVENT"
+            },
+            {
+              "amount": 50,
+              "text": "minnet|bolge|uzun|kapi",
+              "type": "IZ_BIRAK"
             }
           ],
           "label": "Yanına al, birkaç gün eşlik et",
@@ -4744,6 +4799,11 @@
               "amount": -2,
               "text": "",
               "type": "REPUTATION"
+            },
+            {
+              "amount": -40,
+              "text": "kin|kisi|kisa|yuz",
+              "type": "IZ_BIRAK"
             }
           ],
           "label": "Arabacının yanında dur",
@@ -4866,6 +4926,11 @@
               "amount": 2,
               "text": "",
               "type": "MORALE"
+            },
+            {
+              "amount": 40,
+              "text": "minnet|kisi|kisa|teklif",
+              "type": "IZ_BIRAK"
             }
           ],
           "label": "Teşekkür et, kabul et",
@@ -5943,6 +6008,11 @@
                   "amount": 0,
                   "text": "evt_convoy_search",
                   "type": "UNLOCK_EVENT"
+                },
+                {
+                  "amount": 20,
+                  "text": "crate|1|other_city",
+                  "type": "CHAIN_ADVANCE"
                 }
               ],
               "label": "Sandık {who} elinde sessizce vagona girdi. İçinde maaş akçesi var.",
@@ -6599,6 +6669,11 @@
                   "amount": -12,
                   "text": "",
                   "type": "MORALE"
+                },
+                {
+                  "amount": -60,
+                  "text": "kin|bolge|uzun|ret",
+                  "type": "IZ_BIRAK"
                 }
               ],
               "label": "Dua yarıda kalıyor. 'El'e inanmayan El'i taşıyamaz.' Kafilenin önünde, yolun kenarında.",
@@ -7216,6 +7291,11 @@
                   "amount": 2,
                   "text": "",
                   "type": "MORALE"
+                },
+                {
+                  "amount": -80,
+                  "text": "kin|sehir|kisa|ret",
+                  "type": "IZ_BIRAK"
                 }
               ],
               "label": "Bekçi kâğıda bakmadan el sallıyor. {town} yoluna geçiyorsunuz.",
@@ -7297,6 +7377,11 @@
                   "amount": 0,
                   "text": "warden_grudge",
                   "type": "SET_FLAG"
+                },
+                {
+                  "amount": -40,
+                  "text": "kin|kisi|kisa|yuz",
+                  "type": "IZ_BIRAK"
                 }
               ],
               "label": "Bekçi yüzünü buruşturup çekiliyor. Seni unutmayacak; {who} bunu yüzünden okuyor.",
@@ -7643,6 +7728,11 @@
               "amount": 0,
               "text": "captive|-1",
               "type": "CHAIN_ADVANCE"
+            },
+            {
+              "amount": 40,
+              "text": "minnet|bolge|kisa|aday",
+              "type": "IZ_BIRAK"
             }
           ],
           "label": "Doyurup yolla (3 erzak)",
@@ -7667,6 +7757,11 @@
               "amount": 0,
               "text": "captive|-1",
               "type": "CHAIN_ADVANCE"
+            },
+            {
+              "amount": -25,
+              "text": "soylenti|bolge|kisa|fiyat",
+              "type": "IZ_BIRAK"
             }
           ],
           "label": "Geri çevir",
@@ -7703,6 +7798,1612 @@
         {
           "effects": [
             {
+              "amount": 40,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": 2,
+              "text": "",
+              "type": "REPUTATION"
+            },
+            {
+              "amount": 40,
+              "text": "minnet|kisi|kisa|yuz",
+              "type": "IZ_BIRAK"
+            },
+            {
+              "amount": 0,
+              "text": "letter|-1",
+              "type": "CHAIN_ADVANCE"
+            }
+          ],
+          "label": "Mektubu ver",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "INTELLECT"
+          },
+          "effects": [],
+          "label": "Önce mührü kaldır, oku, sonra ver",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 8,
+                  "text": "",
+                  "type": "PROVISIONS"
+                },
+                {
+                  "amount": 0,
+                  "text": "letter|-1",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "{who} mührü kırmadan kaldırıyor. Mektup bir ambarın yerini söylüyor; adamın bundan haberi yok.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 4,
+                  "text": "",
+                  "type": "TRADE_STAIN"
+                },
+                {
+                  "amount": 0,
+                  "text": "letter|-1",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "{who} mührü kaldırırken çatlatıyor. Adam bunu görüyor, mektubu alıp tek söz etmeden gidiyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -40,
+                  "text": "",
+                  "type": "GOLD"
+                },
+                {
+                  "amount": 6,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": 0,
+                  "text": "letter|-1",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "Mührü {who} tutarken balmumu dağılıyor. Adam bıçağını gösteriyor; mektubu da keseyi de alıp gidiyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": -2,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": -50,
+              "text": "kin|kisi|uzun|dusman",
+              "type": "IZ_BIRAK"
+            },
+            {
+              "amount": 0,
+              "text": "letter|-1",
+              "type": "CHAIN_ADVANCE"
+            }
+          ],
+          "label": "Mektubu yak",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "chain_letter_ripe",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 1,
+      "id": "evt_chain_sealed_letter",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Kervanda sakladığın kadın giderken arabacına mühürlü bir mektup bırakmıştı: \"{town} yolunda soran olursa ver.\" Yolun kenarında bir adam duruyor ve mührü tarif ediyor; balmumunun rengini bile biliyor.",
+      "title": "Mühürlü Mektup",
+      "triggered_only": false,
+      "weight": 4
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": 0,
+              "text": "",
+              "type": "TRIGGER_RECRUIT"
+            },
+            {
+              "amount": 3,
+              "text": "",
+              "type": "MORALE"
+            },
+            {
+              "amount": 0,
+              "text": "sibling|-1",
+              "type": "CHAIN_ADVANCE"
+            }
+          ],
+          "label": "Onu da kervana al",
+          "locked": "Kervanda yer yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "party_slots_free",
+              "op": "GREATER_EQUAL",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "effects": [
+            {
+              "amount": -5,
+              "text": "",
+              "type": "PROVISIONS"
+            },
+            {
+              "amount": 40,
+              "text": "minnet|bolge|kisa|aday",
+              "type": "IZ_BIRAK"
+            },
+            {
+              "amount": 0,
+              "text": "sibling|-1",
+              "type": "CHAIN_ADVANCE"
+            }
+          ],
+          "label": "Erzak ver, yolunu göster (5 erzak)",
+          "locked": "Verecek erzak yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "provisions",
+              "op": "GREATER_EQUAL",
+              "value": 5
+            }
+          ]
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "WISDOM"
+          },
+          "effects": [],
+          "label": "Kardeşinin izini anlat",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 4,
+                  "text": "",
+                  "type": "MORALE"
+                },
+                {
+                  "amount": 30,
+                  "text": "minnet|bolge|kisa|yuz",
+                  "type": "IZ_BIRAK"
+                },
+                {
+                  "amount": 0,
+                  "text": "sibling|-1",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "{who} yolu anlatıyor; kız iki kez tekrarlıyor, sonra çanağını sırtına bağlayıp yürüyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": 0,
+                  "text": "sibling|-1",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "{who} anlatıyor, kız dinliyor ama inanmıyor. Yine de gidiyor; başka gidecek yeri yok.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 6,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": -30,
+                  "text": "soylenti|bolge|kisa|fiyat",
+                  "type": "IZ_BIRAK"
+                },
+                {
+                  "amount": 0,
+                  "text": "sibling|-1",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "{who} yanlış yolu anlattığını ancak kız gittikten sonra fark ediyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "chain_sibling_ripe",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 1,
+      "id": "evt_chain_sibling",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Geçen sefer yol kenarından kervana aldığın kişinin kardeşi {town} yolunda seni bekliyor. Ayakları sarılı, elinde iki kişinin yiyeceği sığacak bir çanak. \"Biri gitti, biri kaldı,\" diyor. \"Kalan da gelmek istiyor.\"",
+      "title": "Kardeş",
+      "triggered_only": false,
+      "weight": 4
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": -8,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": 4,
+              "text": "",
+              "type": "MORALE"
+            },
+            {
+              "amount": 40,
+              "text": "minnet|bolge|uzun|kapi",
+              "type": "IZ_BIRAK"
+            },
+            {
+              "amount": 0,
+              "text": "bread|-1",
+              "type": "CHAIN_ADVANCE"
+            }
+          ],
+          "label": "Borcu kabul et, dualarına katıl",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 6,
+              "text": "",
+              "type": "PROVISIONS"
+            },
+            {
+              "amount": -2,
+              "text": "",
+              "type": "REPUTATION"
+            },
+            {
+              "amount": -40,
+              "text": "kin|bolge|uzun|ret",
+              "type": "IZ_BIRAK"
+            },
+            {
+              "amount": 0,
+              "text": "bread|-1",
+              "type": "CHAIN_ADVANCE"
+            }
+          ],
+          "label": "Ekmeğin karşılığını iste",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "FAITH"
+          },
+          "effects": [],
+          "label": "Sayfanın kenarını okumak iste",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -8,
+                  "text": "",
+                  "type": "DANGER"
+                },
+                {
+                  "amount": 0,
+                  "text": "bread|-1",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "{who} kenardaki satırı okuyor: bir yol tarifi, alayın bildiği ve haritada olmayan bir geçit.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -3,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": 0,
+                  "text": "bread|-1",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "{who} satırı okuyor ama anlamıyor. Yaşlı gülümsüyor, açıklamıyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": 0,
+                  "text": "bread|-1",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "{who} sayfaya uzanınca yaşlı Kitap'ı kapatıyor: \"Okumak isteyen önce yazdırır.\"",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "chain_bread_ripe",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 1,
+      "id": "evt_chain_fathers_bread",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Yolun kenarında Orvahel'e giden bir alay. Başındaki yaşlı Kitap'ı açıp bir sayfanın kenarını gösteriyor: orada kervanının adı yazılı, yanına bir somun çizilmiş. \"Bunu bize senden önceki verdi. Kitap borcunu unutmaz.\"",
+      "title": "Ekmeğin Sayfası",
+      "triggered_only": false,
+      "weight": 4
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": -6,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": 40,
+              "text": "kutsal|yol|uzun|yuz",
+              "type": "IZ_BIRAK"
+            },
+            {
+              "amount": 0,
+              "text": "stones|-1",
+              "type": "CHAIN_ADVANCE"
+            }
+          ],
+          "label": "Bir taş ekle ve geç",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "WISDOM"
+          },
+          "effects": [],
+          "label": "Bezi aç, düğümü çöz",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 4,
+                  "text": "",
+                  "type": "PROVISIONS"
+                },
+                {
+                  "amount": -5,
+                  "text": "",
+                  "type": "DANGER"
+                },
+                {
+                  "amount": 0,
+                  "text": "stones|-1",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "{who} düğümü tanıyor, göçebelerin yol düğümü: \"su ileride, sağda\". Bir gün sonra kuyuyu buluyorsunuz.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 2,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": 0,
+                  "text": "stones|-1",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "{who} düğümün ne dediğini çıkaramıyor. Bezi bağlayıp yerine koyuyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -5,
+                  "text": "",
+                  "type": "MORALE"
+                },
+                {
+                  "amount": -30,
+                  "text": "soylenti|bolge|kisa|fiyat",
+                  "type": "IZ_BIRAK"
+                },
+                {
+                  "amount": 0,
+                  "text": "stones|-1",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "{who} düğüme dokununca bez dağılıyor. Arabacı başını sallıyor: \"Ölünün eşyasına dokunulmaz.\"",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 4,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": 0,
+              "text": "stones|-1",
+              "type": "CHAIN_ADVANCE"
+            }
+          ],
+          "label": "Taşlara dokunma, başını eğ ve geç",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "chain_stones_ripe",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 1,
+      "id": "evt_chain_fathers_stones",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Senden öncekinin yığdığı taşlar hâlâ yerinde. En üstteki taşın altına biri bir bez sıkıştırmış: içinde kurumuş ekmek, bir ip düğümü, bir parça kömür. Taşa ad yazılmaz, töre öyle. Bezin içindekiler ise bir şey söylemek istiyor.",
+      "title": "Taşların Altı",
+      "triggered_only": false,
+      "weight": 4
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": 30,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": 30,
+              "text": "minnet|bolge|kisa|yuz",
+              "type": "IZ_BIRAK"
+            },
+            {
+              "amount": 0,
+              "text": "deserter|-1",
+              "type": "CHAIN_ADVANCE"
+            }
+          ],
+          "label": "Hiçbir şey söyleme, onun ne yapacağını bekle",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "CHARISMA"
+          },
+          "effects": [],
+          "label": "Onunla alçak sesle konuş, yolu sor",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -10,
+                  "text": "",
+                  "type": "DANGER"
+                },
+                {
+                  "amount": 0,
+                  "text": "deserter|-1",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "{who} sorunca muhafız fısıldıyor: ileride bir köprüyü tutmuşlar, öbür yoldan gidin.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "MORALE"
+                },
+                {
+                  "amount": 0,
+                  "text": "deserter|-1",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "Muhafız kısa kesiyor ama {who} bir ad koparıyor: {town} kapısında güvenilecek bir kervansaraycı.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 6,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": -50,
+                  "text": "kin|bolge|uzun|dusman",
+                  "type": "IZ_BIRAK"
+                },
+                {
+                  "amount": 0,
+                  "text": "deserter|-1",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "{who} muhafızla konuşurken çavuş görüyor ve muhafızı yanına çağırıyor. Onu bir daha görmüyorsunuz.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 60,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": 2,
+              "text": "",
+              "type": "REPUTATION"
+            },
+            {
+              "amount": 6,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": -70,
+              "text": "kin|bolge|uzun|dusman",
+              "type": "IZ_BIRAK"
+            },
+            {
+              "amount": 0,
+              "text": "deserter|-1",
+              "type": "CHAIN_ADVANCE"
+            }
+          ],
+          "label": "Çavuşa onun kim olduğunu söyle",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "chain_deserter_ripe",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 1,
+      "id": "evt_chain_deserter_gate",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "{town} yolunda bir karakol. Kapıdaki muhafız, geçen sefer arabanın altında sakladığın kaçaklardan biri; şimdi başka bir beyin renklerini taşıyor. Seni tanıyor ve belli etmiyor. Yanındaki çavuş yükünüzü saymaya hazırlanıyor.",
+      "title": "Kapıdaki Yüz",
+      "triggered_only": false,
+      "weight": 4
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": -80,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": 30,
+              "text": "minnet|kisi|kisa|yuz",
+              "type": "IZ_BIRAK"
+            },
+            {
+              "amount": 0,
+              "text": "clerk|-1",
+              "type": "CHAIN_ADVANCE"
+            }
+          ],
+          "label": "Aynısını öde (80 GG)",
+          "locked": "Kesede 80 GG yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "gold",
+              "op": "GREATER_EQUAL",
+              "value": 80
+            }
+          ]
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "CHARISMA"
+          },
+          "effects": [],
+          "label": "Evrakını göster, ağabeyinin defterine itiraz et",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 1,
+                  "text": "",
+                  "type": "REPUTATION"
+                },
+                {
+                  "amount": 0,
+                  "text": "clerk|-1",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "{who} evrakı uzatıyor. Kardeş defteri çevirip bir satırı karalıyor: \"Bu sefer olmamış sayalım.\"",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -40,
+                  "text": "",
+                  "type": "GOLD"
+                },
+                {
+                  "amount": 0,
+                  "text": "clerk|-1",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "{who} pazarlığı yarıda bağlıyor: kardeş yarısını alıyor, yarısını deftere yazıyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -40,
+                  "text": "",
+                  "type": "GOLD"
+                },
+                {
+                  "amount": 6,
+                  "text": "",
+                  "type": "TRADE_STAIN"
+                },
+                {
+                  "amount": 0,
+                  "text": "clerk|-1",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "{who} itiraz ettikçe kardeş yazıyor. Kervanın adı artık iki defterde.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 2,
+              "text": "",
+              "type": "REPUTATION"
+            },
+            {
+              "amount": 1,
+              "text": "",
+              "type": "TRAVEL_DAYS"
+            },
+            {
+              "amount": -60,
+              "text": "kin|sehir|uzun|ret",
+              "type": "IZ_BIRAK"
+            },
+            {
+              "amount": 0,
+              "text": "clerk|-1",
+              "type": "CHAIN_ADVANCE"
+            }
+          ],
+          "label": "İkisini de loncaya şikâyet et",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "chain_clerk_ripe",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 1,
+      "id": "evt_chain_clerk_brother",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "{town} yolundaki geçitte defteri tutan adam, geçen sefer rüşvet verdiğin memura benziyor; kardeşi olduğunu kendisi söylüyor. \"Ağabeyim sizden bahsetti. Bizim aile her şeyi deftere yazar; ödediğinizi de, ödemediğinizi de.\"",
+      "title": "Memurun Kardeşi",
+      "triggered_only": false,
+      "weight": 4
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": -8,
+              "text": "",
+              "type": "DANGER"
+            },
+            {
+              "amount": 0,
+              "text": "crust|-1",
+              "type": "CHAIN_ADVANCE"
+            }
+          ],
+          "label": "Dinle",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": -3,
+              "text": "",
+              "type": "PROVISIONS"
+            },
+            {
+              "amount": 4,
+              "text": "",
+              "type": "MORALE"
+            },
+            {
+              "amount": 40,
+              "text": "minnet|bolge|kisa|aday",
+              "type": "IZ_BIRAK"
+            },
+            {
+              "amount": 0,
+              "text": "crust|-1",
+              "type": "CHAIN_ADVANCE"
+            }
+          ],
+          "label": "Ona da erzak ver (3 erzak)",
+          "locked": "Verecek erzak yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "provisions",
+              "op": "GREATER_EQUAL",
+              "value": 3
+            }
+          ]
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "WISDOM"
+          },
+          "effects": [],
+          "label": "Senden öncekini nasıl tanıdığını sor",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -6,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": 0,
+                  "text": "crust|-1",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "{who} dinledikçe şaşırıyor: yaşlının anlattığı adam daha genç, daha korkak biri. Arabacı gülümsüyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -2,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": 0,
+                  "text": "crust|-1",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "Yaşlı birkaç cümle anlatıp karıştırıyor; {who} kimin anlatıldığını anlamıyor, yaşlı da bilmiyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 6,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": 0,
+                  "text": "crust|-1",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "Yaşlının anlattığı bir şeyi {who} ateş başında tekrarlamıyor: o gün geride biri bırakılmış.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "chain_crust_ripe",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 1,
+      "id": "evt_chain_wanderer_crust",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Yolun kenarında yaşlı bir yolcu oturuyor. Torbasından kararmış bir somun kabuğu çıkarıp sana uzatıyor: \"Bunu senden öncekine borçluyum. O beni doyurmuştu. Ben de sana yolu anlatayım.\"",
+      "title": "Somun Kabuğu",
+      "triggered_only": false,
+      "weight": 4
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": -60,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": 2,
+              "text": "",
+              "type": "REPUTATION"
+            },
+            {
+              "amount": 50,
+              "text": "minnet|bolge|uzun|kapi",
+              "type": "IZ_BIRAK"
+            },
+            {
+              "amount": 0,
+              "text": "village|-1",
+              "type": "CHAIN_ADVANCE"
+            }
+          ],
+          "label": "Köye ilaç gönder (60 GG)",
+          "locked": "Kesede 60 GG yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "gold",
+              "op": "GREATER_EQUAL",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "CHARISMA"
+          },
+          "effects": [],
+          "label": "Hastalığın yoldan geldiğini anlat",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 2,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": 0,
+                  "text": "village|-1",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "{who} anlatıyor; odadakiler başlarını sallıyor. Yol herkesin yolu, bunu biliyorlar.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -2,
+                  "text": "",
+                  "type": "REPUTATION"
+                },
+                {
+                  "amount": 0,
+                  "text": "village|-1",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "{who} anlatıyor, dinliyorlar, ama sofraya oturmuyorlar.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 1,
+                  "text": "",
+                  "type": "TRAVEL_DAYS"
+                },
+                {
+                  "amount": -3,
+                  "text": "",
+                  "type": "REPUTATION"
+                },
+                {
+                  "amount": -50,
+                  "text": "kin|bolge|uzun|ret",
+                  "type": "IZ_BIRAK"
+                },
+                {
+                  "amount": 0,
+                  "text": "village|-1",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "{who} daha sözünü bitirmeden biri kalkıp kapıyı açıyor: \"Yolun açık olsun.\" Gece {town} yolunda, dışarıda.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 5,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": 0,
+              "text": "village|-1",
+              "type": "CHAIN_ADVANCE"
+            }
+          ],
+          "label": "Sessiz kal, sabah erken çık",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "chain_village_ripe",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 1,
+      "id": "evt_chain_visited_village",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "{town} yolundaki kervansarayda anlatıyorlar: hastanı içeri aldığın köyde öksürük başlamış. Köyün adı geçince odadakiler sana bakıyor. Kimse \"sen getirdin\" demiyor; demelerine gerek yok.",
+      "title": "Uğranmış Köy",
+      "triggered_only": false,
+      "weight": 4
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": 6,
+              "text": "",
+              "type": "MORALE"
+            },
+            {
+              "amount": -4,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": 0,
+              "text": "song|-1",
+              "type": "CHAIN_ADVANCE"
+            }
+          ],
+          "label": "Dinle, sonunu bekle",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": -20,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": 2,
+              "text": "",
+              "type": "REPUTATION"
+            },
+            {
+              "amount": 40,
+              "text": "minnet|bolge|kisa|teklif",
+              "type": "IZ_BIRAK"
+            },
+            {
+              "amount": 0,
+              "text": "song|-1",
+              "type": "CHAIN_ADVANCE"
+            }
+          ],
+          "label": "Sözlerini düzeltmeleri için öde (20 GG)",
+          "locked": "Kesede 20 GG yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "gold",
+              "op": "GREATER_EQUAL",
+              "value": 20
+            }
+          ]
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "CHARISMA"
+          },
+          "effects": [],
+          "label": "Aralarına katıl, kendi dizeni söyle",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 8,
+                  "text": "",
+                  "type": "MORALE"
+                },
+                {
+                  "amount": 2,
+                  "text": "",
+                  "type": "REPUTATION"
+                },
+                {
+                  "amount": 0,
+                  "text": "song|-1",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "{who} dizesini söylüyor; avlu onu ikinci kez, bu sefer hep birlikte söylüyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "MORALE"
+                },
+                {
+                  "amount": 0,
+                  "text": "song|-1",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "{who} dizesini söylüyor; yarısı tutuyor, yarısı unutuluyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 5,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": -3,
+                  "text": "",
+                  "type": "MORALE"
+                },
+                {
+                  "amount": 0,
+                  "text": "song|-1",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "{who} dizesini söylerken avludakiler gülüyor; gülmeleri türküden uzun sürüyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "chain_song_ripe",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 1,
+      "id": "evt_chain_song",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "{town} yolunda bir kervansarayın avlusunda gezgin oyuncular. Sofranı paylaştığın kumpanya bu; şimdi senin kervanını anlatan bir türkü söylüyorlar. Türküde kervanın adı var, ama anlatılan yolculuk sizinki değil.",
+      "title": "Ateşte Söylenen",
+      "triggered_only": false,
+      "weight": 4
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": -40,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": 2,
+              "text": "",
+              "type": "REPUTATION"
+            },
+            {
+              "amount": -2,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": 0,
+              "text": "crate|-1",
+              "type": "CHAIN_ADVANCE"
+            }
+          ],
+          "label": "Sandığın parasını öde (40 GG)",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "CHARISMA"
+          },
+          "effects": [],
+          "label": "Hiç görmediğinizi söyle",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": 0,
+                  "text": "crate|-1",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "{who} subayın gözüne bakıyor. Subay listesine bir şey yazmadan atına biniyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -40,
+                  "text": "",
+                  "type": "GOLD"
+                },
+                {
+                  "amount": 4,
+                  "text": "",
+                  "type": "TRADE_STAIN"
+                },
+                {
+                  "amount": 0,
+                  "text": "crate|-1",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "Subay inanmıyor, {who} ne derse desin; ceza kesip kervanın adını listeye yazıyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 0,
+                  "text": "guard",
+                  "type": "TRIGGER_COMBAT"
+                },
+                {
+                  "amount": 0,
+                  "text": "crate|-1",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "{who} sözünü bitirmeden atlılar arabalara yöneliyor. Subay kılıcını çekiyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 1,
+              "text": "",
+              "type": "TRAVEL_DAYS"
+            },
+            {
+              "amount": -50,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": 1,
+              "text": "",
+              "type": "REPUTATION"
+            },
+            {
+              "amount": 0,
+              "text": "crate|-1",
+              "type": "CHAIN_ADVANCE"
+            }
+          ],
+          "label": "Arabaları aratın",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "chain_crate_ripe",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 1,
+      "id": "evt_chain_crate_owner",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "{town} yolunda bir levazım subayı ve iki atlı. Subay elindeki listeyi okuyor: artçıdan düşen bir sandık, düştüğü gün, düştüğü yer. Sonra arabalarınızı sayıyor. \"Listede bir eksik kalmıştı. Belki siz bulmuşsunuzdur.\"",
+      "title": "Sandığın Sahibi",
+      "triggered_only": false,
+      "weight": 4
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
               "amount": -4,
               "text": "",
               "type": "PROVISIONS"
@@ -7716,6 +9417,16 @@
               "amount": 5,
               "text": "",
               "type": "MORALE"
+            },
+            {
+              "amount": 40,
+              "text": "minnet|bolge|kisa|yuz",
+              "type": "IZ_BIRAK"
+            },
+            {
+              "amount": 12,
+              "text": "song|1|other_city",
+              "type": "CHAIN_ADVANCE"
             }
           ],
           "label": "Sofrayı paylaş (4 erzak)",
@@ -7798,6 +9509,11 @@
               "amount": 0,
               "text": "",
               "type": "MERCHANT_LEAVE"
+            },
+            {
+              "amount": -40,
+              "text": "kin|kisi|kisa|yuz",
+              "type": "IZ_BIRAK"
             }
           ],
           "label": "Tüccarlar için oynasınlar, haracı sen topla (+15 GG)",
@@ -7848,6 +9564,11 @@
               "amount": -3,
               "text": "",
               "type": "STRESS"
+            },
+            {
+              "amount": 0,
+              "text": "bread|1|heir",
+              "type": "CHAIN_ADVANCE"
             }
           ],
           "label": "Ekmek ver (6 erzak)",
@@ -8242,6 +9963,11 @@
                   "amount": 20,
                   "text": "weakest",
                   "type": "PARTY_HP"
+                },
+                {
+                  "amount": 30,
+                  "text": "village|1|other_city",
+                  "type": "CHAIN_ADVANCE"
                 }
               ],
               "label": "Kapı bir kişilik açılıyor; {who} yoldaşını içeri taşıyor. Bir gece sonra ateşi düşmüş.",
@@ -9200,6 +10926,11 @@
                   "amount": -10,
                   "text": "",
                   "type": "PARTY_HP"
+                },
+                {
+                  "amount": -60,
+                  "text": "kin|bolge|uzun|ret",
+                  "type": "IZ_BIRAK"
                 }
               ],
               "label": "Yanlış satırı okudun. Muhafızlar El'i taşıyan inançsızın cezasını kesip kafileden attı; {town} yolunun kalanını yalnız yürüdünüz.",
@@ -9965,6 +11696,11 @@
               "amount": -2,
               "text": "",
               "type": "PROVISIONS"
+            },
+            {
+              "amount": 20,
+              "text": "sibling|1|other_city",
+              "type": "CHAIN_ADVANCE"
             }
           ],
           "label": "En güçlüsünü kervana al (bir ağız daha)",
@@ -10014,6 +11750,11 @@
               "amount": 3,
               "text": "",
               "type": "REPUTATION"
+            },
+            {
+              "amount": 60,
+              "text": "minnet|sehir|kisa|kapi",
+              "type": "IZ_BIRAK"
             }
           ],
           "label": "Erzaktan dağıt (10 erzak)",
@@ -10043,6 +11784,11 @@
               "amount": -10,
               "text": "",
               "type": "CITY_MORALE"
+            },
+            {
+              "amount": -70,
+              "text": "kin|bolge|uzun|dusman",
+              "type": "IZ_BIRAK"
             }
           ],
           "label": "Kalabalığı yarıp geç (savaş)",
@@ -10095,6 +11841,11 @@
                   "amount": 2,
                   "text": "",
                   "type": "REPUTATION"
+                },
+                {
+                  "amount": 40,
+                  "text": "minnet|sehir|kisa|yuz",
+                  "type": "IZ_BIRAK"
                 }
               ],
               "label": "Yüklerin {town} için olduğunu anlattın; kalabalık yol açtı.",
@@ -10645,6 +12396,11 @@
               "amount": 0,
               "text": "profiteer_reckoned",
               "type": "SET_FLAG"
+            },
+            {
+              "amount": 60,
+              "text": "minnet|bolge|uzun|fiyat",
+              "type": "IZ_BIRAK"
             }
           ],
           "label": "Farkı geri öde (80 GG)",
@@ -10668,6 +12424,11 @@
               "amount": 0,
               "text": "profiteer_reckoned",
               "type": "SET_FLAG"
+            },
+            {
+              "amount": -60,
+              "text": "kin|bolge|uzun|fiyat",
+              "type": "IZ_BIRAK"
             }
           ],
           "label": "Bakmadan geç",
@@ -11055,6 +12816,16 @@
               "amount": 0,
               "text": "evt_grave_keeper",
               "type": "UNLOCK_EVENT"
+            },
+            {
+              "amount": 50,
+              "text": "kutsal|yol|uzun|yuz",
+              "type": "IZ_BIRAK"
+            },
+            {
+              "amount": 0,
+              "text": "stones|1|heir",
+              "type": "CHAIN_ADVANCE"
             }
           ],
           "label": "Dur, dağılan taşları yeniden yığ",
@@ -11352,6 +13123,16 @@
               "amount": 0,
               "text": "evt_deserter_search",
               "type": "UNLOCK_EVENT"
+            },
+            {
+              "amount": 60,
+              "text": "minnet|bolge|sefer|aday",
+              "type": "IZ_BIRAK"
+            },
+            {
+              "amount": 25,
+              "text": "deserter|1|other_city",
+              "type": "CHAIN_ADVANCE"
             }
           ],
           "label": "Onları sakla",
@@ -11375,6 +13156,11 @@
               "amount": 6,
               "text": "",
               "type": "STRESS"
+            },
+            {
+              "amount": -60,
+              "text": "kin|bolge|uzun|dusman",
+              "type": "IZ_BIRAK"
             }
           ],
           "label": "Bir sonraki karakolda haber ver",
@@ -11393,6 +13179,11 @@
               "amount": 3,
               "text": "",
               "type": "STRESS"
+            },
+            {
+              "amount": -30,
+              "text": "soylenti|bolge|kisa|ret",
+              "type": "IZ_BIRAK"
             }
           ],
           "label": "Geri çevir",

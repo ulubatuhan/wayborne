@@ -94,14 +94,6 @@ cmd /c "$g --headless --script res://tests/report_event_quality.gd > event_quali
 
 Toplam: **14** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
-## Paket P00
-
-### Y-R02 · Yankı varyantlarını seçeneğe göre yaz
-
-- **Durum:** test bekliyor · **Öncelik:** P1 · **Paket:** P00 · **Kim:** kullanıcının işi
-- **Ayrıntı ve geçmiş:** [referans/gorevler/19_ahlak_ruh_iz.md](referans/gorevler/19_ahlak_ruh_iz.md)
-- **Son not:** H9'da 22 kartın her birine bir yankı cümlesi yazıldı (gövdenin sonuna). §D-A4 ayrıca cevaba göre varyant istiyor (<id>_YANKI_<secim>); bedel kayması zaten cevaba bakıyor, metin henüz bakmıyor. | 2026-11-13: 22 kartın 66 cevabına ayrı yankı cümlesi (tr+en, EventCatalog.ECHO_CHOICE_LINE_KEYS; tabloda olmayan cevap genel cümleye düşer). Ekran: screenshot_named_cards.gd ECHO_CARD/ECHO_CHOICE. Metinler kullanıcı onayı bekliyor.
-
 ## Paket P03
 
 ### Y-E03 · Her kartta cazip ama riskli bir seçenek
@@ -154,6 +146,26 @@ Toplam: **14** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Ne:** Veba genel bir durum. Etkileri kart açılmadan görülür: şehrin görünüşü ve kapısı, yol, pazar, işe alınacak insanlar, kervanın sağlığı. Bölgeye göre farklılık var. İlgili olaylar ayrıca olabilir.
   - **Kullanıcı notu:** "Veba genel bir durum olmalı, bununla ilgili olaylar olabilir ama event card çıkmadan da etkilerini görmeliyiz. Bölgeye göre farklılık olmalı."
   - **Kabul:** Veba altındaki bir şehir ve yolun, kart açılmadan farkı gösterilen görüntüsü; etkiler test edilir.
+
+</details>
+
+## Paket P11
+
+### Y-E02 · Uzun zincirler: karşılık başka şehirde ya da sonraki kuşakta
+
+- **Durum:** test bekliyor · **Öncelik:** P1 · **Paket:** P11 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
+- **Bağımlı:** Y-E06
+- **Son not:** 10 zincirin içeriği Y-E06 (lore) kapanınca yazılacak. | 2026-11-13: on zincir yazıldı (EventCatalog.CHAIN_OPENERS + evt_chain_* kartları, tr+en): mühürlü mektup, kardeş, kapıdaki yüz, memurun kardeşi, uğranmış köy, ateşte söylenen, sandığın sahibi (başka şehrin yolunda); ekmeğin sayfası, taşların altı, somun kabuğu (varisin döneminde). Her yol zinciri kapatır (test_event_chains). Metinler onaylı plan içinde.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-E02 Uzun zincirler: karşılık başka şehirde ya da sonraki kuşakta**
+  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `3069762`): 10 zincirin içeriği Y-E06 (lore) kapanınca yazılacak.
+  - **Öncelik:** P1 · **Dalga:** 5 · **Bağımlı:** Y-E06
+  - **Ne:** En az 10 çok seferli zincir; sonucu başka bir şehirde ya da varisin döneminde gelir.
+  - **Kabul:** 10 zincir; kayıtta zincir durumu; testler.
+  - **Literatür:** R24, R48
 
 </details>
 

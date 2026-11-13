@@ -54,7 +54,7 @@ tek soru; cevabın gelince sırayla yapılır.
 
 
 
-Toplam: **45** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **44** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
 
@@ -259,24 +259,6 @@ Toplam: **45** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Kullanıcı notu:** “Sayıyı arttır demek kolay ama arttırabilecek misin?”
   - **Kabul:** En az 120 çekilebilir kart; her kart kalite listesinden geçti; simülatörde finale kadar tekrar oranı ölçüldü.
   - **Literatür:** R15, R48
-
-</details>
-
-### Y-E02 · Uzun zincirler: karşılık başka şehirde ya da sonraki kuşakta
-
-- **Durum:** sistem yapıldı, içerik lore bekliyor · **Öncelik:** P1 · **Paket:** P11 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
-- **Bağımlı:** Y-E06
-- **Son not:** 10 zincirin içeriği Y-E06 (lore) kapanınca yazılacak.
-
-<details><summary>Görev metni</summary>
-
-- [ ] **Y-E02 Uzun zincirler: karşılık başka şehirde ya da sonraki kuşakta**
-  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `3069762`): 10 zincirin içeriği Y-E06 (lore) kapanınca yazılacak.
-  - **Öncelik:** P1 · **Dalga:** 5 · **Bağımlı:** Y-E06
-  - **Ne:** En az 10 çok seferli zincir; sonucu başka bir şehirde ya da varisin döneminde gelir.
-  - **Kabul:** 10 zincir; kayıtta zincir durumu; testler.
-  - **Literatür:** R24, R48
 
 </details>
 
