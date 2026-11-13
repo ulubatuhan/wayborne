@@ -736,4 +736,8 @@ Hâlâ kullanıcıda: Y-C31 geçiş belgesinin adları (SIDERIA'da yok), Y-A07 z
   sönme ×0,7. 40 sefer: dönen 5,5 -> 8-11 (sert 14,5); sönen payı %65 (hedef %25-40). Kalan: 67 izsiz kart,
   dönüş fırsatı yapısal iş. Rapor: `tests/report_trace_coverage.gd`.
 - Y-R02 bitti (acbccf5, e2d3388): 22 kartın 66 cevabı, metinler onay bekliyor.
-- Sıradaki: Y-E02 zincir içerikleri.
+- Kullanıcı Y-R01/Y-R02'yi ve planı onayladı (2026-11-13).
+- Y-E02 bitti (191d403): on zincir (7 başka şehrin yolunda, 3 varisin döneminde), `CHAIN_OPENERS` +
+  `evt_chain_*`; Codex dökümü yenilendi. Türkçe çekim kuralı: ek özel ada yapışmaz ({who}'in yok).
+- Sıradaki: Y-E08 takvim. SIDERIA §2.3'te yalnız yılbaşı var (İlk Ot / Yol Günü / Sayfa Günü, 360 gün);
+  bayram, fuar ve hac günleri [Karar] olarak yazılacak, sonra oyuna (olay ağırlığı, pazar, kafile).
