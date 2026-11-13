@@ -54,7 +54,7 @@ tek soru; cevabın gelince sırayla yapılır.
 
 
 
-Toplam: **43** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **44** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
 
@@ -372,6 +372,26 @@ Toplam: **43** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Ne:** Soy bitince üstü çizili adların sahipleri ufukta siluet olarak yürür. Ortaçağın ölüm dansı geleneğinden; filmin karesinden değil.
   - **Kullanıcı notu:** "Soy sonu: ufukta adlar: Onay."
   - **Kabul:** Bitiş ekranının görüntüsü onaylandı.
+
+</details>
+
+## Paket P13
+
+### Y-I03 · Kâtibin sesi: kısa anlatıcı satırları
+
+- **Durum:** kısmen · **Öncelik:** P3 · **Paket:** P13 · **Kim:** kullanıcının içeriği/lore'u gerekir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
+- **Son not:**  | 2026-11-13: satırlar oyunda: kervanın kâtibi 12 anda (çıkış, ölüm, vagon, kayıp/kazanılan dövüş, açlık, fedakârlık, beş takvim dönemi) yol günlüğüne kısa satır düşer (ScribeLines, GameSession.note_scribe, 36 satır tr+en). Ses yeri hazır: AudioManager.play_voice, dosya data/assets/audio/voice/katip/<anahtar>.ogg; kayıt listesi docs/ses/katip_satirlari.md. Kalan: kayıtlar (kullanıcı AI ile seslendirecek) ve AI beyanına ses satırı.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-I03 Kâtibin sesi: kısa anlatıcı satırları**
+  - **Öncelik:** P3 · **Dalga:** 6 · **İlgili:** Y-J05
+  - **Ne:** Kritik anlarda kısa, kuru anlatıcı satırları; önce Türkçe ve İngilizce. Kullanıcı kararı: AI ile seslendirilebilir; beyan edilir.
+  - **Kullanıcı notu:** “görüntülerde ai içerği mevcut zaten, yani hali hazırda ai beyanı koymam lazım değil mi? o zaman sesi de yaparız ai ile sorun yok.”
+  - **Kabul:** Satır listesi ve kayıtlar; beyan güncel.
+  - **Kaynaklar ve teknik (CC0 araştırması):** CC0 anlatıcı sesi yok. Kokoro-82M (Apache-2.0) yalnızca İngilizce, Türkçe yok; Piper `lessac` sesi ticari kullanıma kapalı. Gemini sesi Steam beyanına girer. `../ICERIK_IHTIYACLARI.md` S-8.
+  - **Literatür:** R22
 
 </details>
 

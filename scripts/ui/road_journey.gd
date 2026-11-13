@@ -28,6 +28,8 @@ const CHOICE_STRIPE_INSET_X: float = 14.0
 const CHOICE_STRIPE_INSET_Y: float = 9.0
 const IMMEDIATE_COLOR: Color = Color(0.95, 0.8, 0.45)
 const OUTCOME_COLOR: Color = Color(0.75, 0.85, 1.0)
+## Kâtibin satırı (Y-I03): mürekkep rengi, sonuç satırlarından ayrı okunur.
+const SCRIBE_COLOR: Color = Color(0.82, 0.78, 0.66)
 
 ## Pazarlık başarısız olursa tam bedel ödenir; başarı indirim demektir.
 const HAGGLE_FAIL_MORALE: int = -8
@@ -1777,6 +1779,8 @@ func _process(delta: float) -> void:
 	if _clock == null:
 		return
 	_apply_zoom(delta)
+	if not _session.scribe_queue.is_empty():
+		_flush_scribe()
 
 	# Kamp kurulurken ve sökülürken insanlar yürürken saat kampın yavaş
 	# akışında değil, CAMP_WALK_CLOCK_SCALE ile akıyor (on saniyelik yürüyüş
@@ -4935,3 +4939,11 @@ func _calendar_suffix() -> String:
 	if period.is_empty():
 		return ""
 	return " · " + tr(SideriaCalendar.name_key(period))
+
+
+## Kâtibin bekleyen satırlarını günlüğe döker; kaydı varsa sesini çalar.
+func _flush_scribe() -> void:
+	for key in _session.scribe_queue:
+		_add_log(tr("UI_SCRIBE_LINE") % tr(key), SCRIBE_COLOR)
+		AudioManager.play_voice(ScribeLines.voice_path(key))
+	_session.scribe_queue.clear()

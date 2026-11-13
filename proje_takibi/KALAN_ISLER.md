@@ -2,7 +2,7 @@
 
 Başlanmamış görevler: kullanıcının işi (S), kullanıcı kararı (CK), kullanıcının içeriği ya da lore (CI) ve yeni eklenen oyun hissi alt görevleri (N31a-f). Her birinin neden beklediği 'Kim' satırında.
 
-Toplam: **15** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **14** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
 
@@ -121,23 +121,6 @@ Toplam: **15** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Kabul:** Yeni müzik kılavuzu; ana menüde müzik yok, ambiyans var.
   - **Kaynaklar ve teknik (CC0 araştırması):** CC0 müzik: RandomMind (OpenGameArt) “Lament for a Warrior's Soul” yas teması adayı; OpenGameArt CC0 dark ambient drone'lar. Hazır stem yok: drone + Freesound CC0 tek vuruşlardan (frame drum, taiko, bodhran) 90 BPM döngüler + CC0 cello drone ve bowed metal gerilim katmanı, hepsi aynı tonalitede. Godot 4.2'de `AudioStreamSynchronized` yok (4.3+): ya sürüm yükseltme (P00 kararı) ya da aynı anda başlatılan birden çok `AudioStreamPlayer`. FreePD kapandı, kullanılmaz. `../ICERIK_IHTIYACLARI.md` S-7.
   - **Literatür:** R18
-
-</details>
-
-### Y-I03 · Kâtibin sesi: kısa anlatıcı satırları
-
-- **Durum:** açık · **Öncelik:** P3 · **Paket:** P13 · **Kim:** kullanıcının içeriği/lore'u gerekir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
-
-<details><summary>Görev metni</summary>
-
-- [ ] **Y-I03 Kâtibin sesi: kısa anlatıcı satırları**
-  - **Öncelik:** P3 · **Dalga:** 6 · **İlgili:** Y-J05
-  - **Ne:** Kritik anlarda kısa, kuru anlatıcı satırları; önce Türkçe ve İngilizce. Kullanıcı kararı: AI ile seslendirilebilir; beyan edilir.
-  - **Kullanıcı notu:** “görüntülerde ai içerği mevcut zaten, yani hali hazırda ai beyanı koymam lazım değil mi? o zaman sesi de yaparız ai ile sorun yok.”
-  - **Kabul:** Satır listesi ve kayıtlar; beyan güncel.
-  - **Kaynaklar ve teknik (CC0 araştırması):** CC0 anlatıcı sesi yok. Kokoro-82M (Apache-2.0) yalnızca İngilizce, Türkçe yok; Piper `lessac` sesi ticari kullanıma kapalı. Gemini sesi Steam beyanına girer. `../ICERIK_IHTIYACLARI.md` S-8.
-  - **Literatür:** R22
 
 </details>
 

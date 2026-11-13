@@ -3749,6 +3749,10 @@ func depart_with_contracts(offers: Array[MerchantOffer]) -> void:
 ## (bkz. road_journey.gd - günlüğe not düşer).
 func advance_day() -> Array[String]:
 	total_days_elapsed += 1
+	# Yeni bir dönem başladıysa kâtip yazar (Y-E08, Y-I03).
+	var period := SideriaCalendar.period(total_days_elapsed)
+	if not period.is_empty() and period != SideriaCalendar.period(total_days_elapsed - 1):
+		note_scribe("cal_" + period)
 	plague.step()
 	_drift_city_morale()
 	_people_day()
@@ -4664,6 +4668,17 @@ func note_beat(kind: String, args: Array = []) -> void:
 	for value in args:
 		text_args.append(String(value))
 	day_beats.append({"kind": kind, "args": text_args, "day": total_days_elapsed})
+	note_scribe(kind)
+
+## Kâtibin satırları (Y-I03): ekran boşaltır, kayda girmez (an geçince anlamı biter).
+var scribe_queue: Array[String] = []
+
+func note_scribe(moment: String) -> void:
+	if not ScribeLines.has_moment(moment):
+		return
+	var key := ScribeLines.pick(moment, "%s|%d" % [caravan_name, total_days_elapsed])
+	if not scribe_queue.has(key):
+		scribe_queue.append(key)
 
 ## Günün en ağır izi; iz yoksa sakin bir gün.
 func top_beat() -> Dictionary:
@@ -5862,6 +5877,7 @@ func start_journey(destination_id: String, days: int, danger: float, plan: Carav
 		push_error("start_journey: run is over, cannot open a new journey")
 		return
 	journey_start_day = total_days_elapsed
+	note_scribe("depart")
 	journey_shortcut = shortcut
 	journey_combat_count = 0
 	journey_hungry_days = 0

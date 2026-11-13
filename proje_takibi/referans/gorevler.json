@@ -2466,13 +2466,14 @@
    "bolum": "13",
    "alan": "Yönetmen: Ses ve atmosfer",
    "oncelik": "P3",
-   "durum": "açık",
+   "durum": "kısmen",
    "bagimli": [],
    "dosya": "gorevler/13_yonetmen_onerileri.md",
    "dalga": 6,
    "paket": "P13",
    "sira": 153,
-   "kim": "CI"
+   "kim": "CI",
+   "not": " | 2026-11-13: satırlar oyunda: kervanın kâtibi 12 anda (çıkış, ölüm, vagon, kayıp/kazanılan dövüş, açlık, fedakârlık, beş takvim dönemi) yol günlüğüne kısa satır düşer (ScribeLines, GameSession.note_scribe, 36 satır tr+en). Ses yeri hazır: AudioManager.play_voice, dosya data/assets/audio/voice/katip/<anahtar>.ogg; kayıt listesi docs/ses/katip_satirlari.md. Kalan: kayıtlar (kullanıcı AI ile seslendirecek) ve AI beyanına ses satırı."
   },
   {
    "id": "Y-H03",

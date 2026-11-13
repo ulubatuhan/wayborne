@@ -78,6 +78,18 @@ func _shoot(card_id: String) -> void:
 		var cal_session: GameSession = screen.get("_session")
 		cal_session.total_days_elapsed = int(OS.get_environment("CAL_DAY"))
 		screen.set("_last_clock_text", "")
+	# Kâtip (Y-I03): SCRIBE ile o anın satırı kuyruğa düşer, günlükte görünür.
+	if not OS.get_environment("SCRIBE").is_empty():
+		var scribe_session: GameSession = screen.get("_session")
+		scribe_session.note_scribe(OS.get_environment("SCRIBE"))
+		await _settle()
+		var overlay: Control = screen.get("_log_overlay")
+		overlay.visible = true
+		await _settle()
+		_save("katip_%s.png" % OS.get_environment("SCRIBE"))
+		screen.queue_free()
+		await _settle()
+		return
 	var echo_choice := OS.get_environment("ECHO_CHOICE")
 	if not echo_choice.is_empty():
 		var live: GameSession = screen.get("_session")

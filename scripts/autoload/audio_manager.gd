@@ -289,6 +289,21 @@ func play_track(track_id: String) -> void:
 	_standby.play()
 	_crossfade()
 
+## Bir seslendirme satırı çalar (Y-I03, kâtibin sesi). Yol doğrudan veriliyor;
+## dosya yoksa sessiz geçer: kayıtlar sonradan gelir, satır onlarsız da okunur.
+func play_voice(path: String) -> void:
+	if path.is_empty() or not ResourceLoader.exists(path):
+		return
+	var stream: AudioStream = load(path)
+	if stream == null:
+		return
+	var player := AudioStreamPlayer.new()
+	player.stream = stream
+	player.bus = BUS_SFX
+	add_child(player)
+	player.finished.connect(player.queue_free)
+	player.play()
+
 ## Tek kerelik bir ses çalar (bkz. `SFX_*`). Dosya eksikse sessizce hiçbir
 ## şey yapmıyor - `_load_stream` ile aynı gerekçe: bir ses efekti asset'i
 ## henüz gelmemişse oyun onsuz da çalışmalı, çökmemeli.
