@@ -2265,6 +2265,32 @@ func _draw() -> void:
 		marker + Vector2(-5.0, -9.0), marker + Vector2(5.0, -9.0), marker,
 	]), Color(ArtPalette.GOLD, 0.85))
 
+## Bütün tekerleklerin daireleri, bu düğümün uzayında (x, y, yarıçap):
+## vagonlarınki ve yarım vagonlarınki, dönüşleri uygulanmış.
+func get_wheel_discs() -> Array[Vector3]:
+	var out: Array[Vector3] = []
+	var height := maxf(size.y, 1.0) * _scale
+	var wagon_h := height * WAGON_HEIGHT_RATIO
+	for index in _wagon_centres.size():
+		var discs := ArtDraw.wagon_wheel_discs(Vector2(_wagon_centres[index], _ground_y), wagon_h)
+		out.append_array(_turned_discs(discs, _wagon_turn(index)))
+	if not _carts.is_empty():
+		var px_per_m := height * PERSON_HEIGHT_RATIO * 0.86 / 1.73
+		var k := px_per_m / PropArt.ppm(CART_PROP)
+		var wheel_tex := PropArt.texture(CART_PROP, "wheel")
+		if wheel_tex != null:
+			for cart in _carts:
+				var c := PropArt.pivot(CART_PROP, "wheel_front", Vector2(float(cart.x), _ground_y), k)
+				var disc: Array[Vector3] = [Vector3(c.x, c.y, wheel_tex.get_width() * k * 0.5)]
+				out.append_array(_turned_discs(disc, _unit_turn(int(cart.unit))))
+	return out
+
+static func _turned_discs(discs: Array[Vector3], turn: Vector3) -> Array[Vector3]:
+	var out: Array[Vector3] = []
+	for d in discs:
+		out.append(Vector3(turn.y * (1.0 - turn.x) + d.x * turn.x, d.y - turn.z, d.z))
+	return out
+
 ## Yarım vagonlar: eşeğin (çocuk düğüm, sonra çiziliyor) altında kalıyor,
 ## yani oklar eşeğin iki yanından geçiyor gibi okunuyor.
 func _draw_carts(height: float) -> void:

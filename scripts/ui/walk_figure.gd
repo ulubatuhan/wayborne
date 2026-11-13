@@ -600,10 +600,9 @@ func _draw_body(height: float) -> float:
 # geliyor (`Soaking`, kervandan `RoadCaravan` üzerinden), figür kendi
 # havasını bilmiyor - ekranla mekaniğin tek kaynaktan okuması kuralı.
 #
-# Islaklık iki yoldan görünüyor: kumaşın kendisi koyulaşıp soğuyor
-# (`self_modulate`, `ArtDraw.wet_tint`) ve üst yüzeylerde gökyüzünün soğuk
-# parıltısı toplanıyor. Yalnız koyulaştırmak figürü gölgede bırakıyordu;
-# ıslaklığı okutan şey koyu kumaşın üstündeki o parıltı.
+# Islaklık bedende gösterilmiyor (kullanıcı, 2026-11-13): koyulaşma ve
+# parıltı ıslak gibi değil, gölgede kalmış gibi okundu. `_wet` yine
+# tutuluyor (test ve ileride bir çizim için), ama boyamıyor.
 #
 # Kar ve yüzeydeki parıltı **kervanın birleşik resminde** çiziliyor
 # (`weather_coat.gdshader`, RoadCaravan'ı saran CanvasGroup): üste bakan her
@@ -649,14 +648,11 @@ func set_wear(hunger: float, fatigue: float) -> void:
 func get_wear() -> Vector2:
 	return Vector2(_hunger, _fatigue)
 
-## Islaklık ve aşınma aynı çarpandan geçiyor: biri öbürünü silmemeli,
-## bu yüzden ikisi de doğrudan `self_modulate`'e yazmıyor.
+## Aşınma bütün figürü kapsayan tek çarpan.
 ## `self_modulate`, `modulate` değil - çocuk düğümler (durum efektleri,
 ## baloncuk) ıslanmamalı ve açlıktan solmamalı.
 func _apply_body_tint() -> void:
-	self_modulate = ArtDraw.worn_tint(
-		ArtDraw.wet_tint(Color.WHITE, _wet), _hunger, _fatigue
-	)
+	self_modulate = ArtDraw.worn_tint(Color.WHITE, _hunger, _fatigue)
 
 ## Aşınmanın duruşa ve adıma etkisi. Saf: test aynı sayıyı okur.
 ##

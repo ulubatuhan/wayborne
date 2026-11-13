@@ -360,6 +360,8 @@ var _coat_group: CanvasGroup
 const WEATHER_COAT_SHADER: Shader = preload("res://scripts/ui/weather_coat.gdshader")
 ## Kar kabuğunun en kalın yeri ve bulaşmanın yüksekliği, metre (okunurluk payıyla).
 const COAT_RIM_METRES: float = 0.07
+## Gölgelendiricinin `MAX_WHEELS`'i ile aynı.
+const COAT_MAX_WHEELS: int = 16
 const COAT_CAKE_METRES: float = 0.45
 ## Üç derinlik düzlemi: uzak, yol, yakın (bkz. WeatherCurtain.Depth).
 var _curtains: Array[WeatherCurtain] = []
@@ -3143,7 +3145,6 @@ func _sync_weather_coat() -> void:
 	if mat == null:
 		return
 	var per_metre := _caravan.fx_px_per_metre()
-	mat.set_shader_parameter("wet", coat.x)
 	mat.set_shader_parameter("snow", coat.y)
 	mat.set_shader_parameter("rim_px", per_metre * COAT_RIM_METRES)
 	mat.set_shader_parameter("cake_h", per_metre * COAT_CAKE_METRES)
@@ -3152,6 +3153,15 @@ func _sync_weather_coat() -> void:
 	var a := _band.ground_y_at(0.0)
 	mat.set_shader_parameter("ground_a", a)
 	mat.set_shader_parameter("ground_b", (_band.ground_y_at(w) - a) / w)
+	var wheels: Array[Vector3] = []
+	for disc in _caravan.get_wheel_discs():
+		if wheels.size() >= COAT_MAX_WHEELS:
+			break
+		wheels.append(disc + Vector3(_caravan.position.x, _caravan.position.y, 0.0))
+	var packed := PackedVector3Array(wheels)
+	packed.resize(COAT_MAX_WHEELS)
+	mat.set_shader_parameter("wheels", packed)
+	mat.set_shader_parameter("wheel_count", wheels.size())
 
 ## Her karede: efekt katmanlarının zeminle birlikte kayması ve yağmurun
 ## yere çarpma izleri.

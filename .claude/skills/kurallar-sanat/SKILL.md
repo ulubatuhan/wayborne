@@ -541,8 +541,6 @@ kumaş, sırtta ve brandada biriken kar. Model `Soaking`, dağıtım `RoadCarava
 - **Kervan tek yerden ıslanır.** Pay figürlere ve vagona `RoadCaravan`'dan
   dağıtılıyor; iki ayrı yerden okunsaydı kervanın yarısı ıslanıp yarısı
   kuru kalırdı (`ArtDraw.wagon`'un var olma gerekçesinin aynısı).
-- **Islaklık `self_modulate`, `modulate` değil.** Kumaş koyulaşıyor ama
-  çocuk düğümler (durum efektleri, konuşma baloncuğu) ıslanmamalı.
 - **Kar ve ıslaklık kervanın birleşik siluetinde çizilir, figürün kendi
   parçalarında değil (kullanıcı, 2026-11-13).** Bütün figürler ve vagonlar
   tek bir `CanvasGroup`'ta; gölgelendirici ekrandaki birleşik resmin
@@ -561,10 +559,18 @@ kumaş, sırtta ve brandada biriken kar. Model `Soaking`, dağıtım `RoadCarava
     gövdenin her yerinde, üst kenara yakın sık aşağıda seyrek yapışan
     lekeler; zemine yakın bantta (`COAT_CAKE_METRES`) bacak, çizme, toynak
     ve tekerleğe bulaşan serpinti. Üstüne hafif kırağı.
-  - Islaklık: renk koyulaşır ve derinleşir, üst kenarda soğuk gök
-    parıltısı, kısa kesik su yolları, seyrek damlalar. Islak hâl ilk
-    sürümde yalnız `self_modulate` koyulaşmasıydı ve kullanıcı yağmurda
-    hiçbir fark göremedi; koyulaşma tek başına okunmuyor, parıltı okunuyor.
+  - **Islaklık bedende gösterilmez (kullanıcı, 2026-11-13).** Önce yalnız
+    `self_modulate` koyulaşmasıydı, kullanıcı yağmurda fark göremedi; sonra
+    koyulaşma + üst kenarda gök parıltısı + su yolları + damla denendi ve
+    "karartma ıslaklık gibi durmuyor, hiç eklememek daha iyi" dedi. Islaklık
+    yerde (çamur, birikinti, `GroundCover`) ve mekanikte (ısı kaybı) yaşar;
+    figüre, hayvana ve vagona boya olarak geri getirilmez, yeni bir çizim
+    fikri kullanıcıya sorulmadan.
+  - **Dönen tekerleğin içine kar konmaz.** Kar tekerlek dönünce düşer;
+    vagonun ve yarım vagonun tekerlek daireleri (`ArtDraw.wagon_wheel_discs`,
+    `RoadCaravan.get_wheel_discs`) gölgelendiriciye veriliyor ve içleri
+    maskeleniyor. Vagonun yanları, kasası, brandası kar alır (kullanıcı,
+    2026-11-13).
   - Gürültünün ölçeği figür boyundan (`unit_px`), ekran pikselinden değil:
     aynı kervan her çözünürlükte aynı lekeleri taşır.
   - Sıcak ve parlak piksele (ateş, fener) kar ve damla konmaz.

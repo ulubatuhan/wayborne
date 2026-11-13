@@ -598,6 +598,20 @@ static func wagon(
 const WAGON_PROP := "covered_wagon"
 const WAGON_MODEL_H: float = 1.6
 
+## Vagonun iki tekerleği: (merkez x, merkez y, yarıçap). Kar gölgelendiricisi
+## bu dairelere kar koymuyor: dönen tekerlekte kar durmaz, düşer (kullanıcı,
+## 2026-11-13). Çizimle aynı pivot ve doku, ayrı bir tahmin değil.
+static func wagon_wheel_discs(base: Vector2, h: float) -> Array[Vector3]:
+	var out: Array[Vector3] = []
+	var k := PropArt.scale_for_height(WAGON_PROP, h, WAGON_MODEL_H)
+	for pair in [["wheel", "wheel_back"], ["wheel_front", "wheel_front"]]:
+		var tex := PropArt.texture(WAGON_PROP, pair[0])
+		if tex == null:
+			continue
+		var c := PropArt.pivot(WAGON_PROP, pair[1], base, k)
+		out.append(Vector3(c.x, c.y, tex.get_width() * k * 0.5))
+	return out
+
 static func _wagon_sprite(
 	canvas: CanvasItem, base: Vector2, h: float, wheel_angle: float, tint: Color,
 	with_load: bool, draw_driver: bool, canopy_sway: float,

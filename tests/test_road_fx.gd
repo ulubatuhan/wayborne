@@ -331,9 +331,8 @@ func _test_weather_coat_on_the_figure(t) -> void:
 	figure.set_weather_coat(0.8, 0.3)
 	t.almost(figure.get_weather_coat().x, 0.8, "ıslaklık yazıldı", 0.001)
 	t.almost(figure.get_weather_coat().y, 0.3, "kar yazıldı", 0.001)
-	# Islak kumaş koyulaşıyor; `self_modulate`, `modulate` değil - çocuk
-	# düğümler (durum efektleri, baloncuk) ıslanmamalı.
-	t.ok(figure.self_modulate.v < 1.0, "ıslak figür koyulaşır")
+	# Islaklık bedeni boyamıyor (kullanıcı, 2026-11-13: koyulaşma ıslak gibi okunmadı).
+	t.eq(figure.self_modulate, Color.WHITE, "ıslaklık figürü koyulaştırmaz")
 	t.eq(figure.modulate, Color.WHITE, "çocuklar etkilenmez")
 	figure.set_weather_coat(2.0, -1.0)
 	t.eq(figure.get_weather_coat(), Vector2(1.0, 0.0), "paylar 0..1 arasına sıkışır")

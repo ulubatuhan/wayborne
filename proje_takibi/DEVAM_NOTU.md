@@ -721,5 +721,5 @@ Kullanıcı: yağmurda ıslaklık görünmüyor, atın karı düz tahta, hayvanl
 pantolon, böğür, tekerlekte de olmalı. Kervan artık bir `CanvasGroup`'ta; `scripts/ui/weather_coat.gdshader`
 birleşik siluette çalışıyor: üst kenarı izleyen kesik kabuk, gövdeye yapışan lekeler, zemine yakın serpinti,
 ıslakta koyulaşma + gök parıltısı + kısa su yolları + damla. Eski `WalkFigure._draw_weather_coat` silindi.
-Bakmak: `tests/screenshot_weather_coat.gd`. Kural metni kurallar-sanat "Weather on the Body Rules". Açık: miktarlar
-kullanıcının gözüne bırakıldı (insanlarda leke az mı, hayvanlarda fazla mı).
+Bakmak: `tests/screenshot_weather_coat.gd`. Kural metni kurallar-sanat "Weather on the Body Rules". Kullanıcı kar seviyesini onayladı. Sonra: tekerlek içine kar konmuyor (dönen tekerlekte
+kar düşer), ıslaklık bedende hiç gösterilmiyor (karartma ıslak gibi okunmadı; mekanik bedeli duruyor).

@@ -16,14 +16,14 @@
 //  2. Yere yakın bantta (bacak, çizme, toynak, tekerlek) yürürken bulaşan
 //     serpinti.
 //  3. Her yüzeyde hafif bir kırağı.
-// Islaklık: kumaş koyulaşır, üst kenarda soğuk gök parıltısı toplanır,
-// yüzeyde dikey su yolları parlar.
+// Islaklık burada çizilmiyor: koyulaşma, parıltı ve damla denendi, ıslak gibi
+// okunmadı; kullanıcı ıslaklığın hiç gösterilmemesini seçti (2026-11-13).
+// Mekanik bedeli (`Temperature.WET_WARMTH_LOSS`) duruyor.
 shader_type canvas_item;
 render_mode unshaded;
 
 uniform sampler2D screen_tex : hint_screen_texture, repeat_disable, filter_nearest;
 uniform float snow : hint_range(0.0, 1.0) = 0.0;
-uniform float wet : hint_range(0.0, 1.0) = 0.0;
 // Kabuğun en kalın yeri, ekran pikseli (kar 1'de).
 uniform float rim_px = 3.0;
 // Zemin çizgisi grubun kendi uzayında: y = ground_a + ground_b * x.
@@ -33,8 +33,12 @@ uniform float ground_b = 0.0;
 uniform float cake_h = 30.0;
 // Gürültünün ölçeği (figür boyundan): aynı kervan her çözünürlükte aynı lekeleri taşısın.
 uniform float unit_px = 60.0;
+// Tekerlek daireleri (x, y, yarıçap), grubun uzayında. İçlerine kar konmaz:
+// dönen tekerlekte kar durmaz, düşer (kullanıcı, 2026-11-13).
+const int MAX_WHEELS = 16;
+uniform vec3 wheels[16];
+uniform int wheel_count = 0;
 uniform vec4 snow_col : source_color = vec4(0.86, 0.89, 0.93, 1.0);
-uniform vec4 sheen_col : source_color = vec4(0.70, 0.78, 0.88, 1.0);
 
 varying vec2 local_pos;
 
@@ -68,6 +72,18 @@ bool is_warm_light(vec3 c) {
 	return lum > 0.55 && c.r > c.b * 1.35;
 }
 
+bool in_wheel(vec2 p) {
+	for (int i = 0; i < MAX_WHEELS; i++) {
+		if (i >= wheel_count) {
+			break;
+		}
+		if (distance(p, wheels[i].xy) <= wheels[i].z * 1.04) {
+			return true;
+		}
+	}
+	return false;
+}
+
 void fragment() {
 	vec4 c = textureLod(screen_tex, SCREEN_UV, 0.0);
 	if (c.a > 0.0001) {
@@ -77,7 +93,7 @@ void fragment() {
 	float n_scale = 6.0 / max(unit_px, 1.0);
 	bool solid = c.a > 0.85;
 
-	if (snow > 0.01) {
+	if (snow > 0.01 && !in_wheel(local_pos)) {
 		// Kabuğun bu sütundaki kalınlığı: kesik kesik, eşit değil.
 		float lumpy = vnoise(vec2(local_pos.x * n_scale * 1.7, 3.1));
 		float thick = rim_px * snow * (0.25 + 0.95 * lumpy);
@@ -127,28 +143,6 @@ void fragment() {
 				float a = 0.95 * (1.0 - below / (thick * 0.45 + 0.001));
 				c = vec4(snow_col.rgb, max(c.a, a));
 			}
-		}
-	}
-
-	if (wet > 0.01 && solid) {
-		// Islak kumaş ve post koyulaşır, renk biraz derinleşir.
-		float lum = dot(c.rgb, vec3(0.299, 0.587, 0.114));
-		c.rgb = mix(c.rgb, mix(vec3(lum), c.rgb, 1.2), wet) * (1.0 - 0.26 * wet);
-		// Üst kenarda gök parıltısı: ince, soğuk bir çizgi.
-		if (alpha_at(SCREEN_UV - vec2(0.0, 1.5 * px.y)) < 0.3 && !is_warm_light(c.rgb)) {
-			c.rgb = mix(c.rgb, sheen_col.rgb, 0.78 * wet);
-		}
-		// Yüzeyden süzülen su: dikey, seyrek parlak çizgiler.
-		// Kısa ve kesik: uzun tek bir çizgi boyanın üstünde bir yırtık gibi duruyordu.
-		float streak = vnoise(vec2(local_pos.x * n_scale * 4.0, local_pos.y * n_scale * 0.5));
-		float run = vnoise(vec2(local_pos.x * n_scale * 4.0 + 7.0, local_pos.y * n_scale * 1.6));
-		if (streak > 0.80 && run > 0.55) {
-			c.rgb = mix(c.rgb, sheen_col.rgb, 0.45 * wet * (streak - 0.80) / 0.20);
-		}
-		// Kumaşta tutunan damlalar: seyrek, küçük, parlak noktalar.
-		float drop = vnoise(local_pos * n_scale * 5.5 + vec2(17.0, 3.0));
-		if (drop > 1.0 - 0.04 * wet && !is_warm_light(c.rgb)) {
-			c.rgb = mix(c.rgb, sheen_col.rgb, 0.85);
 		}
 	}
 
