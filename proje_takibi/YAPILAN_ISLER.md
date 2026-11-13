@@ -2,7 +2,7 @@
 
 Bitmiş ve doğrulanmış (testi ya da kullanıcı onayı geçmiş) görevler. Kod dalı: `wayborne`, `yerel/yapilacaklar-p05-p06` (önceki tur `yerel/yapilacaklar-p01-p04`). Push edilmedi.
 
-Toplam: **202** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **203** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P01
 
@@ -2244,6 +2244,25 @@ Toplam: **202** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler
   - **Ne:** "Kendi hanını kur" gibi bir final yok. Oyun zorluk ve kıtlık içinde geçer; yapılan tek şey kervanı ilerletmek ve ek görevleri başarmak. Kampanya bölümlerinin hedefleri ve metinleri buna göre yeniden yazılır (defter III'teki kampanya metni sorusu da buraya bağlı).
   - **Kullanıcı notu:** "Böyle bir final olmayacak, oyun zorluk ve kıtlık içinde geçecek, şimdilik tek yaptığımız ve yapabildiğimiz kervanı ilerletmek ve ek görevleri başarmak."
   - **Kabul:** Yeni bölüm taslağı onaylandı; `simulate_career` yeniden ölçüldü.
+
+</details>
+
+### Y-E13 · Dağılan tayfa yolda karşına çıkar
+
+- **Durum:** bitti · **Öncelik:** P2 · **Paket:** P11 · **Kim:** Claude tek başına
+- **Ayrıntı ve geçmiş:** [referans/gorevler/15_film_kervan_fikirleri.md](referans/gorevler/15_film_kervan_fikirleri.md)
+- **Son not:** 2026-11-07 kullanıcı (soru defteri IV, dagilma): aç kalıp kervanı bırakan tayfa en yakın şehre gider, çoğu varamaz; bazıları kaçakların yanına katılır. Kart: yolda karşına çıkan silahlı grubun içinde adı deftere yazılmış eski arabacın durur. | 2026-11-13: H8'de (dbe4fdd) yapılmıştı: evt_deserter_face, giden el kaçakların içinde; kayıt güncellendi.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-E13 Dağılan tayfa yolda karşına çıkar**
+  - Kullanıcı, soru defteri IV (dagilma): aç kalıp kervanı bırakan tayfa en yakın şehre gider ve çoğu oraya
+    varamaz; bazıları kaçakların yanına katılır.
+  - Kart: yolu kesen silahlı grubun içinde **adı deftere yazılmış** eski arabacın duruyor. Defter onu
+    "açlıktan ayrıldı" diye yazmıştı; şimdi karşında.
+  - Seçenekler kurgulanacak: tanıdığını söyle (karizma), hiç tanımamış gibi yap, dövüş. Tanıdığını söylemek
+    yükü kurtarabilir ama kervanın geri kalanının gözünde kervanbaşını küçültür.
+  - Bağlar: `crew_lost_to_hunger` sayacı, `CaravanLedger` satırı, `People` hafızası.
 
 </details>
 

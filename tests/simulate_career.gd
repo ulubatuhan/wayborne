@@ -254,8 +254,15 @@ func _trace_report(session: GameSession) -> Dictionary:
 				faded += 1
 			_:
 				open_now += 1
+	# Defterden düşen kapanmış izler de sayılır (liste son 12'yi tutar).
+	var archived: Dictionary = session.traces.archived
+	returned += int(archived["returned"])
+	faded += int(archived["faded"])
+	good_returns += int(archived["good"])
+	days_to_return += int(archived["days"])
 	return {
 		"born": born, "returned": returned, "faded": faded, "open": open_now,
+		"evicted": session.traces.evicted,
 		"good": good_returns,
 		"days": int(float(days_to_return) / float(maxi(1, returned))),
 	}
@@ -277,6 +284,7 @@ func _report_traces(arcs: Array[Dictionary], policy: String) -> void:
 	var returned := 0
 	var faded := 0
 	var open_now := 0
+	var evicted := 0
 	var good := 0
 	var days := 0
 	var states := {}
@@ -286,15 +294,16 @@ func _report_traces(arcs: Array[Dictionary], policy: String) -> void:
 		returned += int(report.get("returned", 0))
 		faded += int(report.get("faded", 0))
 		open_now += int(report.get("open", 0))
+		evicted += int(report.get("evicted", 0))
 		good += int(report.get("good", 0))
 		days += int(report.get("days", 0))
 		for state in (arc.get("states", {}) as Dictionary):
 			states[state] = int(states.get(state, 0)) + int(arc["states"][state])
 	var count := maxi(1, arcs.size())
-	print("   iz dökümü (%s): doğan %.1f · dönen %.1f (iyi %%%d) · sönen %.1f · açık %.1f · dönüş %d gün" % [
+	print("   iz dökümü (%s): doğan %.1f · dönen %.1f (iyi %%%d) · sönen %.1f (tavandan %.1f) · açık %.1f · dönüş %d gün" % [
 		policy, float(born) / count, float(returned) / count,
 		int(round(100.0 * float(good) / float(maxi(1, returned)))),
-		float(faded) / count, float(open_now) / count, int(float(days) / count),
+		float(faded) / count, float(evicted) / count, float(open_now) / count, int(float(days) / count),
 	])
 	var line := "   hâl histogramı (%s):" % policy
 	for state in [CharacterData.STATE_ALIVE, CharacterData.STATE_WEARY, CharacterData.STATE_HARD,

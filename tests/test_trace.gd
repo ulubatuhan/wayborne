@@ -11,6 +11,7 @@ func suite_name() -> String:
 	return "İz"
 
 func run(t) -> void:
+	_test_matrix_table_hits_real_choices(t)
 	_test_birth_and_source(t)
 	_test_same_source_grows_instead_of_doubling(t)
 	_test_cap_does_not_silently_drop_accounts(t)
@@ -58,7 +59,8 @@ func _test_birth_and_source(t) -> void:
 	t.ok(trace.olgunluk_gunu >= session.total_days_elapsed + 15,
 		"kısa vade en erken 15 gün sonra olgunlaşır")
 	t.ok(trace.olgunluk_gunu <= session.total_days_elapsed + 70, "kısa vade 70 günü aşmaz")
-	t.eq(trace.sonme, float(Trace.TYPE_TABLE[Trace.TYPE_GRATITUDE]["sonme"]), "sönme türden geliyor")
+	t.almost(trace.sonme, float(Trace.TYPE_TABLE[Trace.TYPE_GRATITUDE]["sonme"]) * Trace.FADE_SCALE,
+		"sönme türden geliyor (ortak çarpanla)", 0.00001)
 
 func _test_same_source_grows_instead_of_doubling(t) -> void:
 	var session := _session()
@@ -329,3 +331,25 @@ func _test_hardship_costs_more_but_closes_nothing(t) -> void:
 	var choice := EventChoice.new()
 	choice.effects = [EventEffect.make(EventEffect.Type.GOLD, -10)]
 	t.ok(choice.is_available(hungry), "en sert bantta bile seçenek açık")
+
+## Y-R01: matris tablosundaki her anahtar kataloğda bir seçeneğe ya da sonuca
+## düşmeli. Yanlış yazılmış bir anahtar sessizce hiçbir karta iz koymaz.
+func _test_matrix_table_hits_real_choices(t) -> void:
+	var found := {}
+	for event in EventCatalog.get_road_events():
+		for choice in event.choices:
+			found[choice.text_key] = choice.effects
+			for outcome in choice.outcomes:
+				found[outcome.text_key] = outcome.effects
+	for key in EventCatalog.CHOICE_TRACES:
+		t.ok(found.has(key), "matris anahtarı kataloğda: %s" % key)
+		if not found.has(key):
+			continue
+		var effects: Array[EventEffect] = found[key]
+		var count := 0
+		for effect in effects:
+			if effect.type == EventEffect.Type.IZ_BIRAK:
+				var spec: Array = EventCatalog.CHOICE_TRACES[key]
+				if effect.text_value == String(spec[1]):
+					count += 1
+		t.eq(count, 1, "iz tek kez işlendi: %s" % key)

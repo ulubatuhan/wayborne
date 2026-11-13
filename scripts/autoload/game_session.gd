@@ -867,7 +867,7 @@ func break_promise(trace: Trace) -> void:
 	trace.yon = -1
 	trace.siddet = PROMISE_BROKEN_SEVERITY
 	trace.yayilma = 2
-	trace.sonme = float(Trace.TYPE_TABLE[Trace.TYPE_GRUDGE]["sonme"])
+	trace.sonme = float(Trace.TYPE_TABLE[Trace.TYPE_GRUDGE]["sonme"]) * Trace.FADE_SCALE
 	trace.olgunluk_gunu = total_days_elapsed
 	charge_leader_tone(false)
 	change_temper(TEMPER_PROMISE_BROKEN)

@@ -94,6 +94,60 @@ const PROMISED_EFFECTS: Dictionary = {
 	"EVT_VILLAGE_FOOD_HAGGLE_BAD": [[EventEffect.Type.TRADE_STAIN, 4, ""]],
 }
 
+## --- Kelebek matrisinin kartlara işlenişi (§E, görev Y-R01) ---
+##
+## Kartların çoğu dünyada iz bırakmıyordu (106 kartın 25'i): kırk seferde
+## doğan iz 6, dönen 2,5; hedef 12-22 dönüş. Satır numarası matrisin
+## (`docs/design_notes/ahlak_ruh_iz_mimarisi.md` §E) satırı; "türetme" yazan
+## satırlar matriste yok, aynı mantıkla bu kartın kararına göre yazıldı.
+## Anahtar bir seçenek ya da (zarlı seçenekte) bir sonuç: iz yalnız o yol
+## seçilince ya da o sonuç gelince bırakılır. Değer: [güç, "tür|taşıyıcı|gecikme|dönüş"],
+## güç ± yönü verir (minnet +, kin -), büyüklüğü şiddeti (÷100).
+const CHOICE_TRACES: Dictionary = {
+	"EVT_RIOT_OPT_GIVE": [60, "minnet|sehir|kisa|kapi"],            # 12
+	"EVT_RIOT_OPT_FORCE": [-70, "kin|bolge|uzun|dusman"],           # 11
+	"EVT_RIOT_SPEAK_OK": [40, "minnet|sehir|kisa|yuz"],             # türetme
+	"EVT_DESERTER_OPT_HIDE": [60, "minnet|bolge|sefer|aday"],       # 18
+	"EVT_DESERTER_OPT_REPORT": [-60, "kin|bolge|uzun|dusman"],      # 19
+	"EVT_DESERTER_OPT_REFUSE": [-30, "soylenti|bolge|kisa|ret"],    # türetme
+	"EVT_STOWAWAY_SHELTER_GRATEFUL": [50, "minnet|kisi|kisa|yuz"],  # 20
+	"EVT_STOWAWAY_TURN_IN_PLAIN": [-80, "kin|bolge|uzun|dusman"],   # 21 (güçlü iz kuşağa geçer)
+	"EVT_STOWAWAY_TURN_IN_GRUDGE": [-80, "kin|bolge|uzun|dusman"],  # 21
+	"EVT_WARDEN_EXEMPT_OK": [-80, "kin|sehir|kisa|ret"],            # 30 (düello kartı yok: ret)
+	"EVT_WARDEN_GUILD_OK": [-40, "kin|kisi|kisa|yuz"],              # türetme
+	"EVT_GRAVE_OPT_TEND": [50, "kutsal|yol|uzun|yuz"],              # 43
+	"EVT_WANDERER_FEED_PLAIN": [40, "minnet|bolge|kisa|aday"],      # türetme (1 gibi)
+	"EVT_WANDERER_FEED_KIN": [40, "minnet|bolge|kisa|aday"],
+	"EVT_WANDERER_IGNORE_PLAIN": [-25, "soylenti|bolge|kisa|fiyat"],
+	"EVT_STRANGERS_OPT_FEED": [40, "minnet|bolge|kisa|aday"],
+	"EVT_STRANGERS_OPT_SEND": [-25, "soylenti|bolge|kisa|fiyat"],
+	"EVT_PLAYERS_OPT_SHARE": [40, "minnet|bolge|kisa|yuz"],
+	"EVT_PLAYERS_OPT_PERFORM": [-40, "kin|kisi|kisa|yuz"],
+	"EVT_PILGRIM_OPT_ESCORT": [50, "minnet|bolge|uzun|kapi"],       # 5 gibi
+	"EVT_PALM_COLUMN_PRETEND_BAD": [-60, "kin|bolge|uzun|ret"],
+	"EVT_AVUCICI_HAND_PRETEND_BAD": [-60, "kin|bolge|uzun|ret"],
+	"EVT_MERCHANT_GRUDGE_OPT_SIDE_CREW": [-40, "kin|kisi|kisa|yuz"],
+	"EVT_MERCHANT_BREAD_OPT_ACCEPT": [40, "minnet|kisi|kisa|teklif"],
+	"EVT_PROFITEER_OPT_RESTITUTION": [60, "minnet|bolge|uzun|fiyat"],
+	"EVT_PROFITEER_OPT_IGNORE": [-60, "kin|bolge|uzun|fiyat"],
+}
+
+## `CHOICE_TRACES`'i kataloğa işler; aynı iz iki kez eklenmez.
+static func _apply_choice_traces() -> void:
+	for event in _road_events:
+		for choice in event.choices:
+			_add_trace(choice.effects, CHOICE_TRACES.get(choice.text_key, []))
+			for outcome in choice.outcomes:
+				_add_trace(outcome.effects, CHOICE_TRACES.get(outcome.text_key, []))
+
+static func _add_trace(effects: Array[EventEffect], spec: Array) -> void:
+	if spec.is_empty():
+		return
+	for effect in effects:
+		if effect.type == EventEffect.Type.IZ_BIRAK and effect.text_value == String(spec[1]):
+			return
+	effects.append(EventEffect.make(EventEffect.Type.IZ_BIRAK, int(spec[0]), String(spec[1])))
+
 ## Tabloyu kataloğa işler. Aynı etki iki kez eklenmesin diye tür+hedef
 ## çifti kontrol ediliyor: `get_road_events()` önbelleklense de, bir
 ## testin kataloğu yeniden kurması bu adımı iki kez çalıştırabilir.
@@ -277,6 +331,7 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_provision_raid())
 	_apply_career_threats()
 	_apply_promised_effects()
+	_apply_choice_traces()
 	return _road_events
 
 ## `event_id` ile tek bir olayı bulur - doğrudan sunulan (havuzdan

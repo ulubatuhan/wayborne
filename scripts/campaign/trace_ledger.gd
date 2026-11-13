@@ -33,6 +33,14 @@ const FADE_FLOOR: float = 0.05
 const LEDGER_MIN_SEVERITY: float = 0.4
 
 var traces: Array[Trace] = []
+## Defterden düşen kapanmış izlerin sayımı. Defter son 12'yi tutar; kariyer
+## boyunca kaç iz döndü, kaç iz söndü sorusu ise bütününü ister. Ölçüm
+## aracı bunu listeden saymaya çalıştı ve kırk seferde hep "2-3 dönüş"
+## gördü: liste 12'de kesildiği için (Y-R01, 2026-11-13).
+var archived: Dictionary = {"returned": 0, "faded": 0, "good": 0, "days": 0}
+## Tavan dolduğu için söndürülen izler (sönenlerin içinde; ölçüm için ayrı sayılır):
+## "kimse hatırlamadı" ile "defterde yer yoktu" aynı sonuç değil.
+var evicted: int = 0
 var serial: int = 0
 
 func open_traces() -> Array[Trace]:
@@ -78,7 +86,7 @@ func leave(
 	trace.siddet = clampf(siddet_override if siddet_override > 0.0 else float(table["siddet"]), 0.05, 1.0)
 	trace.gecikme = gecikme
 	trace.olgunluk_gunu = day + _delay_days(gecikme, seed_text)
-	trace.sonme = float(table["sonme"])
+	trace.sonme = float(table["sonme"]) * Trace.FADE_SCALE
 	trace.yayilma = int(table["yayilma"])
 	trace.donus = donus
 	trace.donus_karti = donus_karti
@@ -270,6 +278,7 @@ func _fade_cheapest(gecikme: String) -> bool:
 	if victim == null:
 		return false
 	victim.durum = Trace.STATE_FADED
+	evicted += 1
 	return true
 
 func _trim_closed() -> void:
@@ -283,7 +292,17 @@ func _trim_closed() -> void:
 	# En eski kapanmışlar düşer: defterin hafızası sonsuz değil, sonuncular.
 	closed.sort_custom(func(a: Trace, b: Trace) -> bool: return a.dogum_gunu < b.dogum_gunu)
 	for index in excess:
+		_archive(closed[index])
 		traces.erase(closed[index])
+
+func _archive(trace: Trace) -> void:
+	if trace.durum == Trace.STATE_RETURNED:
+		archived["returned"] = int(archived["returned"]) + 1
+		archived["days"] = int(archived["days"]) + maxi(0, trace.donus_gunu - trace.dogum_gunu)
+		if trace.yon > 0:
+			archived["good"] = int(archived["good"]) + 1
+	else:
+		archived["faded"] = int(archived["faded"]) + 1
 
 func _delay_days(gecikme: String, seed_text: String) -> int:
 	var span: Array = Trace.DELAY_DAYS.get(gecikme, Trace.DELAY_DAYS[Trace.DELAY_SHORT])
@@ -299,11 +318,15 @@ func to_dict() -> Dictionary:
 	var rows: Array = []
 	for trace in traces:
 		rows.append(trace.to_dict())
-	return {"izler": rows, "seri": serial}
+	return {"izler": rows, "seri": serial, "arsiv": archived.duplicate(), "tasan": evicted}
 
 func from_dict(data: Dictionary) -> void:
 	traces.clear()
 	serial = int(data.get("seri", 0))
+	evicted = int(data.get("tasan", 0))
+	var old: Dictionary = data.get("arsiv", {})
+	archived = {"returned": int(old.get("returned", 0)), "faded": int(old.get("faded", 0)),
+		"good": int(old.get("good", 0)), "days": int(old.get("days", 0))}
 	var rows: Array = data.get("izler", [])
 	for row in rows:
 		if row is Dictionary:

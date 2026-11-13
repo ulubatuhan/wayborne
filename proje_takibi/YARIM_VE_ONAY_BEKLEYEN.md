@@ -77,9 +77,9 @@ Toplam: **46** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 
 ### Y-R01 · Ahlak/Ruh/İz: §E'nin 50 satırını kartlara işle
 
-- **Durum:** yapılacak · **Öncelik:** P1 · **Paket:** P00 · **Kim:** kullanıcının işi
+- **Durum:** kısmen · **Öncelik:** P1 · **Paket:** P00 · **Kim:** kullanıcının işi
 - **Ayrıntı ve geçmiş:** [referans/gorevler/19_ahlak_ruh_iz.md](referans/gorevler/19_ahlak_ruh_iz.md)
-- **Son not:** H1-H12 bitti (bkz. docs/design_notes/ahlak_ruh_iz_mimarisi.md). Mekanizma kurulu ve ölçülüyor; eksik olan hacim: 101 kartın yalnız on ikisi iz bırakıyor. simulate_career (40 sefer, sert politika): doğan 6,1 · dönen 2,5 · sönen 2,6 · dönüşe 34 gün; §G.2'nin hedefi 12-22 dönüş. Her kart §E matrisindeki satırına göre IZ_BIRAK alacak.
+- **Son not:** H1-H12 bitti (bkz. docs/design_notes/ahlak_ruh_iz_mimarisi.md). Mekanizma kurulu ve ölçülüyor; eksik olan hacim: 101 kartın yalnız on ikisi iz bırakıyor. simulate_career (40 sefer, sert politika): doğan 6,1 · dönen 2,5 · sönen 2,6 · dönüşe 34 gün; §G.2'nin hedefi 12-22 dönüş. Her kart §E matrisindeki satırına göre IZ_BIRAK alacak. | 2026-11-13: 1. parti. Ölçüm aracı hatası düzeltildi: defter kapanmış izlerin son 12'sini tuttuğu için dönen/sönen eksik sayılıyordu (TraceLedger.archived, evicted). 14 karta matris satırına göre iz (EventCatalog.CHOICE_TRACES, 26 seçenek/sonuç; iz bırakan kart 25 -> 39/106). Sönme ortak çarpanı 0,7 (§G.1 ±%30 sınırı). simulate_career 40 sefer: dönen 5,5 -> 8-11 (sert 14,5, hedef 12-22); sönen payı %75 -> %65 (hedef %25-40, düğme sınırında, kalan iş yapısal: dönüş fırsatı). Kalan: izsiz 67 kart (rapor: tests/report_trace_coverage.gd).
 
 ### Y-R02 · Yankı varyantlarını seçeneğe göre yaz
 
@@ -172,7 +172,7 @@ Toplam: **46** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 - **Durum:** kısmen · **Öncelik:** P1 · **Paket:** P07 · **Kim:** kullanıcı kararı gerekir
 - **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
 - **Bağımlı:** Y-E06
-- **Son not:** 2026-10-29 kullanıcı notu: kıtlığı tetikleyen kıta çapında bir olay, savaşların kökü; ticaret sınırlanır, odak kervanı ulaştırmak; şehir morali/mentali. Önce sebep (lore) ve ölçek kararı. | 2026-11-01: mekanik oyunda (Scarcity, şehir morali); sebep lore kararı bekliyor (defter III).
+- **Son not:** 2026-10-29 kullanıcı notu: kıtlığı tetikleyen kıta çapında bir olay, savaşların kökü; ticaret sınırlanır, odak kervanı ulaştırmak; şehir morali/mentali. Önce sebep (lore) ve ölçek kararı. | 2026-11-01: mekanik oyunda (Scarcity, şehir morali); sebep lore kararı bekliyor (defter III). | 2026-11-13: sebep lore'da kapandı (SIDERIA §5.2: büyü ya da mevsim değil, çalışacak insanın kalmaması).
 
 <details><summary>Görev metni</summary>
 

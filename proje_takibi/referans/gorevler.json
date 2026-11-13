@@ -3473,7 +3473,7 @@
    "paket": "P07",
    "sira": 81,
    "kim": "CK",
-   "not": "2026-10-29 kullanıcı notu: kıtlığı tetikleyen kıta çapında bir olay, savaşların kökü; ticaret sınırlanır, odak kervanı ulaştırmak; şehir morali/mentali. Önce sebep (lore) ve ölçek kararı. | 2026-11-01: mekanik oyunda (Scarcity, şehir morali); sebep lore kararı bekliyor (defter III)."
+   "not": "2026-10-29 kullanıcı notu: kıtlığı tetikleyen kıta çapında bir olay, savaşların kökü; ticaret sınırlanır, odak kervanı ulaştırmak; şehir morali/mentali. Önce sebep (lore) ve ölçek kararı. | 2026-11-01: mekanik oyunda (Scarcity, şehir morali); sebep lore kararı bekliyor (defter III). | 2026-11-13: sebep lore'da kapandı (SIDERIA §5.2: büyü ya da mevsim değil, çalışacak insanın kalmaması)."
   },
   {
    "id": "Y-C22",
@@ -4217,14 +4217,14 @@
    "bolum": "15",
    "alan": "Yönetmen: İçerik ve anlatı",
    "oncelik": "P2",
-   "durum": "açık",
+   "durum": "bitti",
    "bagimli": [],
    "dosya": "gorevler/15_film_kervan_fikirleri.md",
    "dalga": 5,
    "paket": "P11",
    "sira": 310,
    "kim": "C",
-   "not": "2026-11-07 kullanıcı (soru defteri IV, dagilma): aç kalıp kervanı bırakan tayfa en yakın şehre gider, çoğu varamaz; bazıları kaçakların yanına katılır. Kart: yolda karşına çıkan silahlı grubun içinde adı deftere yazılmış eski arabacın durur."
+   "not": "2026-11-07 kullanıcı (soru defteri IV, dagilma): aç kalıp kervanı bırakan tayfa en yakın şehre gider, çoğu varamaz; bazıları kaçakların yanına katılır. Kart: yolda karşına çıkan silahlı grubun içinde adı deftere yazılmış eski arabacın durur. | 2026-11-13: H8'de (dbe4fdd) yapılmıştı: evt_deserter_face, giden el kaçakların içinde; kayıt güncellendi."
   },
   {
    "id": "Y-R01",
@@ -4232,14 +4232,14 @@
    "bolum": "19",
    "alan": "Ahlak, Ruh ve İz (Fable mimarisi)",
    "oncelik": "P1",
-   "durum": "yapılacak",
+   "durum": "kısmen",
    "bagimli": [],
    "dosya": "gorevler/19_ahlak_ruh_iz.md",
    "dalga": 1,
    "paket": "P00",
    "sira": 260,
    "kim": "S",
-   "not": "H1-H12 bitti (bkz. docs/design_notes/ahlak_ruh_iz_mimarisi.md). Mekanizma kurulu ve ölçülüyor; eksik olan hacim: 101 kartın yalnız on ikisi iz bırakıyor. simulate_career (40 sefer, sert politika): doğan 6,1 · dönen 2,5 · sönen 2,6 · dönüşe 34 gün; §G.2'nin hedefi 12-22 dönüş. Her kart §E matrisindeki satırına göre IZ_BIRAK alacak."
+   "not": "H1-H12 bitti (bkz. docs/design_notes/ahlak_ruh_iz_mimarisi.md). Mekanizma kurulu ve ölçülüyor; eksik olan hacim: 101 kartın yalnız on ikisi iz bırakıyor. simulate_career (40 sefer, sert politika): doğan 6,1 · dönen 2,5 · sönen 2,6 · dönüşe 34 gün; §G.2'nin hedefi 12-22 dönüş. Her kart §E matrisindeki satırına göre IZ_BIRAK alacak. | 2026-11-13: 1. parti. Ölçüm aracı hatası düzeltildi: defter kapanmış izlerin son 12'sini tuttuğu için dönen/sönen eksik sayılıyordu (TraceLedger.archived, evicted). 14 karta matris satırına göre iz (EventCatalog.CHOICE_TRACES, 26 seçenek/sonuç; iz bırakan kart 25 -> 39/106). Sönme ortak çarpanı 0,7 (§G.1 ±%30 sınırı). simulate_career 40 sefer: dönen 5,5 -> 8-11 (sert 14,5, hedef 12-22); sönen payı %75 -> %65 (hedef %25-40, düğme sınırında, kalan iş yapısal: dönüş fırsatı). Kalan: izsiz 67 kart (rapor: tests/report_trace_coverage.gd)."
   },
   {
    "id": "Y-R02",
