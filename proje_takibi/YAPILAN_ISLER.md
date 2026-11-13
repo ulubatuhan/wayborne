@@ -2,7 +2,7 @@
 
 Bitmiş ve doğrulanmış (testi ya da kullanıcı onayı geçmiş) görevler. Kod dalı: `wayborne`, `yerel/yapilacaklar-p05-p06` (önceki tur `yerel/yapilacaklar-p01-p04`). Push edilmedi.
 
-Toplam: **204** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **205** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
 
@@ -2126,6 +2126,25 @@ Toplam: **204** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler
 </details>
 
 ## Paket P11
+
+### Y-E01 · Olay havuzunu 46'dan 120'nin üstüne çıkar
+
+- **Durum:** bitti · **Öncelik:** P1 · **Paket:** P11 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
+- **Bağımlı:** Y-E06, Y-C01
+- **Son not:** Kart yazımı lore sonrası 10luk partilerle; düzen docs/design_notes/olay_uretim_duzeni.md. | 2026-11-13: iki bölge partisi (22 kart: 18 bölge, 2 yoldaş, 1 zincir açılışı + karşılığı), bağlamda region_<id>. Çekilebilir 98 -> 120 (hedef). simulate_career: farklı kart 77-79 -> 97, tekrar oranı %26 -> %23. Kullanıcı onayı toplu (2026-11-13: 'benden onay isteme').
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-E01 Olay havuzunu 46'dan 120'nin üstüne çıkar**
+  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `cbe2b02`): Kart yazımı lore sonrası 10luk partilerle; düzen docs/design_notes/olay_uretim_duzeni.md.
+  - **Öncelik:** P1 · **Dalga:** 5 · **Bağımlı:** Y-E06, Y-C01
+  - **Ne:** Bölge başına 6–10 kart, yoldaş kartları, zincirler. Her kart oyuncunun kararını değiştirecek kadar farklı olmalı. Üretim düzeni için “Kullanıcının sorularına cevaplar” bölümüne bak.
+  - **Kullanıcı notu:** “Sayıyı arttır demek kolay ama arttırabilecek misin?”
+  - **Kabul:** En az 120 çekilebilir kart; her kart kalite listesinden geçti; simülatörde finale kadar tekrar oranı ölçüldü.
+  - **Literatür:** R15, R48
+
+</details>
 
 ### Y-E07 · Paylaşılabilir defter sayfası ve güncel Codex
 

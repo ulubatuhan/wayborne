@@ -463,6 +463,17 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_reg_blind_miner())
 	_road_events.append(_reg_sogurtay_water())
 	_road_events.append(_reg_page_collector())
+	_road_events.append(_reg_gallows_boots())
+	_road_events.append(_reg_city_oath())
+	_road_events.append(_reg_far_ship())
+	_road_events.append(_reg_soil_trough())
+	_road_events.append(_reg_avalanche_watch())
+	_road_events.append(_reg_miner_wages())
+	_road_events.append(_reg_wages_family())
+	_road_events.append(_reg_herd_crossing())
+	_road_events.append(_reg_silent_hour())
+	_road_events.append(_comp_letter_home())
+	_road_events.append(_comp_night_confession())
 	_road_events.append(_wandering_players())
 	_road_events.append(_penitent_procession())
 	_road_events.append(_hidden_guide())
@@ -3303,6 +3314,171 @@ static func _reg_page_collector() -> GameEvent:
 			"EVT_REG_PAGES_PRAYER_OK", _effects([_fx(EventEffect.Type.STRESS, -8), _fx(EventEffect.Type.IZ_BIRAK, 30, "kutsal|bolge|kisa|kapi")]),
 			"EVT_REG_PAGES_PRAYER_MID", _effects([_fx(EventEffect.Type.STRESS, -2)]),
 			"EVT_REG_PAGES_PRAYER_BAD", _effects([_fx(EventEffect.Type.STRESS, 5), _fx(EventEffect.Type.MORALE, -3)])),
+	])
+	return event
+
+## Y-E01 bölge partisi 2 · Darağaçları (§11.4): krallık kanunu asılanı indirmez.
+static func _reg_gallows_boots() -> GameEvent:
+	var event := _event("evt_reg_gallows_boots", "EVT_REG_GALLOWS_TITLE", "EVT_REG_GALLOWS_TEXT", 1.0)
+	event.cooldown_days = 20
+	event.conditions = _conditions([_c("region_imparatorluk", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_choice("EVT_REG_GALLOWS_OPT_BOOTS", _effects([_fx(EventEffect.Type.STRESS, 3), _fx(EventEffect.Type.MORALE, 3), _fx(EventEffect.Type.TRADE_STAIN, 3)])),
+		_check_choice("EVT_REG_GALLOWS_OPT_SIGN", CharacterStats.Kind.PERCEPTION, SkillCheck.Source.PARTY_BEST,
+			"EVT_REG_GALLOWS_SIGN_OK", _effects([_fx(EventEffect.Type.IZ_BIRAK, -30, "soylenti|bolge|kisa|yuz"), _fx(EventEffect.Type.STRESS, 4)]),
+			"EVT_REG_GALLOWS_SIGN_MID", _effects([_fx(EventEffect.Type.STRESS, 2)]),
+			"EVT_REG_GALLOWS_SIGN_BAD", _effects([_fx(EventEffect.Type.REPUTATION, -2), _fx(EventEffect.Type.TRADE_STAIN, 2)])),
+		_choice("EVT_REG_GALLOWS_OPT_STONE", _effects([_fx(EventEffect.Type.STRESS, -3), _fx(EventEffect.Type.IZ_BIRAK, 30, "kutsal|yol|kisa|yuz")])),
+	])
+	return event
+
+## Y-E01 bölge partisi 2 · Vadi kuzeyi mikro milliyetçi (Ondrelle, Merigaud).
+static func _reg_city_oath() -> GameEvent:
+	var event := _event("evt_reg_city_oath", "EVT_REG_OATH_TITLE", "EVT_REG_OATH_TEXT", 1.0)
+	event.cooldown_days = 20
+	event.conditions = _conditions([_c("region_vadi", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_choice("EVT_REG_OATH_OPT_SWEAR", _effects([_fx(EventEffect.Type.STRESS, 5), _fx(EventEffect.Type.IZ_BIRAK, -30, "soylenti|bolge|kisa|fiyat")])),
+		_check_choice("EVT_REG_OATH_OPT_ARGUE", CharacterStats.Kind.CHARISMA, SkillCheck.Source.LEADER,
+			"EVT_REG_OATH_ARGUE_OK", _effects([_fx(EventEffect.Type.MORALE, 3), _fx(EventEffect.Type.REPUTATION, 1)]),
+			"EVT_REG_OATH_ARGUE_MID", _effects([_fx(EventEffect.Type.GOLD, -30)]),
+			"EVT_REG_OATH_ARGUE_BAD", _effects([_fx(EventEffect.Type.TRAVEL_DAYS, 1), _fx(EventEffect.Type.GOLD, -40), _fx(EventEffect.Type.TRADE_STAIN, 3)])),
+		_choice("EVT_REG_OATH_OPT_ROUND", _effects([_fx(EventEffect.Type.TRAVEL_DAYS, 1), _fx(EventEffect.Type.DANGER, 5)])),
+	])
+	return event
+
+## Y-E01 bölge partisi 2 · Raviellon'a ve uzak kıtalara giden gemiler (§10.10-11).
+static func _reg_far_ship() -> GameEvent:
+	var event := _event("evt_reg_far_ship", "EVT_REG_SHIP_TITLE", "EVT_REG_SHIP_TEXT", 1.0)
+	event.cooldown_days = 20
+	event.conditions = _conditions([_c("region_guney", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_gated_choice("EVT_REG_SHIP_OPT_BUY", "EVT_REG_SHIP_OPT_BUY_LOCKED", _conditions([_c("provisions", EventCondition.Op.GREATER_EQUAL, 5)]), _effects([_fx(EventEffect.Type.PROVISIONS, -5), _fx(EventEffect.Type.ITEM_ADD, 1, "silk")])),
+		_check_choice("EVT_REG_SHIP_OPT_ASK", CharacterStats.Kind.WISDOM, SkillCheck.Source.LEADER,
+			"EVT_REG_SHIP_ASK_OK", _effects([_fx(EventEffect.Type.MORALE, 3), _fx(EventEffect.Type.DANGER, -5)]),
+			"EVT_REG_SHIP_ASK_MID", _effects([_fx(EventEffect.Type.STRESS, -4)]),
+			"EVT_REG_SHIP_ASK_BAD", _effects([_fx(EventEffect.Type.STRESS, 2)])),
+		_choice("EVT_REG_SHIP_OPT_FEED", _effects([_fx(EventEffect.Type.PROVISIONS, -2), _fx(EventEffect.Type.IZ_BIRAK, 40, "minnet|kisi|kisa|teklif")])),
+	])
+	return event
+
+## Y-E01 bölge partisi 2 · Tolvarin toprağa and içer; matris satırı 29.
+static func _reg_soil_trough() -> GameEvent:
+	var event := _event("evt_reg_soil_trough", "EVT_REG_SOIL_TITLE", "EVT_REG_SOIL_TEXT", 1.0)
+	event.cooldown_days = 20
+	event.conditions = _conditions([_c("region_sinir", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_choice("EVT_REG_SOIL_OPT_DIG", _effects([_fx(EventEffect.Type.PROVISIONS, 6), _fx(EventEffect.Type.IZ_BIRAK, -40, "kutsal|bolge|kisa|fiyat")])),
+		_gated_choice("EVT_REG_SOIL_OPT_OFFER", "EVT_REG_SOIL_OPT_OFFER_LOCKED", _conditions([_c("provisions", EventCondition.Op.GREATER_EQUAL, 2)]), _effects([_fx(EventEffect.Type.PROVISIONS, -2), _fx(EventEffect.Type.STRESS, -4), _fx(EventEffect.Type.IZ_BIRAK, 40, "kutsal|bolge|kisa|kapi")])),
+		_check_choice("EVT_REG_SOIL_OPT_ASK", CharacterStats.Kind.CHARISMA, SkillCheck.Source.PARTY_BEST,
+			"EVT_REG_SOIL_ASK_OK", _effects([_fx(EventEffect.Type.PROVISIONS, 4), _fx(EventEffect.Type.IZ_BIRAK, 30, "minnet|bolge|kisa|yuz")]),
+			"EVT_REG_SOIL_ASK_MID", _effects([_fx(EventEffect.Type.STRESS, 1)]),
+			"EVT_REG_SOIL_ASK_BAD", _effects([_fx(EventEffect.Type.REPUTATION, -2), _fx(EventEffect.Type.STRESS, 3)])),
+	])
+	return event
+
+## Y-E01 bölge partisi 2 · Dağlı kısa ve sert konuşur; çığ gözcüsü.
+static func _reg_avalanche_watch() -> GameEvent:
+	var event := _event("evt_reg_avalanche_watch", "EVT_REG_SNOWWATCH_TITLE", "EVT_REG_SNOWWATCH_TEXT", 1.0)
+	event.cooldown_days = 20
+	event.conditions = _conditions([_c("region_dag", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_check_choice("EVT_REG_SNOWWATCH_OPT_QUIET", CharacterStats.Kind.AGILITY, SkillCheck.Source.PARTY_BEST,
+			"EVT_REG_SNOWWATCH_QUIET_OK", _effects([_fx(EventEffect.Type.DANGER, -5), _fx(EventEffect.Type.MORALE, 3)]),
+			"EVT_REG_SNOWWATCH_QUIET_MID", _effects([_fx(EventEffect.Type.STRESS, 5)]),
+			"EVT_REG_SNOWWATCH_QUIET_BAD", _effects([_fx(EventEffect.Type.WAGON_DAMAGE, 1), _fx(EventEffect.Type.PARTY_HP, -4, "weakest")])),
+		_choice("EVT_REG_SNOWWATCH_OPT_WAIT", _effects([_fx(EventEffect.Type.TRAVEL_DAYS, 1), _fx(EventEffect.Type.STRESS, 2)])),
+		_gated_choice("EVT_REG_SNOWWATCH_OPT_PAY", "EVT_REG_SNOWWATCH_OPT_PAY_LOCKED", _conditions([_c("gold", EventCondition.Op.GREATER_EQUAL, 25)]), _effects([_fx(EventEffect.Type.GOLD, -25), _fx(EventEffect.Type.DANGER, -8), _fx(EventEffect.Type.IZ_BIRAK, 30, "minnet|kisi|kisa|yuz")])),
+	])
+	return event
+
+## Y-E01 bölge partisi 2 · Zincir açılışı: ölen madencinin ücreti başka şehirde ailesine.
+static func _reg_miner_wages() -> GameEvent:
+	var event := _event("evt_reg_miner_wages", "EVT_REG_WAGES_TITLE", "EVT_REG_WAGES_TEXT", 1.0)
+	event.cooldown_days = 20
+	event.conditions = _conditions([_c("region_dag_maden", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_choice("EVT_REG_WAGES_OPT_TAKE", _effects([_fx(EventEffect.Type.GOLD, 60), _fx(EventEffect.Type.CHAIN_ADVANCE, 10, "wages|1|other_city"), _fx(EventEffect.Type.IZ_BIRAK, 30, "minnet|bolge|kisa|teklif")])),
+		_check_choice("EVT_REG_WAGES_OPT_COUNT", CharacterStats.Kind.INTELLECT, SkillCheck.Source.LEADER,
+			"EVT_REG_WAGES_COUNT_OK", _effects([_fx(EventEffect.Type.GOLD, 60), _fx(EventEffect.Type.CHAIN_ADVANCE, 10, "wages|1|other_city"), _fx(EventEffect.Type.MORALE, 3)]),
+			"EVT_REG_WAGES_COUNT_MID", _effects([_fx(EventEffect.Type.GOLD, 60), _fx(EventEffect.Type.CHAIN_ADVANCE, 10, "wages|1|other_city")]),
+			"EVT_REG_WAGES_COUNT_BAD", _effects([_fx(EventEffect.Type.REPUTATION, -2), _fx(EventEffect.Type.IZ_BIRAK, -30, "kin|bolge|kisa|ret")])),
+		_choice("EVT_REG_WAGES_OPT_REFUSE", _effects([_fx(EventEffect.Type.STRESS, 2)])),
+	])
+	return event
+
+## Y-E01 bölge partisi 2 · Zincir karşılığı: ücret ailesine ulaşır ya da ulaşmaz.
+static func _reg_wages_family() -> GameEvent:
+	var event := _event("evt_reg_wages_family", "EVT_REG_FAMILY_TITLE", "EVT_REG_FAMILY_TEXT", 4.0)
+	event.cooldown_days = 1
+	event.conditions = _conditions([_c("chain_wages_ripe", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_gated_choice("EVT_REG_FAMILY_OPT_PAY", "EVT_REG_FAMILY_OPT_PAY_LOCKED", _conditions([_c("gold", EventCondition.Op.GREATER_EQUAL, 60)]), _effects([_fx(EventEffect.Type.GOLD, -60), _fx(EventEffect.Type.STRESS, -6), _fx(EventEffect.Type.IZ_BIRAK, 50, "minnet|bolge|uzun|kapi"), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "wages|-1")])),
+		_check_choice("EVT_REG_FAMILY_OPT_EXPLAIN", CharacterStats.Kind.CHARISMA, SkillCheck.Source.LEADER,
+			"EVT_REG_FAMILY_EXPLAIN_OK", _effects([_fx(EventEffect.Type.GOLD, -30), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "wages|-1")]),
+			"EVT_REG_FAMILY_EXPLAIN_MID", _effects([_fx(EventEffect.Type.GOLD, -30), _fx(EventEffect.Type.STRESS, 3), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "wages|-1")]),
+			"EVT_REG_FAMILY_EXPLAIN_BAD", _effects([_fx(EventEffect.Type.GOLD, -30), _fx(EventEffect.Type.STRESS, 8), _fx(EventEffect.Type.IZ_BIRAK, -40, "kin|bolge|uzun|ret"), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "wages|-1")])),
+		_choice("EVT_REG_FAMILY_OPT_DENY", _effects([_fx(EventEffect.Type.STRESS, 6), _fx(EventEffect.Type.IZ_BIRAK, -70, "kin|bolge|uzun|dusman"), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "wages|-1")])),
+	])
+	return event
+
+## Y-E01 bölge partisi 2 · Sürü Yılı: ot nereye, sürü oraya (§2.3).
+static func _reg_herd_crossing() -> GameEvent:
+	var event := _event("evt_reg_herd_crossing", "EVT_REG_HERD_TITLE", "EVT_REG_HERD_TEXT", 1.0)
+	event.cooldown_days = 20
+	event.conditions = _conditions([_c("region_gocebe", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_choice("EVT_REG_HERD_OPT_WAIT", _effects([_fx(EventEffect.Type.TRAVEL_DAYS, 1), _fx(EventEffect.Type.IZ_BIRAK, 30, "minnet|bolge|kisa|kapi")])),
+		_check_choice("EVT_REG_HERD_OPT_THROUGH", CharacterStats.Kind.AGILITY, SkillCheck.Source.PARTY_BEST,
+			"EVT_REG_HERD_THROUGH_OK", _effects([_fx(EventEffect.Type.MORALE, 3), _fx(EventEffect.Type.DANGER, -3)]),
+			"EVT_REG_HERD_THROUGH_MID", _effects([_fx(EventEffect.Type.GOLD, -20)]),
+			"EVT_REG_HERD_THROUGH_BAD", _effects([_fx(EventEffect.Type.REPUTATION, -3), _fx(EventEffect.Type.IZ_BIRAK, -50, "kin|bolge|kisa|kapi"), _fx(EventEffect.Type.STRESS, 5)])),
+		_gated_choice("EVT_REG_HERD_OPT_BUY", "EVT_REG_HERD_OPT_BUY_LOCKED", _conditions([_c("gold", EventCondition.Op.GREATER_EQUAL, 30)]), _effects([_fx(EventEffect.Type.GOLD, -30), _fx(EventEffect.Type.PROVISIONS, 8)])),
+	])
+	return event
+
+## Y-E01 bölge partisi 2 · Avuçiçi: okuma saatinde yol susar.
+static func _reg_silent_hour() -> GameEvent:
+	var event := _event("evt_reg_silent_hour", "EVT_REG_SILENCE_TITLE", "EVT_REG_SILENCE_TEXT", 1.0)
+	event.cooldown_days = 20
+	event.conditions = _conditions([_c("region_ahit", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_choice("EVT_REG_SILENCE_OPT_STOP", _effects([_fx(EventEffect.Type.TRAVEL_DAYS, 1), _fx(EventEffect.Type.STRESS, -3), _fx(EventEffect.Type.REPUTATION, 1)])),
+		_check_choice("EVT_REG_SILENCE_OPT_SLIP", CharacterStats.Kind.AGILITY, SkillCheck.Source.PARTY_BEST,
+			"EVT_REG_SILENCE_SLIP_OK", _effects([_fx(EventEffect.Type.MORALE, 2)]),
+			"EVT_REG_SILENCE_SLIP_MID", _effects([_fx(EventEffect.Type.STRESS, 3)]),
+			"EVT_REG_SILENCE_SLIP_BAD", _effects([_fx(EventEffect.Type.REPUTATION, -3), _fx(EventEffect.Type.TRADE_STAIN, 4)])),
+		_choice("EVT_REG_SILENCE_OPT_SING", _effects([_fx(EventEffect.Type.MORALE, 5), _fx(EventEffect.Type.IZ_BIRAK, -50, "kin|bolge|uzun|ret")])),
+	])
+	return event
+
+## Y-E01 bölge partisi 2 · Yoldaş kartı: eve çağıran mektup.
+static func _comp_letter_home() -> GameEvent:
+	var event := _event("evt_comp_letter_home", "EVT_COMP_LETTER_TITLE", "EVT_COMP_LETTER_TEXT", 1.0)
+	event.cooldown_days = 20
+	event.conditions = _conditions([_c("party_size", EventCondition.Op.GREATER_EQUAL, 2)])
+	event.choices = _choices([
+		_choice("EVT_COMP_LETTER_OPT_GO", _effects([_fx(EventEffect.Type.GOLD, -40), _fx(EventEffect.Type.MORALE, -4), _fx(EventEffect.Type.STRESS, -4), _fx(EventEffect.Type.IZ_BIRAK, 40, "minnet|yoldas|kisa|yuz")])),
+		_check_choice("EVT_COMP_LETTER_OPT_STAY", CharacterStats.Kind.CHARISMA, SkillCheck.Source.LEADER,
+			"EVT_COMP_LETTER_STAY_OK", _effects([_fx(EventEffect.Type.MORALE, 3)]),
+			"EVT_COMP_LETTER_STAY_MID", _effects([_fx(EventEffect.Type.STRESS, 5)]),
+			"EVT_COMP_LETTER_STAY_BAD", _effects([_fx(EventEffect.Type.STRESS, 6), _fx(EventEffect.Type.IZ_BIRAK, -40, "kin|yoldas|kisa|yuz")])),
+		_choice("EVT_COMP_LETTER_OPT_WRITE", _effects([_fx(EventEffect.Type.STRESS, 2), _fx(EventEffect.Type.MORALE, 1)])),
+	])
+	return event
+
+## Y-E01 bölge partisi 2 · Yoldaş kartı: nöbette itiraf.
+static func _comp_night_confession() -> GameEvent:
+	var event := _event("evt_comp_night_confession", "EVT_COMP_CONFESS_TITLE", "EVT_COMP_CONFESS_TEXT", 1.0)
+	event.cooldown_days = 20
+	event.conditions = _conditions([_c("party_size", EventCondition.Op.GREATER_EQUAL, 2)])
+	event.choices = _choices([
+		_choice("EVT_COMP_CONFESS_OPT_KEEP", _effects([_fx(EventEffect.Type.STRESS, 3), _fx(EventEffect.Type.DANGER, 4), _fx(EventEffect.Type.IZ_BIRAK, 50, "minnet|yoldas|uzun|yuz")])),
+		_check_choice("EVT_COMP_CONFESS_OPT_ASK", CharacterStats.Kind.WISDOM, SkillCheck.Source.LEADER,
+			"EVT_COMP_CONFESS_ASK_OK", _effects([_fx(EventEffect.Type.STRESS, -6), _fx(EventEffect.Type.MORALE, 2)]),
+			"EVT_COMP_CONFESS_ASK_MID", _effects([_fx(EventEffect.Type.STRESS, 1)]),
+			"EVT_COMP_CONFESS_ASK_BAD", _effects([_fx(EventEffect.Type.STRESS, 5), _fx(EventEffect.Type.IZ_BIRAK, -30, "kin|yoldas|kisa|yuz")])),
+		_choice("EVT_COMP_CONFESS_OPT_TELL", _effects([_fx(EventEffect.Type.MORALE, -4), _fx(EventEffect.Type.STRESS, 4), _fx(EventEffect.Type.REPUTATION, 1)])),
 	])
 	return event
 

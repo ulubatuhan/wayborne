@@ -9404,6 +9404,3071 @@
         {
           "effects": [
             {
+              "amount": 1,
+              "text": "",
+              "type": "TRAVEL_DAYS"
+            },
+            {
+              "amount": 2,
+              "text": "",
+              "type": "REPUTATION"
+            },
+            {
+              "amount": 30,
+              "text": "minnet|bolge|kisa|kapi",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "Saydır, yazdır (bir gün)",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "INTELLECT"
+          },
+          "effects": [],
+          "label": "Kâğıdı kendin doldur, yükü eksik yaz",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 30,
+                  "text": "",
+                  "type": "GOLD"
+                }
+              ],
+              "label": "{who} sayıları bir kâtip kadar düzgün yazıyor; atlı mührü basıp geçiyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "TRADE_STAIN"
+                }
+              ],
+              "label": "{who} bir satırı karıştırıyor. Atlı kâğıdın kenarına bir işaret koyuyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -40,
+                  "text": "",
+                  "type": "GOLD"
+                },
+                {
+                  "amount": 6,
+                  "text": "",
+                  "type": "TRADE_STAIN"
+                }
+              ],
+              "label": "Atlı yükü kendisi sayıyor ve {who} yazdığı sayının iki katını buluyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": -30,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": -30,
+              "text": "soylenti|bolge|kisa|fiyat",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "Atlıya yol parası ver (30 GG)",
+          "locked": "Kesede 30 GG yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "gold",
+              "op": "GREATER_EQUAL",
+              "value": 30
+            }
+          ]
+        }
+      ],
+      "conditions": [
+        {
+          "key": "region_imparatorluk",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 20,
+      "id": "evt_reg_registry_rider",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Vastrevar Kayıt Bürosu'nun bir atlısı yolu kesmiş; elinde kervanın adını, kişi sayısını ve yükünü soran basılı bir kâğıt. \"Krallıkta adı olmayan yük yoktur,\" diyor. Kâğıdın altında mühür için yer bırakılmış.",
+      "title": "Kayıt Bürosunun Atlısı",
+      "triggered_only": false,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": 1,
+              "text": "",
+              "type": "TRAVEL_DAYS"
+            },
+            {
+              "amount": -4,
+              "text": "",
+              "type": "PROVISIONS"
+            },
+            {
+              "amount": 3,
+              "text": "",
+              "type": "REPUTATION"
+            },
+            {
+              "amount": 50,
+              "text": "minnet|bolge|uzun|teklif",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "Yaralıları al (bir gün, 4 erzak)",
+          "locked": "Yaralıları besleyecek erzak yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "provisions",
+              "op": "GREATER_EQUAL",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "CHARISMA"
+          },
+          "effects": [],
+          "label": "Yerin olmadığını anlat",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 2,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} yükü tek tek gösteriyor; çavuş başını sallayıp başka bir arabaya bakıyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -2,
+                  "text": "",
+                  "type": "REPUTATION"
+                },
+                {
+                  "amount": -30,
+                  "text": "kin|bolge|kisa|ret",
+                  "type": "IZ_BIRAK"
+                }
+              ],
+              "label": "{who} konuşurken çavuş kervanın adını deftere yazıyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -6,
+                  "text": "",
+                  "type": "PROVISIONS"
+                },
+                {
+                  "amount": -2,
+                  "text": "",
+                  "type": "REPUTATION"
+                }
+              ],
+              "label": "Çavuş {who} sözünü bitirmeden bir arabayı boşalttırıp yaralıları bindiriyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": -2,
+              "text": "",
+              "type": "PROVISIONS"
+            },
+            {
+              "amount": 3,
+              "text": "",
+              "type": "STRESS"
+            }
+          ],
+          "label": "Su ve sargı bırakıp geç (2 erzak)",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "region_imparatorluk",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 20,
+      "id": "evt_reg_wounded_column",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Yolun kenarında Vaelghard renklerinde yaralı askerler; dağ kabileleriyle bir çatışmadan dönmüşler. Başlarındaki çavuş arabalarına bakıyor: \"Yaralılar Vastrevar'a gitmeli. Krallık bunu unutmaz.\"",
+      "title": "Dağdan İnen Yaralılar",
+      "triggered_only": false,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": -8,
+              "text": "",
+              "type": "PROVISIONS"
+            },
+            {
+              "amount": 30,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": 40,
+              "text": "minnet|bolge|kisa|aday",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "Kılıçları una değiş (8 erzak)",
+          "locked": "Verecek 8 erzak yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "provisions",
+              "op": "GREATER_EQUAL",
+              "value": 8
+            }
+          ]
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "CHARISMA"
+          },
+          "effects": [],
+          "label": "Onları prenslerinin kapısına yönlendir",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "MORALE"
+                },
+                {
+                  "amount": -5,
+                  "text": "",
+                  "type": "DANGER"
+                }
+              ],
+              "label": "{who} hangi kapıda hangi kâtibin oturduğunu anlatıyor; bölük bayrağını açıp yola düşüyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 4,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": 5,
+                  "text": "",
+                  "type": "DANGER"
+                }
+              ],
+              "label": "Bölük {who} dinliyor, sonra yarısı gidiyor, yarısı kalıp kervanı izliyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 0,
+                  "text": "bandit",
+                  "type": "TRIGGER_COMBAT"
+                }
+              ],
+              "label": "{who} konuşurken içlerinden biri kılıcını yerden alıyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 4,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": -40,
+              "text": "kin|bolge|kisa|dusman",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "Hızla uzaklaş",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "region_vadi",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 20,
+      "id": "evt_reg_unpaid_company",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Vadi'nin paralı bölüklerinden biri bayrağını katlamış bekliyor. Prensleri üç aydır ödeme yapmamış. Başları kılıçları yere seriyor: \"Bunları una değişiriz. Değişmezsek de alırız.\"",
+      "title": "Ödenmemiş Bölük",
+      "triggered_only": false,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": -40,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": 1,
+              "text": "",
+              "type": "REPUTATION"
+            }
+          ],
+          "label": "İkisine de öde (40 GG)",
+          "locked": "Kesede 40 GG yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "gold",
+              "op": "GREATER_EQUAL",
+              "value": 40
+            }
+          ]
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "INTELLECT"
+          },
+          "effects": [],
+          "label": "Kâtipleri birbirine düşür",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 4,
+                  "text": "",
+                  "type": "MORALE"
+                },
+                {
+                  "amount": -20,
+                  "text": "soylenti|bolge|kisa|fiyat",
+                  "type": "IZ_BIRAK"
+                }
+              ],
+              "label": "{who} tek bir soruyla iki kâtibi kavgaya tutuşturuyor; kervan köprüden sessizce geçiyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -20,
+                  "text": "",
+                  "type": "GOLD"
+                }
+              ],
+              "label": "{who} birini ikna ediyor; öbürü yine de parasını alıyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -60,
+                  "text": "",
+                  "type": "GOLD"
+                },
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "TRADE_STAIN"
+                }
+              ],
+              "label": "İki kâtip {who} karşısında birleşiyor; ücret ikiye katlanıyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 1,
+              "text": "",
+              "type": "TRAVEL_DAYS"
+            },
+            {
+              "amount": 1,
+              "text": "",
+              "type": "WAGON_DAMAGE"
+            }
+          ],
+          "label": "Sığ yerden karşıya geç (bir gün)",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "region_vadi",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 20,
+      "id": "evt_reg_two_clerks",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "İki prensliğin arasındaki köprüde iki ayrı kulübe, iki ayrı kâtip. İkisi de köprünün kendi prensine ait olduğunu söylüyor ve ikisi de geçiş parası istiyor. Biri öbürünü duymazdan geliyor, öbürü gülüyor.",
+      "title": "İki Kâtipli Köprü",
+      "triggered_only": false,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "INTELLECT"
+          },
+          "effects": [],
+          "label": "Dipnotları oku, sonra imzala",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 60,
+                  "text": "",
+                  "type": "GOLD"
+                },
+                {
+                  "amount": 30,
+                  "text": "minnet|kisi|kisa|teklif",
+                  "type": "IZ_BIRAK"
+                }
+              ],
+              "label": "{who} üçüncü dipnotta bir ceza maddesi buluyor ve aracıya çizdiriyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 25,
+                  "text": "",
+                  "type": "GOLD"
+                }
+              ],
+              "label": "{who} maddeyi buluyor; aracı çizmiyor ama fiyatı düşürüyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} okurken aracı sabırsızlanıp masasını topluyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 70,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": 4,
+              "text": "",
+              "type": "TRADE_STAIN"
+            }
+          ],
+          "label": "Okumadan imzala",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 1,
+              "text": "",
+              "type": "REPUTATION"
+            }
+          ],
+          "label": "Kibarca reddet",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "region_guney",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 20,
+      "id": "evt_reg_council_contract",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Orsolune Konseyi'nin bir aracısı yolun kenarına bir masa kurmuş. Önündeki sözleşme kervanın yükünü bir sonraki şehirde ondan alacağını yazıyor. Fiyat iyi, sözleşmenin dili kalın, dipnotları ince.",
+      "title": "Konseyin Sözleşmesi",
+      "triggered_only": false,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "PERCEPTION"
+          },
+          "effects": [],
+          "label": "Suyu kendiniz okuyun, şimdi geçin",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -5,
+                  "text": "",
+                  "type": "DANGER"
+                },
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "MORALE"
+                }
+              ],
+              "label": "{who} dalgaların arasını sayıyor; arabalar ıslanmadan karşıda.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 1,
+                  "text": "",
+                  "type": "WAGON_DAMAGE"
+                }
+              ],
+              "label": "{who} biraz geç kalıyor; son arabanın tekerlekleri suda.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -6,
+                  "text": "",
+                  "type": "PROVISIONS"
+                },
+                {
+                  "amount": -3,
+                  "text": "weakest",
+                  "type": "PARTY_HP"
+                }
+              ],
+              "label": "Su {who} hesapladığından erken dönüyor; bir çuval akıp gidiyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": -15,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": 30,
+              "text": "minnet|kisi|kisa|yuz",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "Balıkçı kadına yol parası ver (15 GG)",
+          "locked": "Kesede 15 GG yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "gold",
+              "op": "GREATER_EQUAL",
+              "value": 15
+            }
+          ]
+        },
+        {
+          "effects": [
+            {
+              "amount": 1,
+              "text": "",
+              "type": "TRAVEL_DAYS"
+            }
+          ],
+          "label": "Suyun bir daha çekilmesini bekle (bir gün)",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "region_guney",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 20,
+      "id": "evt_reg_tide_road",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Gelgit Taşları'nın önünde yol denize iniyor. Su çekilmiş ama dönüyor. Kıyıdaki balıkçı kadın sular dönmeden geçmenin bir saat süreceğini söylüyor, ücretini söylemeden.",
+      "title": "Gelgit Yolu",
+      "triggered_only": false,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": 2,
+              "text": "",
+              "type": "MORALE"
+            },
+            {
+              "amount": -40,
+              "text": "kin|bolge|kisa|fiyat",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "Lenart Bey'in adını söyle",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 3,
+              "text": "",
+              "type": "PROVISIONS"
+            },
+            {
+              "amount": -40,
+              "text": "kin|bolge|kisa|kapi",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "Vasko Bey'in adını söyle",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "CHARISMA"
+          },
+          "effects": [],
+          "label": "İkisinin de değil, yolun ekmeğini yediğini söyle",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 5,
+                  "text": "",
+                  "type": "MORALE"
+                },
+                {
+                  "amount": 2,
+                  "text": "",
+                  "type": "REPUTATION"
+                }
+              ],
+              "label": "{who} cevabıyla iki tepeyi de güldürüyor; çitin iki yanından da su veriyorlar.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 2,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} cevabıyla kimseyi kızdırmıyor, kimseyi de sevindirmiyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -4,
+                  "text": "weakest",
+                  "type": "PARTY_HP"
+                },
+                {
+                  "amount": 5,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "İki tepe de {who} cevabını aşağılama sayıyor; taşlar uçuşuyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "region_sinir",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 20,
+      "id": "evt_reg_fence_feud",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Tolvarin'in ve Kirsavel'in atlıları aynı tepede, aralarında bir çit. İkisi de kervana bağırıyor: hangi beyin ekmeğini yiyorsun? Çitin bu yanı toprağa, öbür yanı hayvana and içer.",
+      "title": "Çitin İki Yanı",
+      "triggered_only": false,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": 2,
+              "text": "",
+              "type": "TRAVEL_DAYS"
+            },
+            {
+              "amount": 3,
+              "text": "",
+              "type": "STRESS"
+            }
+          ],
+          "label": "Sınamanın bitmesini bekle (iki gün)",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "STRENGTH"
+          },
+          "effects": [],
+          "label": "Taş kaldırma sınamasına birini sok",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 6,
+                  "text": "",
+                  "type": "MORALE"
+                },
+                {
+                  "amount": -5,
+                  "text": "",
+                  "type": "DANGER"
+                }
+              ],
+              "label": "{who} taşı dizine kadar kaldırıyor; dağlılar yol açıyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 2,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} taşı kaldırıyor ama tutamıyor; dağlılar gülüp yine de geçiriyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -8,
+                  "text": "strength",
+                  "type": "PARTY_HP"
+                },
+                {
+                  "amount": 4,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} taşın altında kalıyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": -50,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": 40,
+              "text": "minnet|bolge|uzun|kapi",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "İki tarafa da hediye gönder (50 GG)",
+          "locked": "Kesede 50 GG yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "gold",
+              "op": "GREATER_EQUAL",
+              "value": 50
+            }
+          ]
+        }
+      ],
+      "conditions": [
+        {
+          "key": "region_dag",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 20,
+      "id": "evt_reg_rule_test",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Ayazkaya yolunda iki kabile boğazı tutmuş: Ulmarec Droskal'ın hükmünü sınıyor. Kimin güçlü olduğu çözülene kadar yoldan kimse geçmiyor. Bir dağlı yaklaşıyor: \"Bekleyecek misin, yoksa kendi gücünü mü sınayacaksın?\"",
+      "title": "Hüküm Sınaması",
+      "triggered_only": false,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "PERCEPTION"
+          },
+          "effects": [],
+          "label": "Cevherin gerçek olup olmadığına bak, sonra al",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -20,
+                  "text": "",
+                  "type": "GOLD"
+                },
+                {
+                  "amount": 30,
+                  "text": "minnet|kisi|kisa|yuz",
+                  "type": "IZ_BIRAK"
+                }
+              ],
+              "label": "{who} cevheri dişiyle sınıyor: gerçek. Adam fiyatı yarıya indiriyor, utanarak.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -40,
+                  "text": "",
+                  "type": "GOLD"
+                },
+                {
+                  "amount": 30,
+                  "text": "minnet|kisi|kisa|yuz",
+                  "type": "IZ_BIRAK"
+                }
+              ],
+              "label": "{who} emin olamıyor; yine de alıyorsunuz.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -40,
+                  "text": "",
+                  "type": "GOLD"
+                },
+                {
+                  "amount": 4,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} taşın boyalı olduğunu ancak para verildikten sonra görüyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 1,
+              "text": "",
+              "type": "TRAVEL_DAYS"
+            },
+            {
+              "amount": -5,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": 40,
+              "text": "minnet|bolge|kisa|aday",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "Onu mezarlığa kadar götür (bir gün)",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 1,
+              "text": "",
+              "type": "STRESS"
+            }
+          ],
+          "label": "Selam ver, geç",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "region_dag_maden",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 20,
+      "id": "evt_reg_blind_miner",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Vorgat yolunda kör bir madenci, sırtında bir torba cevher. Kör Kazmalar Mezarlığı'na gidiyor; ocakta gözünü kaybedenler oraya gömülürmüş, o da yerini görmeye gidiyor. Torbayı yol parası için satmak istiyor.",
+      "title": "Kör Madenci",
+      "triggered_only": false,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": 4,
+              "text": "",
+              "type": "MORALE"
+            },
+            {
+              "amount": 5,
+              "text": "",
+              "type": "DANGER"
+            }
+          ],
+          "label": "Tatlı de",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 2,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": -8,
+              "text": "",
+              "type": "DANGER"
+            },
+            {
+              "amount": 30,
+              "text": "minnet|bolge|kisa|kapi",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "Acı de",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "WISDOM"
+          },
+          "effects": [],
+          "label": "Gerçekten tadına bak, ne ise onu söyle",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -10,
+                  "text": "",
+                  "type": "DANGER"
+                },
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "MORALE"
+                }
+              ],
+              "label": "{who} suyun acısını da tatlısını da söylüyor; yaşlı kadın gülüp yolu baştan anlatıyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 1,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} tadı bulamıyor; kadın omuz silkiyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -3,
+                  "text": "",
+                  "type": "REPUTATION"
+                },
+                {
+                  "amount": -40,
+                  "text": "kin|bolge|kisa|kapi",
+                  "type": "IZ_BIRAK"
+                }
+              ],
+              "label": "{who} suyu tükürüyor; oba sessizleşiyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "region_gocebe",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 20,
+      "id": "evt_reg_sogurtay_water",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Bir oba yolun kenarına kurulmuş. Yaşlı bir kadın bir kâse Sogurtay suyu uzatıyor: misafir önce suyu tadar ve tadını söyler. Acı derse oba ona yolun kötü olduğunu anlatır, tatlı derse iyi. Kâse senin elinde.",
+      "title": "Suyun Tadı",
+      "triggered_only": false,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": -6,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": 2,
+              "text": "",
+              "type": "REPUTATION"
+            },
+            {
+              "amount": -30,
+              "text": "kutsal|yol|kisa|fiyat",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "Ölülerinin adlarını ver",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 3,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": -2,
+              "text": "",
+              "type": "REPUTATION"
+            }
+          ],
+          "label": "Yolun töresini anlat, ad verme",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "FAITH"
+          },
+          "effects": [],
+          "label": "Ad yerine bir satır dua yazdır",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -8,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": 30,
+                  "text": "kutsal|bolge|kisa|kapi",
+                  "type": "IZ_BIRAK"
+                }
+              ],
+              "label": "{who} adı yazmadan bir satır yazdırıyor; kâtip satırı okuyup kabul ediyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -2,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "Kâtip {who} satırını alıyor ama sandığa koymuyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 5,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": -3,
+                  "text": "",
+                  "type": "MORALE"
+                }
+              ],
+              "label": "Kâtip {who} yazdırdığı satırı yüksek sesle okuyup gülüyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "region_ahit",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 20,
+      "id": "evt_reg_page_collector",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Orvahel yolunda bir kilise kâtibi, sırtında bir sandık dolusu boş sayfa. Her kervandan bir satır istiyor: yolda ölenlerinizin adı. \"Kitap onları da yazar,\" diyor. Yolun töresi ise yolda ölenin adının yazılmayacağını söyler.",
+      "title": "Sayfa Toplayıcı",
+      "triggered_only": false,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": 3,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": 3,
+              "text": "",
+              "type": "MORALE"
+            },
+            {
+              "amount": 3,
+              "text": "",
+              "type": "TRADE_STAIN"
+            }
+          ],
+          "label": "Çizmeleri al",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "PERCEPTION"
+          },
+          "effects": [],
+          "label": "Tahtadaki yazıya yakından bak",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -30,
+                  "text": "soylenti|bolge|kisa|yuz",
+                  "type": "IZ_BIRAK"
+                },
+                {
+                  "amount": 4,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} tahtanın altında silinmiş bir ad okuyor: asılan bir kervan soyguncusu değil, bir kervan sahibi. Kimden alacaklı olduğu da yazılı.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 2,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} yazıyı okuyamıyor; tahta yağmurdan şişmiş.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -2,
+                  "text": "",
+                  "type": "REPUTATION"
+                },
+                {
+                  "amount": 2,
+                  "text": "",
+                  "type": "TRADE_STAIN"
+                }
+              ],
+              "label": "{who} tahtaya uzanırken bir devriye görünüyor ve ne yaptığınızı soruyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": -3,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": 30,
+              "text": "kutsal|yol|kisa|yuz",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "Dibine bir taş koy, geç",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "region_imparatorluk",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 20,
+      "id": "evt_reg_gallows_boots",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Yol ayrımında bir darağacı. Asılı adamın boynunda bir tahta: \"Kervan soyguncusu.\" Ayağında yeni, sağlam çizmeler var; kervanda kışı yalınayak geçirecek iki kişi var. Krallığın kanunu asılanı indirmeyi yasaklar.",
+      "title": "Darağacındaki Çizmeler",
+      "triggered_only": false,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": 5,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": -30,
+              "text": "soylenti|bolge|kisa|fiyat",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "Yemin et",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "CHARISMA"
+          },
+          "effects": [],
+          "label": "Malın nereden geldiğini değil, nereye gittiğini anlat",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "MORALE"
+                },
+                {
+                  "amount": 1,
+                  "text": "",
+                  "type": "REPUTATION"
+                }
+              ],
+              "label": "{who} malın bu şehrin pazarında ne kadar eksik olduğunu sayıyor; kâtip yemini deftere yazmadan geçiriyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -30,
+                  "text": "",
+                  "type": "GOLD"
+                }
+              ],
+              "label": "{who} kâtibi ikna ediyor, muhafızı edemiyor; yükün bir kısmı sınırda kalıyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 1,
+                  "text": "",
+                  "type": "TRAVEL_DAYS"
+                },
+                {
+                  "amount": -40,
+                  "text": "",
+                  "type": "GOLD"
+                },
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "TRADE_STAIN"
+                }
+              ],
+              "label": "Muhafız {who} söylediklerini hakaret sayıyor; yük sınırda tutuluyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 1,
+              "text": "",
+              "type": "TRAVEL_DAYS"
+            },
+            {
+              "amount": 5,
+              "text": "",
+              "type": "DANGER"
+            }
+          ],
+          "label": "Sınırı dolaşarak geç (bir gün)",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "region_vadi",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 20,
+      "id": "evt_reg_city_oath",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Prensliğin sınır taşında bir muhafız ve bir kâtip. Komşu şehirden mal getiren her kervana yemin ettiriyorlar: \"O şehrin ekmeğini yemedim, o şehrin malını getirmedim.\" Yükünün yarısı o şehirden.",
+      "title": "Kapı Yemini",
+      "triggered_only": false,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": -5,
+              "text": "",
+              "type": "PROVISIONS"
+            },
+            {
+              "amount": 1,
+              "text": "silk",
+              "type": "ITEM_ADD"
+            }
+          ],
+          "label": "İpeği erzakla al (5 erzak)",
+          "locked": "Verecek 5 erzak yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "provisions",
+              "op": "GREATER_EQUAL",
+              "value": 5
+            }
+          ]
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "WISDOM"
+          },
+          "effects": [],
+          "label": "Uzak kıtayı sor",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "MORALE"
+                },
+                {
+                  "amount": -5,
+                  "text": "",
+                  "type": "DANGER"
+                }
+              ],
+              "label": "{who} gemicinin anlattıklarından denizdeki rüzgârları ve kıyı fiyatlarını ayıklıyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -4,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} dinliyor; gemicinin anlattıkları masal gibi, ama ateşte iyi bir masal.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 2,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} soru sordukça gemici susuyor, sonra ipeğini alıp gidiyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": -2,
+              "text": "",
+              "type": "PROVISIONS"
+            },
+            {
+              "amount": 40,
+              "text": "minnet|kisi|kisa|teklif",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "Ona bir öğün ver, ipeği almadan",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "region_guney",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 20,
+      "id": "evt_reg_far_ship",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Kıyı yolunda yeni inmiş bir gemici, sırtında bir balya ipek. Uzak kıtadan gelmiş; orada kıtlık yok, diyor, ama kimse ona inanmıyor. İpeği ucuza satmak istiyor, çünkü karada aç kalmaktan korkuyor.",
+      "title": "Raviellon Gemisinden İnen",
+      "triggered_only": false,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": 6,
+              "text": "",
+              "type": "PROVISIONS"
+            },
+            {
+              "amount": -40,
+              "text": "kutsal|bolge|kisa|fiyat",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "Kökleri kaz",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": -2,
+              "text": "",
+              "type": "PROVISIONS"
+            },
+            {
+              "amount": -4,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": 40,
+              "text": "kutsal|bolge|kisa|kapi",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "Avucunu bas, oluğa erzak bırak (2 erzak)",
+          "locked": "Bırakacak erzak yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "provisions",
+              "op": "GREATER_EQUAL",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "CHARISMA"
+          },
+          "effects": [],
+          "label": "Köylüye kökleri sormak için birini gönder",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 4,
+                  "text": "",
+                  "type": "PROVISIONS"
+                },
+                {
+                  "amount": 30,
+                  "text": "minnet|bolge|kisa|yuz",
+                  "type": "IZ_BIRAK"
+                }
+              ],
+              "label": "{who} köylüyle oluğun başında konuşuyor; köylü kendi elleriyle bir çuval kök kazıp veriyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 1,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "Köylü {who} dinliyor, başını sallıyor, ama tarlaya girmiyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -2,
+                  "text": "",
+                  "type": "REPUTATION"
+                },
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "Köylü {who} sorusunu duyunca oluğun önüne geçiyor ve bağırıyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "region_sinir",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 20,
+      "id": "evt_reg_soil_trough",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Tolvarin topraklarında yol kenarında taştan bir oluk; içinde toprak, üstünde bir avuç tohum. Yoldan geçen avucunu toprağa basar ve bir şey bırakır. Oluğun yanındaki tarlada yenebilir kökler var; kimse kazmamış.",
+      "title": "Toprak Oluğu",
+      "triggered_only": false,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "AGILITY"
+          },
+          "effects": [],
+          "label": "Sessizce geç",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -5,
+                  "text": "",
+                  "type": "DANGER"
+                },
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "MORALE"
+                }
+              ],
+              "label": "{who} öküzlerin ağzını bezle bağlatıyor; kervan nefes almadan karşıya geçiyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 5,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "Bir öküz böğürüyor; {who} donup yamaca bakıyor. Yamaç bekliyor, sonra susuyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 1,
+                  "text": "",
+                  "type": "WAGON_DAMAGE"
+                },
+                {
+                  "amount": -4,
+                  "text": "weakest",
+                  "type": "PARTY_HP"
+                }
+              ],
+              "label": "{who} kervanın arkasını toplayamadan kar kayıyor; son araba kara gömülüyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 1,
+              "text": "",
+              "type": "TRAVEL_DAYS"
+            },
+            {
+              "amount": 2,
+              "text": "",
+              "type": "STRESS"
+            }
+          ],
+          "label": "Gözcüyle birlikte gecenin soğuğunu bekle (bir gün)",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": -25,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": -8,
+              "text": "",
+              "type": "DANGER"
+            },
+            {
+              "amount": 30,
+              "text": "minnet|kisi|kisa|yuz",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "Gözcüye yol göstermesi için öde (25 GG)",
+          "locked": "Kesede 25 GG yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "gold",
+              "op": "GREATER_EQUAL",
+              "value": 25
+            }
+          ]
+        }
+      ],
+      "conditions": [
+        {
+          "key": "region_dag",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 20,
+      "id": "evt_reg_avalanche_watch",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Boğazın girişinde bir dağlı kayaya oturmuş, yamaca bakıyor. \"Kar ağır,\" diyor. \"Geçeceksen sessiz geç. Öküzlerin böğürürse dağ cevap verir.\"",
+      "title": "Çığ Gözcüsü",
+      "triggered_only": false,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": 60,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": 10,
+              "text": "wages|1|other_city",
+              "type": "CHAIN_ADVANCE"
+            },
+            {
+              "amount": 30,
+              "text": "minnet|bolge|kisa|teklif",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "Keseyi al, götürmeye söz ver",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "INTELLECT"
+          },
+          "effects": [],
+          "label": "Keseyi ustanın önünde say",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 60,
+                  "text": "",
+                  "type": "GOLD"
+                },
+                {
+                  "amount": 10,
+                  "text": "wages|1|other_city",
+                  "type": "CHAIN_ADVANCE"
+                },
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "MORALE"
+                }
+              ],
+              "label": "{who} sayıyor; kesede ücretin iki katı var. Usta yüzünü çeviriyor: \"Ocak ona borçluydu.\"",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 60,
+                  "text": "",
+                  "type": "GOLD"
+                },
+                {
+                  "amount": 10,
+                  "text": "wages|1|other_city",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "{who} sayıyor, tutuyor. Usta bir şey söylemiyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -2,
+                  "text": "",
+                  "type": "REPUTATION"
+                },
+                {
+                  "amount": -30,
+                  "text": "kin|bolge|kisa|ret",
+                  "type": "IZ_BIRAK"
+                }
+              ],
+              "label": "{who} saymaya başlayınca usta keseyi geri alıyor: \"Güvenmeyen taşımaz.\"",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 2,
+              "text": "",
+              "type": "STRESS"
+            }
+          ],
+          "label": "Reddet; yolun belli değil",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "region_dag_maden",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 20,
+      "id": "evt_reg_miner_wages",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Vorgat ocağının ustası yolda seni bekliyor; elinde bir kese. Ocakta ölen bir madencinin ücreti; ailesi kıyıdaki bir şehirde. \"Kervanlar oraya gider, biz gitmeyiz,\" diyor. \"Keseyi götür. Ocak bunu unutmaz.\"",
+      "title": "Ölü Madencinin Ücreti",
+      "triggered_only": false,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": -60,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": -6,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": 50,
+              "text": "minnet|bolge|uzun|kapi",
+              "type": "IZ_BIRAK"
+            },
+            {
+              "amount": 0,
+              "text": "wages|-1",
+              "type": "CHAIN_ADVANCE"
+            }
+          ],
+          "label": "Keseyi eksiksiz ver (60 GG)",
+          "locked": "Kesede 60 GG yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "gold",
+              "op": "GREATER_EQUAL",
+              "value": 60
+            }
+          ]
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "CHARISMA"
+          },
+          "effects": [],
+          "label": "Eksiği anlat, kalanını ver",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -30,
+                  "text": "",
+                  "type": "GOLD"
+                },
+                {
+                  "amount": 0,
+                  "text": "wages|-1",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "{who} yolun neye mal olduğunu anlatıyor; kadın parayı sayıp başını sallıyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -30,
+                  "text": "",
+                  "type": "GOLD"
+                },
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": 0,
+                  "text": "wages|-1",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "Kadın {who} dinliyor, parayı alıyor, teşekkür etmiyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -30,
+                  "text": "",
+                  "type": "GOLD"
+                },
+                {
+                  "amount": 8,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": -40,
+                  "text": "kin|bolge|uzun|ret",
+                  "type": "IZ_BIRAK"
+                },
+                {
+                  "amount": 0,
+                  "text": "wages|-1",
+                  "type": "CHAIN_ADVANCE"
+                }
+              ],
+              "label": "Kadın {who} sözünü kesip çocukları önüne itiyor: \"Bunlara anlat.\"",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 6,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": -70,
+              "text": "kin|bolge|uzun|dusman",
+              "type": "IZ_BIRAK"
+            },
+            {
+              "amount": 0,
+              "text": "wages|-1",
+              "type": "CHAIN_ADVANCE"
+            }
+          ],
+          "label": "Keseyi hiç almadığını söyle",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "chain_wages_ripe",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 1,
+      "id": "evt_reg_wages_family",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "{town} yolunda bir kadın ve iki çocuk, ellerinde Vorgat ocağının bir mührü. Biri onlara kervanın geleceğini söylemiş. Kese hâlâ arabanda; içindekinin bir kısmını yolda harcadın.",
+      "title": "Ücretin Sahibi",
+      "triggered_only": false,
+      "weight": 4
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": 1,
+              "text": "",
+              "type": "TRAVEL_DAYS"
+            },
+            {
+              "amount": 30,
+              "text": "minnet|bolge|kisa|kapi",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "Bekle (bir gün)",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "AGILITY"
+          },
+          "effects": [],
+          "label": "Sürünün arasından geç",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "MORALE"
+                },
+                {
+                  "amount": -3,
+                  "text": "",
+                  "type": "DANGER"
+                }
+              ],
+              "label": "{who} kervanı sürünün iki dalgası arasından geçiriyor; çobanlar el sallıyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -20,
+                  "text": "",
+                  "type": "GOLD"
+                }
+              ],
+              "label": "{who} geçiriyor ama bir koyun tekerleğin altında kalıyor; çobana karşılığı ödeniyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -3,
+                  "text": "",
+                  "type": "REPUTATION"
+                },
+                {
+                  "amount": -50,
+                  "text": "kin|bolge|kisa|kapi",
+                  "type": "IZ_BIRAK"
+                },
+                {
+                  "amount": 5,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "Sürü {who} önünde dağılıyor; çobanlar atlarını kervana sürüyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": -30,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": 8,
+              "text": "",
+              "type": "PROVISIONS"
+            }
+          ],
+          "label": "Bir koyun satın al (30 GG)",
+          "locked": "Kesede 30 GG yok",
+          "outcomes": [],
+          "requirements": [
+            {
+              "key": "gold",
+              "op": "GREATER_EQUAL",
+              "value": 30
+            }
+          ]
+        }
+      ],
+      "conditions": [
+        {
+          "key": "region_gocebe",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 20,
+      "id": "evt_reg_herd_crossing",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Bir obanın sürüsü yolu kesiyor: yüzlerce koyun, arkalarında atlı çobanlar. Ot ileride; sürü yolun öbür yanına geçmeden kimse geçmeyecek. Çobanlardan biri sana bakıp gülüyor: \"Ot beklemez. Sen beklersin.\"",
+      "title": "Sürünün Geçişi",
+      "triggered_only": false,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": 1,
+              "text": "",
+              "type": "TRAVEL_DAYS"
+            },
+            {
+              "amount": -3,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": 1,
+              "text": "",
+              "type": "REPUTATION"
+            }
+          ],
+          "label": "Dur ve sus",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "AGILITY"
+          },
+          "effects": [],
+          "label": "Sessizce yürümeye devam et",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 2,
+                  "text": "",
+                  "type": "MORALE"
+                }
+              ],
+              "label": "{who} tekerleklerin altına bez sardırıyor; okuyucu başını kaldırmıyor bile.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "Bir teker gıcırdıyor. Okuyucu {who} yüzüne uzun uzun bakıyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -3,
+                  "text": "",
+                  "type": "REPUTATION"
+                },
+                {
+                  "amount": 4,
+                  "text": "",
+                  "type": "TRADE_STAIN"
+                }
+              ],
+              "label": "Okuyucu ayağa kalkıp {who} önünde yolu kesiyor ve adını soruyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 5,
+              "text": "",
+              "type": "MORALE"
+            },
+            {
+              "amount": -50,
+              "text": "kin|bolge|uzun|ret",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "Şarkı sürsün",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "region_ahit",
+          "op": "GREATER_EQUAL",
+          "value": 1
+        }
+      ],
+      "cooldown": 20,
+      "id": "evt_reg_silent_hour",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Orvahel çanları çalıyor: okuma saati. Bu topraklarda o saatte yol susar; arabalar durur, kimse konuşmaz. Yolun kenarındaki bir okuyucu kervanına bakıyor. Arabacıların şarkısı yarıda kesilmiş.",
+      "title": "Okuma Saati",
+      "triggered_only": false,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": -40,
+              "text": "",
+              "type": "GOLD"
+            },
+            {
+              "amount": -4,
+              "text": "",
+              "type": "MORALE"
+            },
+            {
+              "amount": -4,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": 40,
+              "text": "minnet|yoldas|kisa|yuz",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "Gitmesine izin ver, yol parası ver (40 GG)",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "CHARISMA"
+          },
+          "effects": [],
+          "label": "Kalması için konuş",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 3,
+                  "text": "",
+                  "type": "MORALE"
+                }
+              ],
+              "label": "{who} ateş başında konuşuyor; yoldaş mektubu katlayıp göğsüne koyuyor ve kalıyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 5,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "Yoldaş {who} dinliyor ve kalıyor, ama o gece kimseyle konuşmuyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 6,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": -40,
+                  "text": "kin|yoldas|kisa|yuz",
+                  "type": "IZ_BIRAK"
+                }
+              ],
+              "label": "Yoldaş {who} sözlerinden sonra kalıyor; ama bir kırgınlık kalıyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": 2,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": 1,
+              "text": "",
+              "type": "MORALE"
+            }
+          ],
+          "label": "Cevap yazdır: kış bitince döner",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "party_size",
+          "op": "GREATER_EQUAL",
+          "value": 2
+        }
+      ],
+      "cooldown": 20,
+      "id": "evt_comp_letter_home",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Bir kervansarayda yoldaşlarından birine mektup bırakılmış. Ailesi yazıyor: tarlaya el lazım, eve dönsün. Mektubu sana getiriyor, okusun diye değil, sen ne dersen onu yapacağını söylemek için.",
+      "title": "Evden Gelen Mektup",
+      "triggered_only": false,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
+              "amount": 3,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": 4,
+              "text": "",
+              "type": "DANGER"
+            },
+            {
+              "amount": 50,
+              "text": "minnet|yoldas|uzun|yuz",
+              "type": "IZ_BIRAK"
+            }
+          ],
+          "label": "Sır olarak kalsın",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        },
+        {
+          "check": {
+            "difficulty": 0,
+            "stat": "WISDOM"
+          },
+          "effects": [],
+          "label": "Neden kaçtığını sor",
+          "locked": "",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "GREATER_EQUAL",
+                  "value": 2
+                }
+              ],
+              "effects": [
+                {
+                  "amount": -6,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": 2,
+                  "text": "",
+                  "type": "MORALE"
+                }
+              ],
+              "label": "{who} sabırla dinliyor; yoldaş bölükte ne yaptırıldığını anlatıyor ve anlattıkça hafifliyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 1
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 1,
+                  "text": "",
+                  "type": "STRESS"
+                }
+              ],
+              "label": "{who} soruyor, yoldaş yarısını anlatıp susuyor.",
+              "weight": 1
+            },
+            {
+              "conditions": [
+                {
+                  "key": "check_tier",
+                  "op": "EQUAL",
+                  "value": 0
+                }
+              ],
+              "effects": [
+                {
+                  "amount": 5,
+                  "text": "",
+                  "type": "STRESS"
+                },
+                {
+                  "amount": -30,
+                  "text": "kin|yoldas|kisa|yuz",
+                  "type": "IZ_BIRAK"
+                }
+              ],
+              "label": "{who} soruyor; yoldaş sorulmasını suçlama sayıp nöbeti bırakıyor.",
+              "weight": 1
+            }
+          ],
+          "requirements": []
+        },
+        {
+          "effects": [
+            {
+              "amount": -4,
+              "text": "",
+              "type": "MORALE"
+            },
+            {
+              "amount": 4,
+              "text": "",
+              "type": "STRESS"
+            },
+            {
+              "amount": 1,
+              "text": "",
+              "type": "REPUTATION"
+            }
+          ],
+          "label": "Ötekilere söyle",
+          "locked": "",
+          "outcomes": [],
+          "requirements": []
+        }
+      ],
+      "conditions": [
+        {
+          "key": "party_size",
+          "op": "GREATER_EQUAL",
+          "value": 2
+        }
+      ],
+      "cooldown": 20,
+      "id": "evt_comp_night_confession",
+      "immediate": [],
+      "modifiers": 0,
+      "once": false,
+      "text": "Gece nöbetinde yoldaşlarından biri yanına oturuyor ve uzun süre susuyor. Sonra söylüyor: bir bölükten kaçmış; peşinden gelen olursa kervana da gelir. \"Bilmen gerekiyordu,\" diyor.",
+      "title": "Nöbette Söylenen",
+      "triggered_only": false,
+      "weight": 1
+    },
+    {
+      "choices": [
+        {
+          "effects": [
+            {
               "amount": -4,
               "text": "",
               "type": "PROVISIONS"

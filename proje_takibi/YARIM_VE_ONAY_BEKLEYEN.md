@@ -54,7 +54,7 @@ tek soru; cevabın gelince sırayla yapılır.
 
 
 
-Toplam: **44** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **43** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
 
@@ -242,25 +242,6 @@ Toplam: **44** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 </details>
 
 ## Paket P11
-
-### Y-E01 · Olay havuzunu 46'dan 120'nin üstüne çıkar
-
-- **Durum:** sistem yapıldı, içerik lore bekliyor · **Öncelik:** P1 · **Paket:** P11 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
-- **Bağımlı:** Y-E06, Y-C01
-- **Son not:** Kart yazımı lore sonrası 10luk partilerle; düzen docs/design_notes/olay_uretim_duzeni.md.
-
-<details><summary>Görev metni</summary>
-
-- [ ] **Y-E01 Olay havuzunu 46'dan 120'nin üstüne çıkar**
-  - **Kısmen yapıldı** (`yerel/yapilacaklar-p05-p06`, commit `cbe2b02`): Kart yazımı lore sonrası 10luk partilerle; düzen docs/design_notes/olay_uretim_duzeni.md.
-  - **Öncelik:** P1 · **Dalga:** 5 · **Bağımlı:** Y-E06, Y-C01
-  - **Ne:** Bölge başına 6–10 kart, yoldaş kartları, zincirler. Her kart oyuncunun kararını değiştirecek kadar farklı olmalı. Üretim düzeni için “Kullanıcının sorularına cevaplar” bölümüne bak.
-  - **Kullanıcı notu:** “Sayıyı arttır demek kolay ama arttırabilecek misin?”
-  - **Kabul:** En az 120 çekilebilir kart; her kart kalite listesinden geçti; simülatörde finale kadar tekrar oranı ölçüldü.
-  - **Literatür:** R15, R48
-
-</details>
 
 ### Y-C18 · Kampanya bölümlerini yaz
 

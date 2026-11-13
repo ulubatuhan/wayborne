@@ -1889,7 +1889,7 @@
    "bolum": "13",
    "alan": "Yönetmen: İçerik ve anlatı",
    "oncelik": "P1",
-   "durum": "sistem yapıldı, içerik lore bekliyor",
+   "durum": "bitti",
    "bagimli": [
     "Y-E06",
     "Y-C01"
@@ -1900,7 +1900,7 @@
    "sira": 118,
    "kim": "CO",
    "commit": "cbe2b02",
-   "not": "Kart yazımı lore sonrası 10luk partilerle; düzen docs/design_notes/olay_uretim_duzeni.md."
+   "not": "Kart yazımı lore sonrası 10luk partilerle; düzen docs/design_notes/olay_uretim_duzeni.md. | 2026-11-13: iki bölge partisi (22 kart: 18 bölge, 2 yoldaş, 1 zincir açılışı + karşılığı), bağlamda region_<id>. Çekilebilir 98 -> 120 (hedef). simulate_career: farklı kart 77-79 -> 97, tekrar oranı %26 -> %23. Kullanıcı onayı toplu (2026-11-13: 'benden onay isteme')."
   },
   {
    "id": "Y-E02",
