@@ -723,3 +723,17 @@ birleşik siluette çalışıyor: üst kenarı izleyen kesik kabuk, gövdeye yap
 ıslakta koyulaşma + gök parıltısı + kısa su yolları + damla. Eski `WalkFigure._draw_weather_coat` silindi.
 Bakmak: `tests/screenshot_weather_coat.gd`. Kural metni kurallar-sanat "Weather on the Body Rules". Kullanıcı kar seviyesini onayladı. Sonra: tekerlek içine kar konmuyor (dönen tekerlekte
 kar düşer), ıslaklık bedende hiç gösterilmiyor (karartma ıslak gibi okunmadı; mekanik bedeli duruyor).
+
+## Lore geldi, ana hikâye yok: lore'dan yazılabilecekler (2026-11-13)
+
+Sıra (kullanıcıya verildi): 1 Y-R01 iz hacmi · 2 Y-R02 cevaba göre yankı · 3 Y-E02 on uzun zincirin içeriği ·
+4 Y-E01 yeni kart partileri (10'luk, onaylı) · 5 Y-E08 takvim (SIDERIA §2.3) · 6 Y-I03 kâtibin sesi ·
+7 Y-E04 yavaş açılan dünya sırrı (kadim sonun kendisi söylenmez) · 8 Codex'in 42 kartlık tasarım notu.
+Hâlâ kullanıcıda: Y-C31 geçiş belgesinin adları (SIDERIA'da yok), Y-A07 zindan onayı, ana hikâye.
+
+- Y-R01 1. parti bitti (317a3d3). Ölçüm hatası: defter kapanmış izlerin son 12'sini tutuyordu, simülatör
+  dönen/sönen izleri eksik sayıyordu (`TraceLedger.archived`, `evicted`). 14 karta iz (`CHOICE_TRACES`),
+  sönme ×0,7. 40 sefer: dönen 5,5 -> 8-11 (sert 14,5); sönen payı %65 (hedef %25-40). Kalan: 67 izsiz kart,
+  dönüş fırsatı yapısal iş. Rapor: `tests/report_trace_coverage.gd`.
+- Y-R02 bitti (acbccf5, e2d3388): 22 kartın 66 cevabı, metinler onay bekliyor.
+- Sıradaki: Y-E02 zincir içerikleri.
