@@ -92,7 +92,15 @@ cmd /c "$g --headless --script res://tests/report_event_quality.gd > event_quali
 
 
 
-Toplam: **13** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **14** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+
+## Paket P00
+
+### Y-R02 · Yankı varyantlarını seçeneğe göre yaz
+
+- **Durum:** test bekliyor · **Öncelik:** P1 · **Paket:** P00 · **Kim:** kullanıcının işi
+- **Ayrıntı ve geçmiş:** [referans/gorevler/19_ahlak_ruh_iz.md](referans/gorevler/19_ahlak_ruh_iz.md)
+- **Son not:** H9'da 22 kartın her birine bir yankı cümlesi yazıldı (gövdenin sonuna). §D-A4 ayrıca cevaba göre varyant istiyor (<id>_YANKI_<secim>); bedel kayması zaten cevaba bakıyor, metin henüz bakmıyor. | 2026-11-13: 22 kartın 66 cevabına ayrı yankı cümlesi (tr+en, EventCatalog.ECHO_CHOICE_LINE_KEYS; tabloda olmayan cevap genel cümleye düşer). Ekran: screenshot_named_cards.gd ECHO_CARD/ECHO_CHOICE. Metinler kullanıcı onayı bekliyor.
 
 ## Paket P03
 
