@@ -553,11 +553,10 @@ func _draw() -> void:
 	var height := size.y
 	if height <= 1.0:
 		return
-	var back_y := _draw_body(height)
-	# Yağmur ve kar gövdenin **üstünde**: su kumaşın üstünde parlar, kar
-	# omzun üstünde durur. Bu yüzden beden çizildikten sonra.
-	if _wet > 0.01 or _snow > 0.01:
-		_draw_weather_coat(height, back_y)
+	_draw_body(height)
+	# Kar ve yüzeydeki su figürün kendisinde değil, kervanın birleşik
+	# resminde çiziliyor (`weather_coat.gdshader`): figür burada yalnız
+	# ıslak kumaşın koyuluğunu taşıyor (`_apply_body_tint`).
 
 ## Bedenin kendisi. Döner: dört ayaklının sırt çizgisi (karın üstünde
 ## duracağı yer), iki ayaklıda `NAN` - orada sırt yok, omuz var ve o
@@ -606,43 +605,13 @@ func _draw_body(height: float) -> float:
 # parıltısı toplanıyor. Yalnız koyulaştırmak figürü gölgede bırakıyordu;
 # ıslaklığı okutan şey koyu kumaşın üstündeki o parıltı.
 #
-# Kar yüzeylere **oturuyor**: iki ayaklıda baş ve omuzlar, dört ayaklıda
-# sırt çizgisi, vagonda brandanın tepesi. `ArtDraw.snow_cap` siluetin
-# dışına taşan, mürekkepli bir tümsek çiziyor - içine konan yumuşak bir
-# elips omza yapıştırılmış disk gibi okunuyordu (öküzün hörgücü dersi).
+# Kar ve yüzeydeki parıltı **kervanın birleşik resminde** çiziliyor
+# (`weather_coat.gdshader`, RoadCaravan'ı saran CanvasGroup): üste bakan her
+# kenarda gerçek siluetin kıvrımını izleyen bir kabuk, yere yakın bacakta ve
+# tekerlekte bulaşma. Önceki hâli başa, omza ve sırta konan tek bir
+# tümsekti; atta düz bir tahtanın üstünde duruyordu, insanlarda hiç
+# görünmüyordu (kullanıcı, 2026-11-13).
 
-## İki ayaklının ölçü birimi **kalça ile baş arası**: iskelet nereye
-## çizerse kar da oraya düşer, oran kutudan değil eklemden gelir (atlı
-## binici ile yürüyen tayfanın kutusu aynı değil).
-##
-## Sayılar ölçüldü (`tests/screenshot_road_fx.gd`'nin kurduğu figürde, 400
-## piksellik kutuda): baş eklemi 99.5, omuz 131.2, kalça 235.2, ayak 400 -
-## yani kalça-baş açıklığı kutunun 0.339'u. İlk sürüm birim olarak
-## **omuz-baş** açıklığını almıştı ve onu boyun 0.17'si sanıyordu; gerçek
-## değer 0.079, yani bütün birikinti dörtte bir boyda çizilmiş ve ekranda
-## hiç görünmemişti.
-##
-## Kalınlıklar gerçeğin üstünde: 1080p'de bir tayfanın kutusu ~119 piksel,
-## yani omzundaki gerçekçi bir kar tabakası 3 piksel - yolun koyu zemininde
-## görünmez. Aynı gerekçe öküzün boyunda ve zemin efektlerinin
-## `FX_READABILITY` payında da yazılı: hesap işi başlatır, ölçüm bitirir.
-## Kalınlıklar **ince**: ilk ölçüde baş birikintisi 0.12 birim derindi ve
-## figürler aşçı şapkası giymiş gibi görünüyordu (ekran görüntüsünde
-## yakalandı). İnsanın üstündeki kar bir yığın değil, bir **kabuk**;
-## gövdeyi örtmez, dış hattını beyazlatır.
-const SNOW_HEAD_WIDTH: float = 0.26
-const SNOW_HEAD_DEPTH: float = 0.045
-## Omuz profilden görünüyor: önden ölçülen omuz eni burada dar.
-const SNOW_SHOULDER_WIDTH: float = 0.38
-const SNOW_SHOULDER_DEPTH: float = 0.05
-## Başın tepesi baş ekleminin bu kadar üstünde (ölçüldü: ~20 / 135.7).
-const SNOW_HEAD_LIFT: float = 0.15
-## Dört ayaklının sırtı: figür kutusunun bu kadarı kar tutuyor. Dar, çünkü
-## kutunun yarısı kadar geniş bir birikinti sırta konmuş kalas gibi
-## okunuyordu (ekran görüntüsünde yakalandı).
-const SNOW_BACK_WIDTH: float = 0.32
-const SNOW_BACK_DEPTH: float = 0.055
-const SHEEN_ALPHA: float = 0.42
 
 var _wet: float = 0.0
 var _snow: float = 0.0
@@ -651,7 +620,6 @@ var _snow: float = 0.0
 ## görünmesinin sebebi Kollwitz dersi: **kıtlığın yeri bedendir, çubuk değil.**
 var _hunger: float = 0.0
 var _fatigue: float = 0.0
-var _coat_seed: int = 0
 
 ## Üstündeki su ve kar payı (0..1). `RoadCaravan` her karede veriyor.
 func set_weather_coat(wet: float, snow: float) -> void:
@@ -724,57 +692,6 @@ func wear_stoop() -> float:
 
 func get_weather_coat() -> Vector2:
 	return Vector2(_wet, _snow)
-
-func _draw_weather_coat(height: float, back_y: float) -> void:
-	var seed_base := _coat_seed if _coat_seed != 0 else int(size.x)
-	# Dört ayaklının sırtı. Atlıda sırtın ortasında binici oturuyor: kar
-	# oraya değil **sağrıya** biner, ve dar biner - yoksa birikinti
-	# binicinin kucağına düşüyor (ekran görüntüsünde yakalandı).
-	if is_finite(back_y):
-		var mounted := _kind == KIND_MOUNTED and not _riderless
-		var span := size.x * (SNOW_BACK_WIDTH * 0.42 if mounted else SNOW_BACK_WIDTH)
-		var shift := -0.13 if mounted else -0.03
-		var centre := Vector2(size.x * 0.5 + size.x * shift * _facing, back_y)
-		if _snow > 0.02:
-			ArtDraw.snow_cap(
-				self, centre, span, height * SNOW_BACK_DEPTH * _snow, seed_base, _snow
-			)
-		if _wet > 0.05:
-			ArtDraw.wet_sheen(self, centre, span * 0.92, _wet * SHEEN_ALPHA, seed_base)
-	# İki ayaklı: baş ve omuzlar. Eklemler gövdeyi çizen iskeletten geliyor,
-	# tahminden değil - figür eğilince kar da onunla eğiliyor.
-	#
-	# **İki ayrı eklem kümesi var.** Render edilmiş kareler başın tepesini
-	# (`head_top`) veriyor, prosedürel iskelet başın eklemini (`head`). İlk
-	# sürüm yalnız `head`'e bakıyordu - ve oyundaki her gerçek figür render
-	# edilmiş kare kullandığı için insanların hiçbirinde kar çizilmedi.
-	# Yapısal test bunu göremezdi, ekran görüntüsü gördü.
-	var crown_key := "head_top" if _last_joints.has("head_top") else "head"
-	if _last_joints.has("shoulder") and _last_joints.has("hip") and _last_joints.has(crown_key):
-		# Omuz eklemi render edilmiş karelerde boynun dibinde: kar oraya
-		# konunca göğsün ortasında beyaz bir leke oluyordu. Varsa sırtın
-		# üstü (`back_upper`) kullanılıyor - profilden kar oraya düşer.
-		var shoulder: Vector2 = _last_joints.get("back_upper", _last_joints.shoulder)
-		var crown: Vector2 = _last_joints[crown_key]
-		var hip: Vector2 = _last_joints.hip
-		var unit := maxf(4.0, absf(hip.y - crown.y))
-		# `head_top` zaten tepe; `head` eklemin kendisi, onun üstüne çıkmak
-		# gerekiyor.
-		var lift := 0.0 if crown_key == "head_top" else unit * SNOW_HEAD_LIFT
-		if _snow > 0.02:
-			ArtDraw.snow_cap(
-				self, shoulder, unit * SNOW_SHOULDER_WIDTH, unit * SNOW_SHOULDER_DEPTH * _snow,
-				seed_base + 7, _snow
-			)
-			ArtDraw.snow_cap(
-				self, crown - Vector2(0.0, lift),
-				unit * SNOW_HEAD_WIDTH, unit * SNOW_HEAD_DEPTH * _snow, seed_base + 13, _snow
-			)
-		if _wet > 0.05:
-			ArtDraw.wet_sheen(
-				self, shoulder, unit * SNOW_SHOULDER_WIDTH * 0.9,
-				_wet * SHEEN_ALPHA, seed_base + 7
-			)
 
 # --- İki ayaklı ---
 

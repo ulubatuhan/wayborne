@@ -478,9 +478,15 @@ var _leader_ground: float = 0.0
 var _leader_walking: bool = false
 var _leader_turn_scale: float = 1.0
 
+## Çapayla ebeveynini doldursun mu. Yol ekranı kervanı kar ve ıslaklık için
+## bir `CanvasGroup`'a koyuyor; ebeveyni Control olmayan bir Control'ün
+## çapası ekrana göre hesaplanır, o yüzden orada boyu şerit verir.
+var fill_parent: bool = true
+
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	if fill_parent:
+		set_anchors_preset(Control.PRESET_FULL_RECT)
 	# Çapa ön ayarı boyutu *bir sonraki* yerleşim geçişinde veriyor, yani
 	# `configure()` çağrıldığı anda boy hâlâ sıfır olabiliyor. Yeniden
 	# boyutlanmayı dinlemezsek kolon o sıfır boyla yerleşip öyle kalıyordu:
@@ -2233,7 +2239,9 @@ func _draw() -> void:
 			self, Vector2(centre, _ground_y), wagon_w, wagon_h,
 			_wheel_angle, _light, index == 0, not driver_gone,
 			canopy_sway_at(_wheel_angle, index, wagon_h, _wagon_motion),
-			_coat_wet, Soaking.wagon_snow(_coat_snow)
+			# Kar ve parıltı kervanın birleşik resminde (weather_coat.gdshader);
+			# burada verilseydi brandanın tepesinde ikinci, düz bir yığın olurdu.
+			0.0, 0.0
 		)
 		_draw_mud(centre, wagon_w, wagon_h, index)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)

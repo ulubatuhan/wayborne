@@ -1022,6 +1022,10 @@ func _draw_road(area: Rect2, cover: Rect2) -> void:
 func road_line_y() -> float:
 	return _ground_y_at_screen(size.x * 0.5)
 
+## Yolun x'teki y'si (kervanın birleşik resmine zemin çizgisini vermek için).
+func ground_y_at(x: float) -> float:
+	return _ground_y_at_screen(x)
+
 ## Yolun ekrandaki y'si. Eğim yolu döndürüyor; kervan da bu çizgiye
 ## basıyor (bkz. ground_line_changed).
 func _ground_y_at_screen(x: float) -> float:

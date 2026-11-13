@@ -517,8 +517,9 @@ toz, çamur, yerde kalan iz, nefes buharı, kor ve duman. Kaynak
 ### Weather on the Body Rules
 
 Havanın bedene ve eşyaya bıraktığı iz (görev Y-G25): yağmurun ıslattığı
-kumaş, sırtta ve brandada biriken kar. Model `Soaking`, çizim
-`ArtDraw.snow_cap`/`wet_sheen`/`wet_tint`, dağıtım `RoadCaravan`.
+kumaş, sırtta ve brandada biriken kar. Model `Soaking`, dağıtım `RoadCaravan`,
+çizim `scripts/ui/weather_coat.gdshader` (kervanı saran `CanvasGroup`'ta,
+`road_journey._sync_weather_coat`).
 
 - **Zeminin ıslaklığıyla kervanın ıslaklığı iki ayrı birikimdir.**
   `GroundCover` yere, `Soaking` sırta bakıyor; ikisi de aynı iki girdiyi
@@ -542,27 +543,37 @@ kumaş, sırtta ve brandada biriken kar. Model `Soaking`, çizim
   kuru kalırdı (`ArtDraw.wagon`'un var olma gerekçesinin aynısı).
 - **Islaklık `self_modulate`, `modulate` değil.** Kumaş koyulaşıyor ama
   çocuk düğümler (durum efektleri, konuşma baloncuğu) ıslanmamalı.
-- **Kar ne tahta, ne sıra sıra kubbe, ne de şapka.** Üç deneme ve üçü de
-  ekran görüntüsünde elendi: (1) bütün genişliği örten tek kubbe öküzün
-  sırtına konmuş beyaz bir kalastı (ölçüldü, 18:1); (2) eşit dilimlere
-  bölünmüş kubbeler hizalı bir sıra şekerleme gibi okundu - eşit genişlik
-  ve eşit kabarıklık doğada yok; (3) kalın bir baş birikintisi figürlere
-  aşçı şapkası giydirdi. Şimdiki hâli **tek bir yığın**, sırtı birkaç
-  dalga boyunun toplamıyla düzensiz, uçları sıfıra inen, tabanı yüzeyin
-  içine gömülü (üstüne oturan yığın havada duruyor gibiydi) ve insanda bir
-  yığın değil **ince bir kabuk**. Mürekkebi yumuşak: `inked`'in tam siyah
-  hattı karı kesilmiş karton gibi gösteriyordu.
-- **Eklem adları iki kümeden gelir.** Render edilmiş kareler başın
-  tepesini `head_top` diye veriyor, prosedürel iskelet başın eklemini
-  `head` diye. İlk sürüm yalnız `head`'e baktı - ve oyundaki her gerçek
-  figür render edilmiş kare kullandığı için insanların hiçbirinde kar
-  çizilmedi. Yapısal test bunu göremezdi; ekran görüntüsü gördü.
-- **Ölçü eklemden, orandan değil.** İki ayaklının birimi kalça-baş
-  açıklığı (ölçüldü: kutunun 0.339'u), kutunun kendisi değil - atlı
-  binicinin kutusu yürüyen tayfanınkiyle aynı değil. İlk sürüm omuz-baş
-  açıklığını boyun 0.17'si sandı; gerçek değer 0.079.
-- **Atlının sırtında binici oturuyor:** kar oraya değil sağrıya biner,
-  yoksa birikinti binicinin kucağına düşüyor.
+- **Kar ve ıslaklık kervanın birleşik siluetinde çizilir, figürün kendi
+  parçalarında değil (kullanıcı, 2026-11-13).** Bütün figürler ve vagonlar
+  tek bir `CanvasGroup`'ta; gölgelendirici ekrandaki birleşik resmin
+  saydamlığına bakıyor. Neden: figürler katman katman atlas sayfalarından
+  çiziliyor, bir parçanın kendi "üst kenarı" çoğu zaman gövdenin altında
+  kalan bir kesik ve atlas komşuları dokuda kenar araması yanıltıyor.
+  Ekrandaki siluetin üstü ise gerçekten gökyüzüne bakan yüzey.
+  - Önceki çizimler eklemlere konmuş yığınlardı ve hepsi ekranda elendi:
+    tek kubbe öküzün sırtında beyaz bir kalas (18:1), eşit kubbeler bir sıra
+    şekerleme, kalın baş birikintisi aşçı şapkası; son sürümde de atın
+    sırtında "düz bir tahta" duruyordu, insanlarda kar hiç görünmüyordu ve
+    kar yalnız tepeye konuyordu. Kullanıcı: kol, pantolon, böğür, tekerlek
+    de iz taşır, yalnız baş değil.
+  - Kar üç parçadır: üste bakan her kenarda kalınlığı x boyunca gürültüyle
+    değişen, yer yer kesilen ince bir kabuk (`rim_px`, `COAT_RIM_METRES`);
+    gövdenin her yerinde, üst kenara yakın sık aşağıda seyrek yapışan
+    lekeler; zemine yakın bantta (`COAT_CAKE_METRES`) bacak, çizme, toynak
+    ve tekerleğe bulaşan serpinti. Üstüne hafif kırağı.
+  - Islaklık: renk koyulaşır ve derinleşir, üst kenarda soğuk gök
+    parıltısı, kısa kesik su yolları, seyrek damlalar. Islak hâl ilk
+    sürümde yalnız `self_modulate` koyulaşmasıydı ve kullanıcı yağmurda
+    hiçbir fark göremedi; koyulaşma tek başına okunmuyor, parıltı okunuyor.
+  - Gürültünün ölçeği figür boyundan (`unit_px`), ekran pikselinden değil:
+    aynı kervan her çözünürlükte aynı lekeleri taşır.
+  - Sıcak ve parlak piksele (ateş, fener) kar ve damla konmaz.
+  - Kabuk siluetin dışına da taşar; `CanvasGroup`'un `fit_margin`'i bu pay
+    için. Kervan `fill_parent = false` ile kurulur ve boyu banttan
+    elle verilir: Node2D altındaki bir Control'ün çapaları görünüm alanına
+    göre çözülüyor.
+  - Bakmak için `tests/screenshot_weather_coat.gd` (öğle, perde kapalı,
+    kuru/ıslak/karlı/hafif kar).
 - **Islanmanın mekanik karşılığı var, yoksa sadece boya olurdu.** Islak
   giysi ısısının `Temperature.WET_WARMTH_LOSS` kadarını kaybediyor, yani
   yağmurlu bir günün bedeli o gece stres, yorgunluk ve humma olarak

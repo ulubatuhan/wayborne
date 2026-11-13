@@ -714,3 +714,12 @@ Düzeltilenler (ayrıntı `docs/playtest/2026-11-12/08_dalga1_sonucu.md` "Deneti
 
 Kullanıcı kararı bekleyenler: dört yeni kartın metni (kurallar-olay: kartlar onaylı partilerle girer);
 tanıdıkların yön ipucunun şehir özetinde bedava olması "Ticaret bilgi oyunudur" sütunuyla gerilimde (tavernaya mı?).
+
+## Kervanın üstünde kar ve ıslaklık, gölgelendiriciyle (2026-11-13)
+
+Kullanıcı: yağmurda ıslaklık görünmüyor, atın karı düz tahta, hayvanlarda çok kar, insanlarda hiç yok; kar kol,
+pantolon, böğür, tekerlekte de olmalı. Kervan artık bir `CanvasGroup`'ta; `scripts/ui/weather_coat.gdshader`
+birleşik siluette çalışıyor: üst kenarı izleyen kesik kabuk, gövdeye yapışan lekeler, zemine yakın serpinti,
+ıslakta koyulaşma + gök parıltısı + kısa su yolları + damla. Eski `WalkFigure._draw_weather_coat` silindi.
+Bakmak: `tests/screenshot_weather_coat.gd`. Kural metni kurallar-sanat "Weather on the Body Rules". Açık: miktarlar
+kullanıcının gözüne bırakıldı (insanlarda leke az mı, hayvanlarda fazla mı).

@@ -355,6 +355,12 @@ var _caravan: RoadCaravan
 var _fx_ground: FxLayer
 var _fx_front: FxLayer
 var _curtain: WeatherCurtain
+## Kervanı tek resimde birleştiren grup: kar ve ıslaklık onun gölgelendiricisinde.
+var _coat_group: CanvasGroup
+const WEATHER_COAT_SHADER: Shader = preload("res://scripts/ui/weather_coat.gdshader")
+## Kar kabuğunun en kalın yeri ve bulaşmanın yüksekliği, metre (okunurluk payıyla).
+const COAT_RIM_METRES: float = 0.07
+const COAT_CAKE_METRES: float = 0.45
 ## Üç derinlik düzlemi: uzak, yol, yakın (bkz. WeatherCurtain.Depth).
 var _curtains: Array[WeatherCurtain] = []
 ## Zeminin o günkü hâli (`GroundCover.at`); her şafakta yenileniyor.
@@ -681,11 +687,24 @@ func _build_world_layer() -> void:
 	_band.add_actor_layer(_fx_ground)
 
 	_caravan = RoadCaravan.new()
+	# Kervan tek bir resimde birleşiyor ki kar ve yüzeydeki su ekranda
+	# görünen siluetin gerçek üst kenarına otursun (weather_coat.gdshader).
+	# Grubun payı karın siluetin üstüne taşan kısmına yer açıyor.
+	_caravan.fill_parent = false
+	_coat_group = CanvasGroup.new()
+	_coat_group.fit_margin = 18.0
+	_coat_group.clear_margin = 18.0
+	var coat_material := ShaderMaterial.new()
+	coat_material.shader = WEATHER_COAT_SHADER
+	_coat_group.material = coat_material
+	_coat_group.add_child(_caravan)
 	# `add_child` değil `add_actor_layer`: şerit ön plan katmanını her
 	# zaman en üstte tutuyor, yoksa yolun önündeki çalılar kervanın
 	# arkasına düşüyor ve figürler onların üzerinde yürüyor gibi
 	# duruyor (bkz. TravelForeground).
-	_band.add_actor_layer(_caravan)
+	_band.add_actor_layer(_coat_group)
+	_caravan.size = _band.size
+	_band.resized.connect(func() -> void: _caravan.size = _band.size)
 	_band.ground_line_changed.connect(_caravan.set_ground_line)
 	# Kolon uzadıkça çapa sağa kayıyor, yoksa satın alınan her vagon
 	# ekranın solundan dışarı çıkıyor (bkz. TravelBand.CARAVAN_X_RATIO).
@@ -3115,6 +3134,25 @@ var _snow_share: float = 0.0
 var _soaking: Dictionary = {}
 var _drip_accum: float = 0.0
 
+## Kervanın birleşik resmine havanın payını ve zemin çizgisini verir.
+func _sync_weather_coat() -> void:
+	if _coat_group == null or _caravan == null:
+		return
+	var coat := _caravan.get_soaking()
+	var mat := _coat_group.material as ShaderMaterial
+	if mat == null:
+		return
+	var per_metre := _caravan.fx_px_per_metre()
+	mat.set_shader_parameter("wet", coat.x)
+	mat.set_shader_parameter("snow", coat.y)
+	mat.set_shader_parameter("rim_px", per_metre * COAT_RIM_METRES)
+	mat.set_shader_parameter("cake_h", per_metre * COAT_CAKE_METRES)
+	mat.set_shader_parameter("unit_px", per_metre * 1.73)
+	var w := maxf(1.0, _band.size.x)
+	var a := _band.ground_y_at(0.0)
+	mat.set_shader_parameter("ground_a", a)
+	mat.set_shader_parameter("ground_b", (_band.ground_y_at(w) - a) / w)
+
 ## Her karede: efekt katmanlarının zeminle birlikte kayması ve yağmurun
 ## yere çarpma izleri.
 func _sync_fx(delta: float) -> void:
@@ -3125,6 +3163,7 @@ func _sync_fx(delta: float) -> void:
 		_fx_ground.set_world_x(scroll)
 	if _fx_front != null:
 		_fx_front.set_world_x(scroll)
+	_sync_weather_coat()
 	for curtain in _curtains:
 		curtain.set_world_x(scroll)
 		if _caravan != null:
