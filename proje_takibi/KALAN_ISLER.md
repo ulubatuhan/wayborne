@@ -2,7 +2,7 @@
 
 Başlanmamış görevler: kullanıcının işi (S), kullanıcı kararı (CK), kullanıcının içeriği ya da lore (CI) ve yeni eklenen oyun hissi alt görevleri (N31a-f). Her birinin neden beklediği 'Kim' satırında.
 
-Toplam: **14** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **13** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
 
@@ -65,25 +65,6 @@ Toplam: **14** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
   - **Kabul:** Onaylı sahne tahtası; oyunda sahne ve video; atlanabilir ama ilk seferde tam oynar.
   - **Kaynaklar ve teknik (CC0 araştırması):** Ücretsiz yol: oyun içi gerçek zamanlı sahne ya da Blender Grease Pencil ve kâğıt kesik tekniğiyle kısa video (J03 araçları). Sesler: Freesound CC0 `quill writing`, `wax seal`, `book close`.
   - **Literatür:** R60, R22, R76
-
-</details>
-
-## Paket P11
-
-### Y-E04 · Yavaş açılan dünya sırrı
-
-- **Durum:** açık · **Öncelik:** P2 · **Paket:** P11 · **Kim:** kullanıcının içeriği/lore'u gerekir
-- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
-- **Bağımlı:** Y-E06
-
-<details><summary>Görev metni</summary>
-
-- [ ] **Y-E04 Yavaş açılan dünya sırrı**
-  - **Öncelik:** P2 · **Dalga:** 5 · **Bağımlı:** Y-E06
-  - **Ne:** İnançlar, nefes inancı ve nadir görülen varlık: kenar notları, söylentiler, parça parça bulgular. Açıklama değil, ipucu.
-  - **Kullanıcı notu:** “Kesinlikle.”
-  - **Kabul:** Sır belgesi (yalnızca geliştirici için) ve oyuna dağıtılmış en az 15 ipucu.
-  - **Literatür:** R37, R38, R9
 
 </details>
 

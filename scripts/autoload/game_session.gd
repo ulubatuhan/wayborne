@@ -3753,6 +3753,8 @@ func advance_day() -> Array[String]:
 	var period := SideriaCalendar.period(total_days_elapsed)
 	if not period.is_empty() and period != SideriaCalendar.period(total_days_elapsed - 1):
 		note_scribe("cal_" + period)
+	if is_journey_active():
+		_hear_secret_clue()
 	plague.step()
 	_drift_city_morale()
 	_people_day()
@@ -4259,6 +4261,24 @@ func note_city_arrival(lines: Array[String]) -> bool:
 			return false
 	write_journal(" ".join(lines))
 	return true
+
+## Dünya sırrının duyulan ipuçları (Y-E04). Kayıtta; ipucu bir kez duyulur.
+var secret_clues: Array = []
+## Bu yol gününde duyulan ipucu, ekranın günlüğe dökmesi için (kayda girmez).
+var clue_queue: Array[String] = []
+
+## Yol gününde belki bir ipucu: bölgeye uyan ve henüz duyulmamış ilki.
+func _hear_secret_clue() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("clue|%s|%d" % [caravan_name, total_days_elapsed])
+	if rng.randf() >= WorldSecret.HEAR_CHANCE:
+		return
+	var key := WorldSecret.next_clue(secret_clues, journey_region())
+	if key.is_empty():
+		return
+	secret_clues.append(key)
+	clue_queue.append(key)
+	write_journal(TranslationServer.translate("UI_CLUE_HEARD") % TranslationServer.translate(key))
 
 ## Bilinen son haber; hiç duyulmadıysa boş.
 func plague_news_for(location_id: String) -> Dictionary:
@@ -7348,6 +7368,7 @@ func to_save_dict() -> Dictionary:
 		"plague": plague.to_dict(),
 		"plague_news": plague_news.duplicate(true),
 		"journal": journal.duplicate(true),
+		"secret_clues": secret_clues.duplicate(),
 		"city_morale": city_morale.duplicate(),
 		"journeys_completed": journeys_completed,
 		"best_forage_find": best_forage_find,
@@ -7509,6 +7530,7 @@ func load_from_dict(raw_data: Dictionary) -> void:
 	plague.load_from_dict(data.get("plague", {}) as Dictionary)
 	plague_news = (data.get("plague_news", {}) as Dictionary).duplicate(true)
 	journal = (data.get("journal", []) as Array).duplicate(true)
+	secret_clues = (data.get("secret_clues", []) as Array).duplicate()
 	city_morale = (data.get("city_morale", {}) as Dictionary).duplicate()
 
 	# Vagonlar önce senkron edilir - kargo yalnızca vagonlar gerçek

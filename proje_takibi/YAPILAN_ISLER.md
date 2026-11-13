@@ -2,7 +2,7 @@
 
 Bitmiş ve doğrulanmış (testi ya da kullanıcı onayı geçmiş) görevler. Kod dalı: `wayborne`, `yerel/yapilacaklar-p05-p06` (önceki tur `yerel/yapilacaklar-p01-p04`). Push edilmedi.
 
-Toplam: **206** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
+Toplam: **207** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.json`'dan üretilir.
 
 ## Paket P00
 
@@ -2143,6 +2143,24 @@ Toplam: **206** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler
   - **Kullanıcı notu:** “Sayıyı arttır demek kolay ama arttırabilecek misin?”
   - **Kabul:** En az 120 çekilebilir kart; her kart kalite listesinden geçti; simülatörde finale kadar tekrar oranı ölçüldü.
   - **Literatür:** R15, R48
+
+</details>
+
+### Y-E04 · Yavaş açılan dünya sırrı
+
+- **Durum:** bitti · **Öncelik:** P2 · **Paket:** P11 · **Kim:** kullanıcının içeriği/lore'u gerekir
+- **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
+- **Bağımlı:** Y-E06
+- **Son not:**  | 2026-11-13: sır belgesi docs/lore/SIR.md (yalnız geliştirici); 18 ipucu (WorldSecret.CLUES, tr+en), bölgelere dağılmış, yolda ateş başında duyulur, günlüğe ve kervanbaşının defterine yazılır, kayıtta (secret_clues). Kırk seferde ortalama 10,5 ipucu (HEAR_CHANCE 0,025). Son hiç söylenmez.
+
+<details><summary>Görev metni</summary>
+
+- [ ] **Y-E04 Yavaş açılan dünya sırrı**
+  - **Öncelik:** P2 · **Dalga:** 5 · **Bağımlı:** Y-E06
+  - **Ne:** İnançlar, nefes inancı ve nadir görülen varlık: kenar notları, söylentiler, parça parça bulgular. Açıklama değil, ipucu.
+  - **Kullanıcı notu:** “Kesinlikle.”
+  - **Kabul:** Sır belgesi (yalnızca geliştirici için) ve oyuna dağıtılmış en az 15 ipucu.
+  - **Literatür:** R37, R38, R9
 
 </details>
 

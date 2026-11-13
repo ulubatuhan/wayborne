@@ -1926,7 +1926,7 @@
    "bolum": "13",
    "alan": "Yönetmen: İçerik ve anlatı",
    "oncelik": "P2",
-   "durum": "açık",
+   "durum": "bitti",
    "bagimli": [
     "Y-E06"
    ],
@@ -1934,7 +1934,8 @@
    "dalga": 5,
    "paket": "P11",
    "sira": 120,
-   "kim": "CI"
+   "kim": "CI",
+   "not": " | 2026-11-13: sır belgesi docs/lore/SIR.md (yalnız geliştirici); 18 ipucu (WorldSecret.CLUES, tr+en), bölgelere dağılmış, yolda ateş başında duyulur, günlüğe ve kervanbaşının defterine yazılır, kayıtta (secret_clues). Kırk seferde ortalama 10,5 ipucu (HEAR_CHANCE 0,025). Son hiç söylenmez."
   },
   {
    "id": "Y-E08",

@@ -263,6 +263,7 @@ func _trace_report(session: GameSession) -> Dictionary:
 	return {
 		"born": born, "returned": returned, "faded": faded, "open": open_now,
 		"evicted": session.traces.evicted,
+		"clues": session.secret_clues.size(),
 		"good": good_returns,
 		"days": int(float(days_to_return) / float(maxi(1, returned))),
 	}
@@ -285,6 +286,7 @@ func _report_traces(arcs: Array[Dictionary], policy: String) -> void:
 	var faded := 0
 	var open_now := 0
 	var evicted := 0
+	var clues := 0
 	var good := 0
 	var days := 0
 	var states := {}
@@ -295,6 +297,7 @@ func _report_traces(arcs: Array[Dictionary], policy: String) -> void:
 		faded += int(report.get("faded", 0))
 		open_now += int(report.get("open", 0))
 		evicted += int(report.get("evicted", 0))
+		clues += int(report.get("clues", 0))
 		good += int(report.get("good", 0))
 		days += int(report.get("days", 0))
 		for state in (arc.get("states", {}) as Dictionary):
@@ -305,6 +308,7 @@ func _report_traces(arcs: Array[Dictionary], policy: String) -> void:
 		int(round(100.0 * float(good) / float(maxi(1, returned)))),
 		float(faded) / count, float(evicted) / count, float(open_now) / count, int(float(days) / count),
 	])
+	print("   dünya sırrı (%s): duyulan ipucu %.1f / %d" % [policy, float(clues) / count, WorldSecret.CLUES.size()])
 	var line := "   hâl histogramı (%s):" % policy
 	for state in [CharacterData.STATE_ALIVE, CharacterData.STATE_WEARY, CharacterData.STATE_HARD,
 			CharacterData.STATE_DIM, CharacterData.STATE_STONE, CharacterData.STATE_LEAVING]:

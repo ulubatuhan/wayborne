@@ -1781,6 +1781,10 @@ func _process(delta: float) -> void:
 	_apply_zoom(delta)
 	if not _session.scribe_queue.is_empty():
 		_flush_scribe()
+	if not _session.clue_queue.is_empty():
+		for key in _session.clue_queue:
+			_add_log(tr("UI_CLUE_HEARD") % tr(key), SCRIBE_COLOR)
+		_session.clue_queue.clear()
 
 	# Kamp kurulurken ve sökülürken insanlar yürürken saat kampın yavaş
 	# akışında değil, CAMP_WALK_CLOCK_SCALE ile akıyor (on saniyelik yürüyüş
