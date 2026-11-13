@@ -7871,6 +7871,11 @@ func build_event_context() -> Dictionary:
 	# Godot 4.2'de Dictionary.merged() yok (4.3+), o yüzden in-place merge().
 	context.merge(_build_skill_check_context())
 	context.merge(_build_chain_context())
+	# Bölge kartları (Y-E01): yolun gittiği bölge `region_<id>` olarak bağlamda.
+	# Bölgeye özgü kart bunu koşul yapar; kart metni bölgenin töresini taşır.
+	var region := journey_region()
+	if not region.is_empty():
+		context["region_" + region] = 1.0
 	return context
 
 ## --- Lonca özel görevleri (bkz. Faz 17 PR-4) ---

@@ -452,6 +452,17 @@ static func get_road_events() -> Array[GameEvent]:
 	_road_events.append(_chain_visited_village())
 	_road_events.append(_chain_song())
 	_road_events.append(_chain_crate_owner())
+	_road_events.append(_reg_registry_rider())
+	_road_events.append(_reg_wounded_column())
+	_road_events.append(_reg_unpaid_company())
+	_road_events.append(_reg_two_clerks())
+	_road_events.append(_reg_council_contract())
+	_road_events.append(_reg_tide_road())
+	_road_events.append(_reg_fence_feud())
+	_road_events.append(_reg_rule_test())
+	_road_events.append(_reg_blind_miner())
+	_road_events.append(_reg_sogurtay_water())
+	_road_events.append(_reg_page_collector())
 	_road_events.append(_wandering_players())
 	_road_events.append(_penitent_procession())
 	_road_events.append(_hidden_guide())
@@ -3127,6 +3138,171 @@ static func _chain_crate_owner() -> GameEvent:
 			"EVT_CH_CRATE_DENY_MID", _effects([_fx(EventEffect.Type.GOLD, -40), _fx(EventEffect.Type.TRADE_STAIN, 4), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "crate|-1")]),
 			"EVT_CH_CRATE_DENY_BAD", _effects([_fx(EventEffect.Type.TRIGGER_COMBAT, 0, "guard"), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "crate|-1")])),
 		_choice("EVT_CH_CRATE_OPT_SEARCH", _effects([_fx(EventEffect.Type.TRAVEL_DAYS, 1), _fx(EventEffect.Type.GOLD, -50), _fx(EventEffect.Type.REPUTATION, 1), _fx(EventEffect.Type.CHAIN_ADVANCE, 0, "crate|-1")])),
+	])
+	return event
+
+## Y-E01 bölge partisi 1 · Vaelghard: Kayıt Bürosu her yükü sayar.
+static func _reg_registry_rider() -> GameEvent:
+	var event := _event("evt_reg_registry_rider", "EVT_REG_REGISTRY_TITLE", "EVT_REG_REGISTRY_TEXT", 1.0)
+	event.cooldown_days = 20
+	event.conditions = _conditions([_c("region_imparatorluk", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_choice("EVT_REG_REGISTRY_OPT_COUNT", _effects([_fx(EventEffect.Type.TRAVEL_DAYS, 1), _fx(EventEffect.Type.REPUTATION, 2), _fx(EventEffect.Type.IZ_BIRAK, 30, "minnet|bolge|kisa|kapi")])),
+		_check_choice("EVT_REG_REGISTRY_OPT_FILL", CharacterStats.Kind.INTELLECT, SkillCheck.Source.LEADER,
+			"EVT_REG_REGISTRY_FILL_OK", _effects([_fx(EventEffect.Type.GOLD, 30)]),
+			"EVT_REG_REGISTRY_FILL_MID", _effects([_fx(EventEffect.Type.TRADE_STAIN, 3)]),
+			"EVT_REG_REGISTRY_FILL_BAD", _effects([_fx(EventEffect.Type.GOLD, -40), _fx(EventEffect.Type.TRADE_STAIN, 6)])),
+		_gated_choice("EVT_REG_REGISTRY_OPT_PAY", "EVT_REG_REGISTRY_OPT_PAY_LOCKED", _conditions([_c("gold", EventCondition.Op.GREATER_EQUAL, 30)]), _effects([_fx(EventEffect.Type.GOLD, -30), _fx(EventEffect.Type.IZ_BIRAK, -30, "soylenti|bolge|kisa|fiyat")])),
+	])
+	return event
+
+## Y-E01 bölge partisi 1 · Vaelghard dağ kabileleriyle savaşır; yaralı birlik.
+static func _reg_wounded_column() -> GameEvent:
+	var event := _event("evt_reg_wounded_column", "EVT_REG_WOUNDED_TITLE", "EVT_REG_WOUNDED_TEXT", 1.0)
+	event.cooldown_days = 20
+	event.conditions = _conditions([_c("region_imparatorluk", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_gated_choice("EVT_REG_WOUNDED_OPT_CARRY", "EVT_REG_WOUNDED_OPT_CARRY_LOCKED", _conditions([_c("provisions", EventCondition.Op.GREATER_EQUAL, 4)]), _effects([_fx(EventEffect.Type.TRAVEL_DAYS, 1), _fx(EventEffect.Type.PROVISIONS, -4), _fx(EventEffect.Type.REPUTATION, 3), _fx(EventEffect.Type.IZ_BIRAK, 50, "minnet|bolge|uzun|teklif")])),
+		_check_choice("EVT_REG_WOUNDED_OPT_REFUSE", CharacterStats.Kind.CHARISMA, SkillCheck.Source.LEADER,
+			"EVT_REG_WOUNDED_REFUSE_OK", _effects([_fx(EventEffect.Type.STRESS, 2)]),
+			"EVT_REG_WOUNDED_REFUSE_MID", _effects([_fx(EventEffect.Type.REPUTATION, -2), _fx(EventEffect.Type.IZ_BIRAK, -30, "kin|bolge|kisa|ret")]),
+			"EVT_REG_WOUNDED_REFUSE_BAD", _effects([_fx(EventEffect.Type.PROVISIONS, -6), _fx(EventEffect.Type.REPUTATION, -2)])),
+		_choice("EVT_REG_WOUNDED_OPT_LEAVE", _effects([_fx(EventEffect.Type.PROVISIONS, -2), _fx(EventEffect.Type.STRESS, 3)])),
+	])
+	return event
+
+## Y-E01 bölge partisi 1 · Vadi paralı bölükleri ödenmiyor; kaçakların kaynağı.
+static func _reg_unpaid_company() -> GameEvent:
+	var event := _event("evt_reg_unpaid_company", "EVT_REG_COMPANY_TITLE", "EVT_REG_COMPANY_TEXT", 1.0)
+	event.cooldown_days = 20
+	event.conditions = _conditions([_c("region_vadi", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_gated_choice("EVT_REG_COMPANY_OPT_TRADE", "EVT_REG_COMPANY_OPT_TRADE_LOCKED", _conditions([_c("provisions", EventCondition.Op.GREATER_EQUAL, 8)]), _effects([_fx(EventEffect.Type.PROVISIONS, -8), _fx(EventEffect.Type.GOLD, 30), _fx(EventEffect.Type.IZ_BIRAK, 40, "minnet|bolge|kisa|aday")])),
+		_check_choice("EVT_REG_COMPANY_OPT_SEND", CharacterStats.Kind.CHARISMA, SkillCheck.Source.LEADER,
+			"EVT_REG_COMPANY_SEND_OK", _effects([_fx(EventEffect.Type.MORALE, 3), _fx(EventEffect.Type.DANGER, -5)]),
+			"EVT_REG_COMPANY_SEND_MID", _effects([_fx(EventEffect.Type.STRESS, 4), _fx(EventEffect.Type.DANGER, 5)]),
+			"EVT_REG_COMPANY_SEND_BAD", _effects([_fx(EventEffect.Type.TRIGGER_COMBAT, 0, "bandit")])),
+		_choice("EVT_REG_COMPANY_OPT_GO", _effects([_fx(EventEffect.Type.STRESS, 4), _fx(EventEffect.Type.IZ_BIRAK, -40, "kin|bolge|kisa|dusman")])),
+	])
+	return event
+
+## Y-E01 bölge partisi 1 · Vadi prenslikleri birbirine düşman; köprüde iki kâtip.
+static func _reg_two_clerks() -> GameEvent:
+	var event := _event("evt_reg_two_clerks", "EVT_REG_BRIDGE_TITLE", "EVT_REG_BRIDGE_TEXT", 1.0)
+	event.cooldown_days = 20
+	event.conditions = _conditions([_c("region_vadi", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_gated_choice("EVT_REG_BRIDGE_OPT_PAY", "EVT_REG_BRIDGE_OPT_PAY_LOCKED", _conditions([_c("gold", EventCondition.Op.GREATER_EQUAL, 40)]), _effects([_fx(EventEffect.Type.GOLD, -40), _fx(EventEffect.Type.REPUTATION, 1)])),
+		_check_choice("EVT_REG_BRIDGE_OPT_SPLIT", CharacterStats.Kind.INTELLECT, SkillCheck.Source.LEADER,
+			"EVT_REG_BRIDGE_SPLIT_OK", _effects([_fx(EventEffect.Type.MORALE, 4), _fx(EventEffect.Type.IZ_BIRAK, -20, "soylenti|bolge|kisa|fiyat")]),
+			"EVT_REG_BRIDGE_SPLIT_MID", _effects([_fx(EventEffect.Type.GOLD, -20)]),
+			"EVT_REG_BRIDGE_SPLIT_BAD", _effects([_fx(EventEffect.Type.GOLD, -60), _fx(EventEffect.Type.TRADE_STAIN, 3)])),
+		_choice("EVT_REG_BRIDGE_OPT_FORD", _effects([_fx(EventEffect.Type.TRAVEL_DAYS, 1), _fx(EventEffect.Type.WAGON_DAMAGE, 1)])),
+	])
+	return event
+
+## Y-E01 bölge partisi 1 · Ors: hesap ve sözleşme dili.
+static func _reg_council_contract() -> GameEvent:
+	var event := _event("evt_reg_council_contract", "EVT_REG_CONTRACT_TITLE", "EVT_REG_CONTRACT_TEXT", 1.0)
+	event.cooldown_days = 20
+	event.conditions = _conditions([_c("region_guney", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_check_choice("EVT_REG_CONTRACT_OPT_READ", CharacterStats.Kind.INTELLECT, SkillCheck.Source.LEADER,
+			"EVT_REG_CONTRACT_READ_OK", _effects([_fx(EventEffect.Type.GOLD, 60), _fx(EventEffect.Type.IZ_BIRAK, 30, "minnet|kisi|kisa|teklif")]),
+			"EVT_REG_CONTRACT_READ_MID", _effects([_fx(EventEffect.Type.GOLD, 25)]),
+			"EVT_REG_CONTRACT_READ_BAD", _effects([_fx(EventEffect.Type.STRESS, 3)])),
+		_choice("EVT_REG_CONTRACT_OPT_SIGN", _effects([_fx(EventEffect.Type.GOLD, 70), _fx(EventEffect.Type.TRADE_STAIN, 4)])),
+		_choice("EVT_REG_CONTRACT_OPT_DECLINE", _effects([_fx(EventEffect.Type.REPUTATION, 1)])),
+	])
+	return event
+
+## Y-E01 bölge partisi 1 · Gelgit Kıyısı: yol denize iner.
+static func _reg_tide_road() -> GameEvent:
+	var event := _event("evt_reg_tide_road", "EVT_REG_TIDE_TITLE", "EVT_REG_TIDE_TEXT", 1.0)
+	event.cooldown_days = 20
+	event.conditions = _conditions([_c("region_guney", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_check_choice("EVT_REG_TIDE_OPT_READ", CharacterStats.Kind.PERCEPTION, SkillCheck.Source.PARTY_BEST,
+			"EVT_REG_TIDE_READ_OK", _effects([_fx(EventEffect.Type.DANGER, -5), _fx(EventEffect.Type.MORALE, 3)]),
+			"EVT_REG_TIDE_READ_MID", _effects([_fx(EventEffect.Type.WAGON_DAMAGE, 1)]),
+			"EVT_REG_TIDE_READ_BAD", _effects([_fx(EventEffect.Type.PROVISIONS, -6), _fx(EventEffect.Type.PARTY_HP, -3, "weakest")])),
+		_gated_choice("EVT_REG_TIDE_OPT_GUIDE", "EVT_REG_TIDE_OPT_GUIDE_LOCKED", _conditions([_c("gold", EventCondition.Op.GREATER_EQUAL, 15)]), _effects([_fx(EventEffect.Type.GOLD, -15), _fx(EventEffect.Type.IZ_BIRAK, 30, "minnet|kisi|kisa|yuz")])),
+		_choice("EVT_REG_TIDE_OPT_WAIT", _effects([_fx(EventEffect.Type.TRAVEL_DAYS, 1)])),
+	])
+	return event
+
+## Y-E01 bölge partisi 1 · Çitler: Tolvarin toprağa, Kirsavel hayvana and içer.
+static func _reg_fence_feud() -> GameEvent:
+	var event := _event("evt_reg_fence_feud", "EVT_REG_FENCE_TITLE", "EVT_REG_FENCE_TEXT", 1.0)
+	event.cooldown_days = 20
+	event.conditions = _conditions([_c("region_sinir", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_choice("EVT_REG_FENCE_OPT_TOLVARIN", _effects([_fx(EventEffect.Type.MORALE, 2), _fx(EventEffect.Type.IZ_BIRAK, -40, "kin|bolge|kisa|fiyat")])),
+		_choice("EVT_REG_FENCE_OPT_KIRSAVEL", _effects([_fx(EventEffect.Type.PROVISIONS, 3), _fx(EventEffect.Type.IZ_BIRAK, -40, "kin|bolge|kisa|kapi")])),
+		_check_choice("EVT_REG_FENCE_OPT_ROAD", CharacterStats.Kind.CHARISMA, SkillCheck.Source.LEADER,
+			"EVT_REG_FENCE_ROAD_OK", _effects([_fx(EventEffect.Type.MORALE, 5), _fx(EventEffect.Type.REPUTATION, 2)]),
+			"EVT_REG_FENCE_ROAD_MID", _effects([_fx(EventEffect.Type.STRESS, 2)]),
+			"EVT_REG_FENCE_ROAD_BAD", _effects([_fx(EventEffect.Type.PARTY_HP, -4, "weakest"), _fx(EventEffect.Type.STRESS, 5)])),
+	])
+	return event
+
+## Y-E01 bölge partisi 1 · Ayazkaya: hüküm sınaması (§8.4).
+static func _reg_rule_test() -> GameEvent:
+	var event := _event("evt_reg_rule_test", "EVT_REG_RULETEST_TITLE", "EVT_REG_RULETEST_TEXT", 1.0)
+	event.cooldown_days = 20
+	event.conditions = _conditions([_c("region_dag", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_choice("EVT_REG_RULETEST_OPT_WAIT", _effects([_fx(EventEffect.Type.TRAVEL_DAYS, 2), _fx(EventEffect.Type.STRESS, 3)])),
+		_check_choice("EVT_REG_RULETEST_OPT_STONE", CharacterStats.Kind.STRENGTH, SkillCheck.Source.PARTY_BEST,
+			"EVT_REG_RULETEST_STONE_OK", _effects([_fx(EventEffect.Type.MORALE, 6), _fx(EventEffect.Type.DANGER, -5)]),
+			"EVT_REG_RULETEST_STONE_MID", _effects([_fx(EventEffect.Type.STRESS, 2)]),
+			"EVT_REG_RULETEST_STONE_BAD", _effects([_fx(EventEffect.Type.PARTY_HP, -8, "strength"), _fx(EventEffect.Type.STRESS, 4)])),
+		_gated_choice("EVT_REG_RULETEST_OPT_GIFT", "EVT_REG_RULETEST_OPT_GIFT_LOCKED", _conditions([_c("gold", EventCondition.Op.GREATER_EQUAL, 50)]), _effects([_fx(EventEffect.Type.GOLD, -50), _fx(EventEffect.Type.IZ_BIRAK, 40, "minnet|bolge|uzun|kapi")])),
+	])
+	return event
+
+## Y-E01 bölge partisi 1 · Karaocak: Kör Kazmalar Mezarlığı.
+static func _reg_blind_miner() -> GameEvent:
+	var event := _event("evt_reg_blind_miner", "EVT_REG_MINER_TITLE", "EVT_REG_MINER_TEXT", 1.0)
+	event.cooldown_days = 20
+	event.conditions = _conditions([_c("region_dag_maden", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_check_choice("EVT_REG_MINER_OPT_TEST", CharacterStats.Kind.PERCEPTION, SkillCheck.Source.PARTY_BEST,
+			"EVT_REG_MINER_TEST_OK", _effects([_fx(EventEffect.Type.GOLD, -20), _fx(EventEffect.Type.IZ_BIRAK, 30, "minnet|kisi|kisa|yuz")]),
+			"EVT_REG_MINER_TEST_MID", _effects([_fx(EventEffect.Type.GOLD, -40), _fx(EventEffect.Type.IZ_BIRAK, 30, "minnet|kisi|kisa|yuz")]),
+			"EVT_REG_MINER_TEST_BAD", _effects([_fx(EventEffect.Type.GOLD, -40), _fx(EventEffect.Type.STRESS, 4)])),
+		_choice("EVT_REG_MINER_OPT_ESCORT", _effects([_fx(EventEffect.Type.TRAVEL_DAYS, 1), _fx(EventEffect.Type.STRESS, -5), _fx(EventEffect.Type.IZ_BIRAK, 40, "minnet|bolge|kisa|aday")])),
+		_choice("EVT_REG_MINER_OPT_PASS", _effects([_fx(EventEffect.Type.STRESS, 1)])),
+	])
+	return event
+
+## Y-E01 bölge partisi 1 · Gokyurt: Sogurtay suyunun tadı yılı sayar (§2.3, §8.3).
+static func _reg_sogurtay_water() -> GameEvent:
+	var event := _event("evt_reg_sogurtay_water", "EVT_REG_WATER_TITLE", "EVT_REG_WATER_TEXT", 1.0)
+	event.cooldown_days = 20
+	event.conditions = _conditions([_c("region_gocebe", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_choice("EVT_REG_WATER_OPT_SWEET", _effects([_fx(EventEffect.Type.MORALE, 4), _fx(EventEffect.Type.DANGER, 5)])),
+		_choice("EVT_REG_WATER_OPT_BITTER", _effects([_fx(EventEffect.Type.STRESS, 2), _fx(EventEffect.Type.DANGER, -8), _fx(EventEffect.Type.IZ_BIRAK, 30, "minnet|bolge|kisa|kapi")])),
+		_check_choice("EVT_REG_WATER_OPT_TASTE", CharacterStats.Kind.WISDOM, SkillCheck.Source.LEADER,
+			"EVT_REG_WATER_TASTE_OK", _effects([_fx(EventEffect.Type.DANGER, -10), _fx(EventEffect.Type.MORALE, 3)]),
+			"EVT_REG_WATER_TASTE_MID", _effects([_fx(EventEffect.Type.STRESS, 1)]),
+			"EVT_REG_WATER_TASTE_BAD", _effects([_fx(EventEffect.Type.REPUTATION, -3), _fx(EventEffect.Type.IZ_BIRAK, -40, "kin|bolge|kisa|kapi")])),
+	])
+	return event
+
+## Y-E01 bölge partisi 1 · Avuçiçi: Kitap her ölüyü yazar; yol töresi adı yazmaz.
+static func _reg_page_collector() -> GameEvent:
+	var event := _event("evt_reg_page_collector", "EVT_REG_PAGES_TITLE", "EVT_REG_PAGES_TEXT", 1.0)
+	event.cooldown_days = 20
+	event.conditions = _conditions([_c("region_ahit", EventCondition.Op.GREATER_EQUAL, 1)])
+	event.choices = _choices([
+		_choice("EVT_REG_PAGES_OPT_NAMES", _effects([_fx(EventEffect.Type.STRESS, -6), _fx(EventEffect.Type.REPUTATION, 2), _fx(EventEffect.Type.IZ_BIRAK, -30, "kutsal|yol|kisa|fiyat")])),
+		_choice("EVT_REG_PAGES_OPT_CUSTOM", _effects([_fx(EventEffect.Type.STRESS, 3), _fx(EventEffect.Type.REPUTATION, -2)])),
+		_check_choice("EVT_REG_PAGES_OPT_PRAYER", CharacterStats.Kind.FAITH, SkillCheck.Source.LEADER,
+			"EVT_REG_PAGES_PRAYER_OK", _effects([_fx(EventEffect.Type.STRESS, -8), _fx(EventEffect.Type.IZ_BIRAK, 30, "kutsal|bolge|kisa|kapi")]),
+			"EVT_REG_PAGES_PRAYER_MID", _effects([_fx(EventEffect.Type.STRESS, -2)]),
+			"EVT_REG_PAGES_PRAYER_BAD", _effects([_fx(EventEffect.Type.STRESS, 5), _fx(EventEffect.Type.MORALE, -3)])),
 	])
 	return event
 
