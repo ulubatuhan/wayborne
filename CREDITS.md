@@ -45,6 +45,15 @@ Lisans: https://creativecommons.org/licenses/by/4.0/ — giysiler oyunun bedenin
 | MPFB2 (MakeHuman) | gövde ve giysi üreteci | https://github.com/makehumancommunity/mpfb2 |
 | ambientCG | Bricks097, Fabric085, Ground106, Metal041B, Metal063, Paper005, PavingStones119, Planks037A, Plaster001, Rock064 (yalnızca renk haritaları) | https://ambientcg.com |
 
+- **Zindan savaş arka planları (geçici, Y-A07)** - `data/assets/backgrounds/dungeon/`, oyunun paletine gri tona
+  çevrilip 1920x1080'e kırpıldı. El çizimi gelince yerlerine konur.
+  - `eski_agiz.jpg`: "Cave Background (Horizontal Tiling)", Cal McEachern, OpenGameArt (CC0),
+    https://opengameart.org/node/159112
+  - `kemrug_yarigi.jpg`: "Seamless cave background", PWL, OpenGameArt (CC0),
+    https://opengameart.org/content/seamless-cave-background
+  - `kor_kazmalar.jpg`: "Seamless Parallax Cave Background", JonathanPalmerGD, OpenGameArt (CC0),
+    https://opengameart.org/content/seamless-parallax-cave-background
+
 ## Yazı tipleri (SIL OFL 1.1)
 
 EB Garamond, IM Fell English SC, Grenze Gotisch, Noto Serif SC ve Noto Serif JP (alt kümeler). Lisans metinleri `data/assets/fonts/*-OFL.txt`.

@@ -8,7 +8,7 @@ ağız töresi). Kod: `DungeonCatalog`, `GameSession.dungeons`/`dungeon_run`, `D
 `EnemyCatalog.KIND_DEEP` (galeri porsuğu, taş kurdu, mağara ayısı; var olan figürler solgun renkle). Işık: meşale her
 aşamada yanar, ışıksız iniş ağır stres. Sırt yükü kişi başına 2. Her iki aşama bir gün, kervan bekler ve erzak
 yer. Ağızda kaybedilen savaş inişi bitirir, yük yağmalanmaz. Test: test_dungeon; ekran: screenshot_dungeon.
-Açık: zindan savaşının arka planı hâlâ yol sahnesi (karanlık galeri arka planı çizim işi); oda haritası istenmedi.
+Zindan savaşının arka planı ağza göre geçici CC0 mağara resmi (`data/assets/backgrounds/dungeon/`, CREDITS.md); el çizimi gelince aynı adla değişir. Oda haritası istenmedi.
 
 ## Kullanıcı notu
 

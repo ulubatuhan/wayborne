@@ -4033,7 +4033,7 @@ func _on_pre_combat_confirmed(ordered: Array) -> void:
 	panel.start_combat(
 		_current_combat_party, _pending_combat_danger, null,
 		_current_combat_kind, _session.journey_destination_id, current_biome,
-		"" if _terrain == null else _terrain.look_at(_terrain_day())
+		_combat_look()
 	)
 	_mark_chief(panel)
 
@@ -4971,3 +4971,9 @@ func _continue_dungeon() -> void:
 	var next := _session.dungeon_next_event()
 	if next != null:
 		call_deferred("_present_event", next)
+
+## Savaş arka planı: yolun o konumdaki resmi; galeri ağzında ağzın kendi resmi (Y-A07).
+func _combat_look() -> String:
+	if _session.dungeon_run.has("id"):
+		return CombatBackdrop.DUNGEON_PREFIX + String(_session.dungeon_run["id"])
+	return "" if _terrain == null else _terrain.look_at(_terrain_day())

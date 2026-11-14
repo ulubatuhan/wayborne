@@ -753,4 +753,6 @@ Hâlâ kullanıcıda: Y-C31 geçiş belgesinin adları (SIDERIA'da yok), Y-A07 z
 
 - Y-C31 bitti (e6defa6): `PassCatalog`, dört belge, `PASS_GRANT`, belgesiz kart, test_passes.
 - Y-A07 zindanlar oyunda: SIDERIA §11.7 galeri ağızları, `DungeonCatalog`, `dungeon_run`, 18 kart, `KIND_DEEP`.
-  Ekran: tests/screenshot_dungeon.gd. Açık: zindan savaşının karanlık arka planı (çizim).
+  Ekran: tests/screenshot_dungeon.gd. Savaş arka planı: üç geçici CC0 mağara resmi (ağız başına,
+  `data/assets/backgrounds/dungeon/`), `CombatBackdrop` dokuyu `biome` atanırken yükler (`_draw` içinde
+  ilk yükleme kareyi beyaz çiziyordu). El çizimi gelince aynı dosya adına konur.

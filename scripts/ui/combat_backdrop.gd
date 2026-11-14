@@ -39,7 +39,13 @@ const POOL_STRENGTH: float = 0.035
 var biome: String = "":
 	set(value):
 		biome = value
+		# Doku `_draw` içinde ilk kez yüklenince o kare beyaz çiziliyor ve
+		# yeniden çizim gelmiyordu (ekranda ölçüldü, 2026-11-14): önceden yükle.
+		_cave = null
+		if biome.begins_with(DUNGEON_PREFIX):
+			_cave = TextureLoader.load_any(DUNGEON_DIR + biome.trim_prefix(DUNGEON_PREFIX) + ".jpg")
 		queue_redraw()
+var _cave: Texture2D
 
 ## Ayakların bastığı çizgi (yüksekliğin payı): saflar sahnenin dibine yakın.
 const FEET_LINE: float = 0.80
@@ -50,12 +56,30 @@ const SCENERY_TINT: Color = Color(0.55, 0.52, 0.50)
 const SCENERY_SKY_TOP: Color = Color(0.10, 0.11, 0.14)
 const SCENERY_SKY_BOTTOM: Color = Color(0.30, 0.26, 0.22)
 
+## Galeri ağzında savaş (Y-A07): `biome` = "dungeon:<ağız>". Geçici CC0 mağara
+## arka planları (CREDITS.md), oyunun karanlık paletine çevrilmiş; el çizimi
+## gelince aynı yola konur. Meşale havuzu ve vinyet yine üstte: tek sıcak kaynak.
+const DUNGEON_PREFIX: String = "dungeon:"
+const DUNGEON_DIR: String = "res://data/assets/backgrounds/dungeon/"
+const DUNGEON_TINT: Color = Color(0.80, 0.80, 0.82)
+
+func _draw_dungeon(box: Vector2) -> void:
+	var src := Vector2(_cave.get_width(), _cave.get_height())
+	var fit := maxf(box.x / src.x, box.y / src.y)
+	var drawn := src * fit
+	draw_texture_rect(_cave, Rect2((box - drawn) * 0.5, drawn), false, DUNGEON_TINT)
+	_draw_torch_pool(box)
+	_draw_vignette(box)
+
 func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 func _draw() -> void:
 	var box := size
 	if box.x <= 8.0 or box.y <= 8.0:
+		return
+	if _cave != null:
+		_draw_dungeon(box)
 		return
 	if not biome.is_empty() and RoadStrips.has_biome(biome):
 		_draw_scenery(box)
