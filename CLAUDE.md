@@ -383,7 +383,7 @@ verir.
   [Oyun], [Harita], [Karar] benim kararım, [Boş] kasıtlı sessizlik.
 - **Bütün görseller el çizimi (kullanıcı hedefi, 2026-10-22; program 2026-10-27).** Kullanıcı oyunun bütün görsellerini
   tablette (ibis Paint X) kendisi çiziyor; amaç AI beyanından olabildiğince kurtulmak. Tek liste
-  `tools/el_cizimi/envanter.py` (676 satır, eski ve kullanılmayan dosyalar hariç); şablonlar `sablon_uret.py` (hizalı
+  `tools/el_cizimi/envanter.py` (838 satır, 2026-11-14; eski, türetilen ve kullanılmayan dosyalar hariç); şablonlar `sablon_uret.py` (hizalı
   referans, katman haritası, adlı katmanlı PSD; zipler depoda değil), takip `docs/el_cizimi/el_cizimi_takip.xlsx`
   (`takip_excel.py`, çizerin girdileri korunur), teslim `art_source/el_cizimi/gelen/` -> `al.py` (doğrular, oyuna işler,
   durumu "Oyunda" yapar; ardından ekran görüntüsü). Süreç: `docs/el_cizimi/SUREC.md`. Figürler tek rölanti çizimi,

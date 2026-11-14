@@ -14,7 +14,10 @@ Bilerek dışarıda kalanlar (kullanıcı kararı: "olması gerekmeyen, eski
   - yalnızca taslak ekranlarda (GrimDrafts) okunan dokular: lantern_emblem,
     notice_card, tatter_mask, frost_overlay, grime_overlay,
   - b6_map (dünya haritası artık karo), saf gradyanlar (vignette, lantern_glow),
-  - art_source/ altındaki ham paketler (Kenney, Quaternius, MakeHuman...).
+  - art_source/ altındaki ham paketler (Kenney, Quaternius, MakeHuman...),
+  - türetilen dosyalar: kasabaların tıklama maskesi ve dış hatları (outline, mask), hayvanların 3B kare
+    sayfaları (characters/frames/beast_*: deri çiziminden render), eski parça mankeni (characters/wardrobe/body*),
+  - kamp sahnesi (ui/towns/camp): yalnızca taslak ekranda.
 Oyunda ne olduğu kodla birlikte değişir; bu dosya değişince şablonlar ve Excel
 yeniden üretilir (`python3 tools/el_cizimi/sablon_uret.py`, `takip_excel.py`).
 
@@ -509,6 +512,8 @@ _NEW = [
     ("SAH-durak_kervansaray", "Sahne", "Yol durağı", "Yol kenarı kervansarayı (3 hâl)", "Avlulu, iki kuleli yapı; açık (kapıda fener), harabe (kırık duvar, ayakta kemer), haydut elinde (kulede koyu bez). Kubbe ve dini simge yok.", "2048x1024", ["acik", "harabe", "haydut"], 5.0),
     ("SAH-bataklik_sis", "Efekt", "Hava", "Bataklık sisi tutamları (4 çeşit)", "Gri-yeşil, yere yakın, yumuşak kenarlı; oyun kaydırır ve saydamlaştırır. Gri tonla da olur.", "2048x1024", ["sis_1", "sis_2", "sis_3", "sis_4"], 1.5),
     ("ARY-ilan_panosu", "Arayüz", "Lonca", "İlan Panosu", "Loncanın tahta panosu: çivili kâğıtlar asılı. Pano boş çizilir; ilan kâğıtları ayrı katmanlarda (oyun içine yazı basar), raptiye/çivi ayrı.", "2048x2048", ["pano", "ilan_1", "ilan_2", "ilan_3", "ilan_4", "civi"], 5.0),
+    ("ARY-gecis_belgeleri", "Arayüz", "Geçiş belgesi", "Geçiş belgeleri (4)", "Yol belgeleri, nesne olarak: tamga (deriye basılmış damga), boynuz fiş (oyulmuş boynuz), bedel taşı (işaretli yassı taş), zil (bakır çan). Defterde ve yolda gösterilir.", "2048x1024", ["tamga", "boynuz_fis", "bedel_tasi", "zil"], 2.0),
+    ("ARY-dunya_olay_isaretleri", "Arayüz", "Dünya haritası", "Dünya olaylarının harita işaretleri (4)", "Haritada şehrin ya da yolun üstüne binen küçük işaret: veba (kapalı kapı, bez), fuar (çadır), savaş (kırık mızrak), haraç (çit ve kese). Bugün yalnız yazı.", "2048x1024", ["veba", "fuar", "savas", "harac"], 2.0),
     ("ARY-kart_cerceve", "Arayüz", "Olay kartı", "Olay kartı çerçeveleri (8 bölge)", "Kartın resmini saran çerçeve; bölgenin dili: Gokyurt dikiş, Vadi düz, Dağ ve Maden çentik, Sınır kırık, İmparatorluk çift çizgi, Güney noktalı, Ahit köşe taşları. İçi boş.", "2048x2048", ["gokyurt", "vadi", "dag", "maden", "sinir", "imparatorluk", "guney", "ahit"], 4.0),
 ]
 
@@ -527,8 +532,117 @@ def new_art() -> list[dict]:
     return rows
 
 
+# Galeri ağızları (Y-A07): her ağzın üç bölgesi, SIDERIA §11.7 "İçeriden".
+_DUNGEON_TR = {"eski_agiz": "Eski Ağız", "kemrug_yarigi": "Kemrug Yarığı", "kor_kazmalar": "Kör Kazmalar'ın Alt Katı"}
+_ZONE_TR = {"agiz": "Ağız", "gecis": "Geçit", "galeri": "Kadim galeri"}
+_DUNGEON_WHAT = {
+    "eski_agiz_agiz": "Vorgat'ın ilk kuyusunun dibi: kaba kaya; tavandaki kuyu ağzından, kırık taş örtünün arasından "
+                      "inen soğuk gün ışığı; sarkan halat ve kova; yere düşmüş örtü taşları, moloz.",
+    "eski_agiz_gecis": "Madencilerin dikmeli tüneli, kazma izli duvar; sağda kaya birden biter, arkasından düz, "
+                       "derzleri kıl kadar, kazmayla açılmamış koyu bir yüz çıkar. Yerde kazma, sandık.",
+    "eski_agiz_galeri": "Kadim tünel: harçsız iri bloklar, uzun levhalardan düz tavan, tek süs düz bir oluk sırası; "
+                        "sağda üç kademeli çerçeveyle taş levhayla örtülmüş kapı, solda tavandan inmiş göçük.",
+    "kemrug_yarigi_agiz": "Ocağın tabanındaki ıslak kara yarık, tavanı yukarı kapanmaz; zeminde birikinti, ılık buhar; "
+                          "solda bir taş rafta bez üstünde ekmek sepeti (Kemruglular'ın bıraktığı).",
+    "kemrug_yarigi_gecis": "Yarık genişler: duvarın altı iri kesme bloklara döner, üstü ıslak kaya; duvar dibinde "
+                           "dümdüz oyulmuş, içinden ılık su akan kanal.",
+    "kemrug_yarigi_galeri": "Ilık kaynak salonu: kare ayaklar, kesme taş duvar, duvar dibinde basamaklı taş havuzlar ve "
+                            "buhar; aşınmış iri döşeme.",
+    "kor_kazmalar_agiz": "Mezarlığın altına inen merdivenin dibi: duvar boyunca yukarı çıkan oyma basamaklar, tepeden "
+                         "düşen soğuk gün ışığı, tavandan sarkan kökler, kaba örgü duvar.",
+    "kor_kazmalar_gecis": "Merdivenin dibindeki koridor: düz kesilmiş aşınmış taş, duvarda boş nişler, yer yer kalmış "
+                          "sıva parçaları.",
+    "kor_kazmalar_galeri": "Resimli duvarlar: sıvalı panolar, oyma kuşak ve ayaklar; panolarda solmuş gündelik hayat "
+                           "(ayrı satır: ZND-fresk).",
+}
+
+
+def dungeons() -> list[dict]:
+    """Galerinin bölge resimleri, fresk, harita simgeleri ve kör dişler."""
+    rows = []
+    folder = A / "backgrounds" / "dungeon"
+    for f in sorted(os.listdir(folder)):
+        if not f.endswith(".jpg"):
+            continue
+        stem = f[:-4]
+        dungeon, zone = stem.rsplit("_", 1)
+        rows.append(_row(
+            id="ZND-%s" % stem, kategori="Zindan", alt_grup=_DUNGEON_TR.get(dungeon, dungeon),
+            ad="%s - %s" % (_DUNGEON_TR.get(dungeon, dungeon), _ZONE_TR.get(zone, zone)),
+            ne_cizilecek=_DUNGEON_WHAT.get(stem, "Bölgenin yandan görünüşü."),
+            hedef="data/assets/backgrounds/dungeon/" + f, kaynak=KAYNAK_RENDER, tuval="3840x2160",
+            oncelik=3, saat=8.0, sablon_tip="image", kaynak_dosya="backgrounds/dungeon/" + f,
+        ))
+        rows[-1]["not"] = ("Yandan, savaşın dili: duvar dibi yüksekliğin ~%46'sı, kadronun ayağı ~%59'u; alt üçte "
+                           "biri arayüzün altında kalır. Tek sıcak ışık ortada kadronun meşalesi, kenarlar soğuk ve "
+                           "karanlık. Ortada figürlerin önünde duracağı yer sakin kalsın.")
+    rows.append(_row(
+        id="ZND-fresk", kategori="Zindan", alt_grup="Kör Kazmalar'ın Alt Katı", ad="Resimli duvarın freski (5 pano)",
+        ne_cizilecek="Kadimlerin gündelik hayatı, toprak boyasıyla, solmuş ve yer yer dökülmüş: tarla biçenler, "
+                     "başında testiyle su taşıyanlar, sürü ve çobanı, dokuma tezgâhı, sofra. Savaş, kral ve tanrı yok.",
+        hedef="(yeni) build_dungeon.py fresk resmi", kaynak=KAYNAK_PROC, tuval="4096x1024",
+        katmanlar=["pano_1", "pano_2", "pano_3", "pano_4", "pano_5"], oncelik=3, saat=6.0, sablon_tip="blank",
+        kod_gerekir=True,
+    ))
+    rows[-1]["not"] = ("Bugün tools/dungeon/fresco.py çiziyor. Teslim gelince fresk duvara geçirilip "
+                       "kor_kazmalar_galeri yeniden render edilir.")
+    rows.append(_row(
+        id="ARY-zindan_oda_simgeleri", kategori="Arayüz", alt_grup="Zindan haritası", ad="Galeri haritasının oda simgeleri",
+        ne_cizilecek="Madencinin taşa tebeşirle çizdiği kroki gibi: giriş (ip merdiven), geçit, savaş (çapraz bıçak), "
+                     "hazine (sandık), dinlenme (niş), kalıntı (kesme taş), iniş (basamak), son oda (örtülü kapı), "
+                     "görülmemiş oda (soru işareti). Tek renk, kemik beyazı.",
+        hedef="(yeni) DungeonMapView", kaynak=KAYNAK_PROC, tuval="2048x1024",
+        katmanlar=["giris", "gecit", "savas", "hazine", "dinlenme", "kalinti", "inis", "son", "gorulmedi"],
+        oncelik=3, saat=2.0, sablon_tip="blank", kod_gerekir=True,
+    ))
+    for rid, ad, what in (
+        ("HAY-galeri_porsugu", "Galeri porsuğu (kör diş)", "Gözsüz porsuk; solgun, toprak rengi. Bugün porsuk yok, domuz figürü solgun boyanıyor."),
+        ("HAY-tas_kurdu", "Taş kurdu (kör diş)", "Solgun, taşa benzeyen kurt. Bugün kurt figürü solgun boyanıyor."),
+        ("HAY-yuzsuz_ayi", "Mağara ayısı (kör diş)", "En derindeki, yüzü olmayan ayı. Bugün ayı figürü solgun boyanıyor."),
+    ):
+        rows.append(_row(
+            id=rid, kategori="Hayvan", alt_grup="Kör dişler (galeri)", ad=ad, ne_cizilecek=what,
+            hedef="(yeni) data/assets/characters/beasts/<tür>/skin_*.png", kaynak=KAYNAK_RENDER,
+            tuval="2048x1024", katmanlar=BEAST_LAYERS, oncelik=3, saat=5.0, sablon_tip="blank",
+            kod_gerekir=True,
+        ))
+        rows[-1]["not"] = "SIDERIA §11.7: kadim değişimin torunları; ışıktan değil sesten kaçarlar."
+    return rows
+
+
+_FX_FAMILY_TR = {"perde": "Yağış perdesi", "patlama": "Sıçrama", "halka": "Halka", "bulut": "Bulut / duman",
+                 "iz": "Yerde kalan iz"}
+
+
+def fx_sheets() -> list[dict]:
+    """Hava ve zeminin kare dizileri (tools/efekt üretiyor, Y-G24)."""
+    rows = []
+    folder = A / "fx" / "sheets"
+    spec = json.loads((folder / "fx.json").read_text(encoding="utf-8"))["efektler"]
+    for eid in sorted(spec):
+        path = folder / ("%s.png" % eid)
+        if not path.exists():
+            continue
+        e = spec[eid]
+        w, h = _size(path)
+        frames = int(e.get("kare", 1))
+        rows.append(_row(
+            id="EFX-kare-%s" % eid, kategori="Efekt", alt_grup=_FX_FAMILY_TR.get(e.get("aile", ""), "Efekt kare dizisi"),
+            ad=eid.replace("_", " "),
+            ne_cizilecek="%d karelik dizi, %d sütun; her kare kendi kutusunda, %s." % (
+                frames, int(e.get("sutun", 1)), "döngüye girer" if e.get("dongu") else "bir kez oynar"),
+            hedef="data/assets/fx/sheets/%s.png" % eid, kaynak="Prosedürel (tools/efekt)",
+            renk=GRI, tuval=_canvas_for(w, h, min(4096, max(w, h) * 2)), oncelik=3,
+            saat=round(max(0.5, frames * 0.15), 2), sablon_tip="image", kaynak_dosya="fx/sheets/%s.png" % eid,
+        ))
+        if e.get("dosenir"):
+            rows[-1]["not"] = "Döşenen perde: her karenin sol-sağ ve üst-alt kenarları birleşir."
+    return rows
+
+
 def all_rows() -> list[dict]:
-    rows = figures() + beasts() + props() + towns() + road() + world_map() + waybook() + events() + small_art() + new_art()
+    rows = (figures() + beasts() + props() + towns() + road() + world_map() + waybook() + events() + small_art()
+            + new_art() + dungeons() + fx_sheets())
     seen = set()
     for r in rows:
         assert r["id"] not in seen, r["id"]
@@ -536,7 +650,7 @@ def all_rows() -> list[dict]:
     return rows
 
 
-ORDER = ["Figür", "Hayvan", "Eşya", "Yerleşim", "Yol", "Harita", "Arayüz", "Gösterge", "Olay", "Sahne",
+ORDER = ["Figür", "Hayvan", "Eşya", "Yerleşim", "Yol", "Zindan", "Harita", "Arayüz", "Gösterge", "Olay", "Sahne",
          "Gökyüzü", "Efekt"]
 
 

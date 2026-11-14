@@ -9,7 +9,7 @@ kurtulması ve "içimize sinen" tek bir el.
 | Parça | Nerede | Ne |
 |---|---|---|
 | Takip dosyası | `docs/el_cizimi/el_cizimi_takip.xlsx` | 676 görselin listesi, öncelik, tahmini süre, durum |
-| Şablon paketleri | `01_figur.zip` ... `10_efekt.zip` (depoda değil, sana ayrıca gönderilir) | her görselin hizalı referansı, katman haritası, adlı katmanlı PSD |
+| Şablon paketleri | `01_figur.zip` ... `11_zindan.zip` (depoda değil, sana ayrıca gönderilir) | her görselin hizalı referansı, katman haritası, adlı katmanlı PSD |
 | Alım aracı | `tools/el_cizimi/al.py` | yüklediğin dosyayı doğrular ve oyuna işler |
 | Takip sayfası | https://claude.ai/artifact/2n5snQZu3vRhhQSv6K2cPk | tablette açılan atölye sayfası: liste, nasıl çizilir, nereye yüklenir, depodan ölçülen ilerleme |
 

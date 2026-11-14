@@ -233,6 +233,39 @@
    1024
   ]
  },
+ "ARY-dunya_olay_isaretleri": {
+  "kutular": {
+   "fuar": [
+    520,
+    168,
+    496,
+    848
+   ],
+   "harac": [
+    1544,
+    168,
+    496,
+    848
+   ],
+   "savas": [
+    1032,
+    168,
+    496,
+    848
+   ],
+   "veba": [
+    8,
+    168,
+    496,
+    848
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   2048,
+   1024
+  ]
+ },
  "ARY-e6a_wildlife": {
   "asil": [
    900,
@@ -1011,6 +1044,39 @@
   "tuval": [
    1024,
    992
+  ]
+ },
+ "ARY-gecis_belgeleri": {
+  "kutular": {
+   "bedel_tasi": [
+    1032,
+    168,
+    496,
+    848
+   ],
+   "boynuz_fis": [
+    520,
+    168,
+    496,
+    848
+   ],
+   "tamga": [
+    8,
+    168,
+    496,
+    848
+   ],
+   "zil": [
+    1544,
+    168,
+    496,
+    848
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   2048,
+   1024
   ]
  },
  "ARY-icon_camp": {
@@ -2526,6 +2592,69 @@
    208
   ]
  },
+ "ARY-zindan_oda_simgeleri": {
+  "kutular": {
+   "dinlenme": [
+    8,
+    456,
+    496,
+    272
+   ],
+   "gecit": [
+    520,
+    168,
+    496,
+    272
+   ],
+   "giris": [
+    8,
+    168,
+    496,
+    272
+   ],
+   "gorulmedi": [
+    8,
+    744,
+    496,
+    272
+   ],
+   "hazine": [
+    1544,
+    168,
+    496,
+    272
+   ],
+   "inis": [
+    1032,
+    456,
+    496,
+    272
+   ],
+   "kalinti": [
+    520,
+    456,
+    496,
+    272
+   ],
+   "savas": [
+    1032,
+    168,
+    496,
+    272
+   ],
+   "son": [
+    1544,
+    456,
+    496,
+    272
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   2048,
+   1024
+  ]
+ },
  "EFX-circle_02": {
   "asil": [
    128,
@@ -2667,6 +2796,604 @@
   "tuval": [
    512,
    512
+  ]
+ },
+ "EFX-kare-blizzard": {
+  "asil": [
+   656,
+   656
+  ],
+  "hedef": "data/assets/fx/sheets/blizzard.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1312,
+   1312
+  ]
+ },
+ "EFX-kare-breath_vapor": {
+  "asil": [
+   168,
+   112
+  ],
+  "hedef": "data/assets/fx/sheets/breath_vapor.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   336,
+   224
+  ]
+ },
+ "EFX-kare-breath_vapor_beast": {
+  "asil": [
+   248,
+   136
+  ],
+  "hedef": "data/assets/fx/sheets/breath_vapor_beast.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   496,
+   272
+  ]
+ },
+ "EFX-kare-canopy_drip": {
+  "asil": [
+   48,
+   156
+  ],
+  "hedef": "data/assets/fx/sheets/canopy_drip.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   96,
+   320
+  ]
+ },
+ "EFX-kare-dust_gust": {
+  "asil": [
+   352,
+   156
+  ],
+  "hedef": "data/assets/fx/sheets/dust_gust.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   704,
+   320
+  ]
+ },
+ "EFX-kare-ember_rise": {
+  "asil": [
+   116,
+   300
+  ],
+  "hedef": "data/assets/fx/sheets/ember_rise.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   224,
+   608
+  ]
+ },
+ "EFX-kare-fire_steam": {
+  "asil": [
+   228,
+   292
+  ],
+  "hedef": "data/assets/fx/sheets/fire_steam.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   448,
+   576
+  ]
+ },
+ "EFX-kare-fog_drift": {
+  "asil": [
+   1296,
+   656
+  ],
+  "hedef": "data/assets/fx/sheets/fog_drift.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   2592,
+   1312
+  ]
+ },
+ "EFX-kare-frost_glint": {
+  "asil": [
+   112,
+   108
+  ],
+  "hedef": "data/assets/fx/sheets/frost_glint.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   224,
+   224
+  ]
+ },
+ "EFX-kare-ground_mist": {
+  "asil": [
+   1296,
+   336
+  ],
+  "hedef": "data/assets/fx/sheets/ground_mist.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   2592,
+   672
+  ]
+ },
+ "EFX-kare-hail": {
+  "asil": [
+   656,
+   656
+  ],
+  "hedef": "data/assets/fx/sheets/hail.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1312,
+   1312
+  ]
+ },
+ "EFX-kare-hoof_dust": {
+  "asil": [
+   212,
+   93
+  ],
+  "hedef": "data/assets/fx/sheets/hoof_dust.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   416,
+   192
+  ]
+ },
+ "EFX-kare-hoof_mud": {
+  "asil": [
+   296,
+   96
+  ],
+  "hedef": "data/assets/fx/sheets/hoof_mud.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   592,
+   192
+  ]
+ },
+ "EFX-kare-hoof_snow": {
+  "asil": [
+   224,
+   78
+  ],
+  "hedef": "data/assets/fx/sheets/hoof_snow.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   448,
+   160
+  ]
+ },
+ "EFX-kare-hoof_splash": {
+  "asil": [
+   392,
+   138
+  ],
+  "hedef": "data/assets/fx/sheets/hoof_splash.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   784,
+   272
+  ]
+ },
+ "EFX-kare-lantern_halo": {
+  "asil": [
+   304,
+   304
+  ],
+  "hedef": "data/assets/fx/sheets/lantern_halo.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   608,
+   608
+  ]
+ },
+ "EFX-kare-leaf_drift": {
+  "asil": [
+   268,
+   136
+  ],
+  "hedef": "data/assets/fx/sheets/leaf_drift.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   544,
+   272
+  ]
+ },
+ "EFX-kare-paw_snow": {
+  "asil": [
+   96,
+   45
+  ],
+  "hedef": "data/assets/fx/sheets/paw_snow.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   192,
+   96
+  ]
+ },
+ "EFX-kare-puddle_shiver": {
+  "asil": [
+   336,
+   128
+  ],
+  "hedef": "data/assets/fx/sheets/puddle_shiver.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   672,
+   256
+  ]
+ },
+ "EFX-kare-rain_crown": {
+  "asil": [
+   152,
+   60
+  ],
+  "hedef": "data/assets/fx/sheets/rain_crown.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   304,
+   128
+  ]
+ },
+ "EFX-kare-rain_heavy": {
+  "asil": [
+   656,
+   656
+  ],
+  "hedef": "data/assets/fx/sheets/rain_heavy.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1312,
+   1312
+  ]
+ },
+ "EFX-kare-rain_impact_dry": {
+  "asil": [
+   128,
+   45
+  ],
+  "hedef": "data/assets/fx/sheets/rain_impact_dry.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   256,
+   96
+  ]
+ },
+ "EFX-kare-rain_light": {
+  "asil": [
+   656,
+   656
+  ],
+  "hedef": "data/assets/fx/sheets/rain_light.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1312,
+   1312
+  ]
+ },
+ "EFX-kare-rain_medium": {
+  "asil": [
+   656,
+   656
+  ],
+  "hedef": "data/assets/fx/sheets/rain_medium.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1312,
+   1312
+  ]
+ },
+ "EFX-kare-rain_ripple": {
+  "asil": [
+   240,
+   102
+  ],
+  "hedef": "data/assets/fx/sheets/rain_ripple.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   480,
+   208
+  ]
+ },
+ "EFX-kare-sleet": {
+  "asil": [
+   656,
+   656
+  ],
+  "hedef": "data/assets/fx/sheets/sleet.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1312,
+   1312
+  ]
+ },
+ "EFX-kare-smoke_thick": {
+  "asil": [
+   340,
+   288
+  ],
+  "hedef": "data/assets/fx/sheets/smoke_thick.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   672,
+   576
+  ]
+ },
+ "EFX-kare-smoke_thin": {
+  "asil": [
+   224,
+   252
+  ],
+  "hedef": "data/assets/fx/sheets/smoke_thin.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   448,
+   512
+  ]
+ },
+ "EFX-kare-snow_gust": {
+  "asil": [
+   360,
+   176
+  ],
+  "hedef": "data/assets/fx/sheets/snow_gust.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   720,
+   352
+  ]
+ },
+ "EFX-kare-snow_heavy": {
+  "asil": [
+   656,
+   656
+  ],
+  "hedef": "data/assets/fx/sheets/snow_heavy.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1312,
+   1312
+  ]
+ },
+ "EFX-kare-snow_light": {
+  "asil": [
+   656,
+   656
+  ],
+  "hedef": "data/assets/fx/sheets/snow_light.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1312,
+   1312
+  ]
+ },
+ "EFX-kare-snow_settle": {
+  "asil": [
+   144,
+   54
+  ],
+  "hedef": "data/assets/fx/sheets/snow_settle.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   288,
+   112
+  ]
+ },
+ "EFX-kare-step_dust": {
+  "asil": [
+   156,
+   78
+  ],
+  "hedef": "data/assets/fx/sheets/step_dust.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   320,
+   160
+  ]
+ },
+ "EFX-kare-step_mud": {
+  "asil": [
+   256,
+   81
+  ],
+  "hedef": "data/assets/fx/sheets/step_mud.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   512,
+   160
+  ]
+ },
+ "EFX-kare-step_snow": {
+  "asil": [
+   196,
+   63
+  ],
+  "hedef": "data/assets/fx/sheets/step_snow.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   384,
+   128
+  ]
+ },
+ "EFX-kare-step_splash": {
+  "asil": [
+   312,
+   120
+  ],
+  "hedef": "data/assets/fx/sheets/step_splash.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   624,
+   240
+  ]
+ },
+ "EFX-kare-track_foot_mud": {
+  "asil": [
+   90,
+   36
+  ],
+  "hedef": "data/assets/fx/sheets/track_foot_mud.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   176,
+   64
+  ]
+ },
+ "EFX-kare-track_foot_snow": {
+  "asil": [
+   93,
+   36
+  ],
+  "hedef": "data/assets/fx/sheets/track_foot_snow.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   192,
+   64
+  ]
+ },
+ "EFX-kare-track_hoof_mud": {
+  "asil": [
+   84,
+   28
+  ],
+  "hedef": "data/assets/fx/sheets/track_hoof_mud.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   160,
+   64
+  ]
+ },
+ "EFX-kare-track_hoof_snow": {
+  "asil": [
+   84,
+   28
+  ],
+  "hedef": "data/assets/fx/sheets/track_hoof_snow.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   160,
+   64
+  ]
+ },
+ "EFX-kare-track_wheel_mud": {
+  "asil": [
+   300,
+   40
+  ],
+  "hedef": "data/assets/fx/sheets/track_wheel_mud.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   608,
+   80
+  ]
+ },
+ "EFX-kare-track_wheel_snow": {
+  "asil": [
+   300,
+   40
+  ],
+  "hedef": "data/assets/fx/sheets/track_wheel_snow.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   608,
+   80
+  ]
+ },
+ "EFX-kare-wheel_dust": {
+  "asil": [
+   236,
+   116
+  ],
+  "hedef": "data/assets/fx/sheets/wheel_dust.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   480,
+   224
+  ]
+ },
+ "EFX-kare-wheel_mud": {
+  "asil": [
+   460,
+   156
+  ],
+  "hedef": "data/assets/fx/sheets/wheel_mud.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   928,
+   320
+  ]
+ },
+ "EFX-kare-wheel_snow": {
+  "asil": [
+   372,
+   132
+  ],
+  "hedef": "data/assets/fx/sheets/wheel_snow.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   736,
+   256
+  ]
+ },
+ "EFX-kare-wheel_splash": {
+  "asil": [
+   520,
+   192
+  ],
+  "hedef": "data/assets/fx/sheets/wheel_splash.png",
+  "saydam": true,
+  "tip": "image",
+  "tuval": [
+   1040,
+   384
   ]
  },
  "EFX-light_01": {
@@ -4526,6 +5253,33 @@
    1808
   ]
  },
+ "HAY-galeri_porsugu": {
+  "kutular": {
+   "govde": [
+    1372,
+    168,
+    666,
+    848
+   ],
+   "kuyruk": [
+    690,
+    168,
+    666,
+    848
+   ],
+   "uzak_bacaklar": [
+    8,
+    168,
+    666,
+    848
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   2048,
+   1024
+  ]
+ },
  "HAY-harita_atli": {
   "asil": [
    128,
@@ -4857,6 +5611,33 @@
    2048
   ]
  },
+ "HAY-tas_kurdu": {
+  "kutular": {
+   "govde": [
+    1372,
+    168,
+    666,
+    848
+   ],
+   "kuyruk": [
+    690,
+    168,
+    666,
+    848
+   ],
+   "uzak_bacaklar": [
+    8,
+    168,
+    666,
+    848
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   2048,
+   1024
+  ]
+ },
  "HAY-wolf": {
   "katmanlar": {
    "govde": {
@@ -4909,6 +5690,33 @@
   "tuval": [
    2048,
    1200
+  ]
+ },
+ "HAY-yuzsuz_ayi": {
+  "kutular": {
+   "govde": [
+    1372,
+    168,
+    666,
+    848
+   ],
+   "kuyruk": [
+    690,
+    168,
+    666,
+    848
+   ],
+   "uzak_bacaklar": [
+    8,
+    168,
+    666,
+    848
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   2048,
+   1024
   ]
  },
  "HRT-00": {
@@ -12611,6 +13419,162 @@
   "tuval": [
    4096,
    1082
+  ]
+ },
+ "ZND-eski_agiz_agiz": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/backgrounds/dungeon/eski_agiz_agiz.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "ZND-eski_agiz_galeri": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/backgrounds/dungeon/eski_agiz_galeri.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "ZND-eski_agiz_gecis": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/backgrounds/dungeon/eski_agiz_gecis.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "ZND-fresk": {
+  "kutular": {
+   "pano_1": [
+    8,
+    168,
+    1008,
+    416
+   ],
+   "pano_2": [
+    1032,
+    168,
+    1008,
+    416
+   ],
+   "pano_3": [
+    2056,
+    168,
+    1008,
+    416
+   ],
+   "pano_4": [
+    3080,
+    168,
+    1008,
+    416
+   ],
+   "pano_5": [
+    8,
+    600,
+    1008,
+    416
+   ]
+  },
+  "tip": "blank",
+  "tuval": [
+   4096,
+   1024
+  ]
+ },
+ "ZND-kemrug_yarigi_agiz": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/backgrounds/dungeon/kemrug_yarigi_agiz.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "ZND-kemrug_yarigi_galeri": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/backgrounds/dungeon/kemrug_yarigi_galeri.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "ZND-kemrug_yarigi_gecis": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/backgrounds/dungeon/kemrug_yarigi_gecis.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "ZND-kor_kazmalar_agiz": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/backgrounds/dungeon/kor_kazmalar_agiz.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "ZND-kor_kazmalar_galeri": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/backgrounds/dungeon/kor_kazmalar_galeri.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
+  ]
+ },
+ "ZND-kor_kazmalar_gecis": {
+  "asil": [
+   1920,
+   1080
+  ],
+  "hedef": "data/assets/backgrounds/dungeon/kor_kazmalar_gecis.jpg",
+  "saydam": false,
+  "tip": "image",
+  "tuval": [
+   3840,
+   2160
   ]
  }
 }

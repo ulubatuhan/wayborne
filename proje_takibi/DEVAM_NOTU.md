@@ -770,3 +770,14 @@ Hâlâ kullanıcıda: Y-C31 geçiş belgesinin adları (SIDERIA'da yok), Y-A07 z
   Cycles 56 örnek + gürültü giderme, ~8 dk/sahne, 4 çekirdek), `fresco.py` (Kör Kazmalar resimli duvarı). Blender:
   `tools/figure_pipeline/setup_blender.sh` (Pillow eklendi). Geçici OpenGameArt resimleri silindi.
 - Lore: SIDERIA §11.7 "İçeriden" ve "Madenci krokisi" [Karar]. Ekran: tests/screenshot_dungeon.gd (DUNGEON=, NO_COMBAT=).
+
+## El çizimi envanteri güncellendi (2026-11-14)
+
+- Oyundaki bütün görsel dosyalar envanterle karşılaştırıldı (`data/assets` taraması). Eklenen 62 kalem: 9 zindan bölge
+  resmi (`ZND-*`), fresk (`ZND-fresk`), galeri haritasının oda simgeleri, 3 kör diş (porsuk, taş kurdu, yüzsüz ayı),
+  geçiş belgeleri (4), dünya olaylarının harita işaretleri (4), 46 efekt kare dizisi (`EFX-kare-*`, tools/efekt).
+  Bilerek dışarıda: kasaba tıklama maskeleri ve dış hatları, hayvanların 3B kare sayfaları, eski parça mankeni,
+  kamp sahnesi (yalnız taslakta), iso_* eşyaları, GrimDrafts dokuları. Toplam 838 kalem, ~2551 saat.
+- Yeni grup `11_zindan`. Ek şablon paketleri yalnız yeni kalemler için (`*_ek_2026-11-14.zip`, depoda değil).
+- Excel, ilerleme.json ve atölye sayfası (https://claude.ai/artifact/2n5snQZu3vRhhQSv6K2cPk, sürüm 2) yenilendi.
+  Teslim edilmiş çizim yok (oyunda 0, yüklendi 0).

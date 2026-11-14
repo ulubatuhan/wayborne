@@ -39,7 +39,7 @@ FIG_CENTER_X = 1024
 ZIP_GROUPS = {
     "Figür": "01_figur", "Hayvan": "02_hayvan", "Eşya": "03_esya", "Yerleşim": "04_yerlesim",
     "Yol": "05_yol", "Harita": "06_harita", "Arayüz": "07_arayuz", "Gösterge": "07_arayuz",
-    "Olay": "08_olay", "Sahne": "09_sahne", "Gökyüzü": "09_sahne", "Efekt": "10_efekt",
+    "Olay": "08_olay", "Sahne": "09_sahne", "Gökyüzü": "09_sahne", "Efekt": "10_efekt", "Zindan": "11_zindan",
 }
 
 JOINT_TR = {"shoulder": "omuz", "elbow_front": "dirsek", "hand_front": "el", "hip": "kalça", "neck": "boyun",
