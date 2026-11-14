@@ -154,6 +154,9 @@ enum Type {
 	DUNGEON_LOOT,
 	# Dünya sırrından belirli bir ipucu (Y-E04): text_value = ipucu anahtarı.
 	CLUE_HEAR,
+	# Galeri haritasında yürümek (Y-A07 derinleşme): amount = varılacak oda;
+	# bulunulan oda kalmak demek (haritaya dön), -1 çıkışa yönelmek (kapı kartı).
+	DUNGEON_MOVE,
 }
 
 @export var type: Type = Type.GOLD

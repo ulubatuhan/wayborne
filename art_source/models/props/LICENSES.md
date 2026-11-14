@@ -16,6 +16,7 @@ Hepsi CC0 (atıf gerekmez, ticari kullanım serbest). Kaynaklar:
 | kenney_survival | Kenney · Survival Kit | https://kenney.nl/assets/survival-kit |
 | kenney_graveyard | Kenney · Graveyard Kit 5.0 (haç, haçlı taş ve korku figürleri alınmadı: Art Rules) | https://kenney.nl/assets/graveyard-kit |
 | polyhaven_lantern_01 | Poly Haven · Lantern 01 (Rajil Jose Macatangay), 1k glTF | https://polyhaven.com/a/Lantern_01 |
+| (indirilir, depoda yok) | Poly Haven · galeri ağızlarının dokuları ve modelleri (liste: `tools/dungeon/fetch_assets.py`, CREDITS.md) | https://polyhaven.com |
 | kaykit_medieval_hexagon | KayKit · Medieval Hexagon (Kay Lousberg) | https://kaylousberg.itch.io/kaykit-medieval-hexagon |
 
 Yalnız oyunda kullanılan modeller kopyalandı; normal/pürüzlülük dokuları alınmadı

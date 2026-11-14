@@ -4292,7 +4292,10 @@ func dungeon_known_here() -> String:
 			return id
 	return ""
 
+## Işık: kadronun elinde yanan meşale, ya da yükte meşale veya fener.
 func dungeon_has_light() -> bool:
+	if int(dungeon_run.get("light", 0)) > 0:
+		return true
 	return get_total_quantity(ItemCatalog.TORCH) > 0 or get_total_quantity(ItemCatalog.LANTERN) > 0
 
 ## Ağzı bulur; `enter` ise kadro iner. Kimlik boşsa bu yolun ağzı.
@@ -4308,30 +4311,79 @@ func dungeon_enter(dungeon_id: String, enter: bool) -> void:
 		write_journal(TranslationServer.translate("UI_DUNGEON_FOUND") % TranslationServer.translate(DungeonCatalog.name_key(id)))
 	dungeons[id] = record
 	if enter:
-		dungeon_run = {"id": id, "depth": 1, "phase": "stage", "used": [], "bag": 0, "visit": int(record["visits"])}
+		var visit := int(record["visits"])
+		dungeon_run = {"id": id, "depth": 1, "phase": "map", "room": 0, "used": [], "bag": 0, "visit": visit,
+			"light": 0, "steps": 0, "map": DungeonMap.generate(id, visit)}
+		_dungeon_arrive(0)
 
 func dungeon_bag_free() -> int:
 	if dungeon_run.is_empty():
 		return 0
 	return maxi(0, get_party().size() * DungeonCatalog.BAG_PER_PERSON - int(dungeon_run["bag"]))
 
+## Kartı yaşanan oda biter; kadro haritaya döner.
 func dungeon_after_stage(event_id: String) -> void:
 	if dungeon_run.is_empty() or String(dungeon_run["phase"]) != "stage":
 		return
 	(dungeon_run["used"] as Array).append(event_id)
-	dungeon_run["phase"] = "gate"
+	var here := DungeonMap.room(DungeonMap.level_of(dungeon_run), int(dungeon_run["room"]))
+	if not here.is_empty():
+		here["done"] = true
+	dungeon_run["phase"] = "map"
 
-## Bir aşama daha derine: meşale yanar (fener yanmaz, yağıyla gider).
+## Haritada yürümek. Bulunulan oda: haritaya dön (çıkıştan vazgeçmek); -1:
+## çıkışa yönel (çıkış kartı); komşu oda: koridor yürünür, ışık yanar, oda
+## kartı varsa açılır.
+func dungeon_move(room_id: int) -> void:
+	if dungeon_run.is_empty() or not dungeon_run.has("map"):
+		return
+	if room_id < 0:
+		dungeon_run["phase"] = "gate"
+		return
+	if room_id == int(dungeon_run["room"]):
+		dungeon_run["phase"] = "map"
+		return
+	if not DungeonMap.neighbours(DungeonMap.level_of(dungeon_run), int(dungeon_run["room"])).has(room_id):
+		return
+	dungeon_run["steps"] = int(dungeon_run.get("steps", 0)) + 1
+	_dungeon_burn_light()
+	_dungeon_arrive(room_id)
+
+## Merdivenden bir seviye aşağı: yeni seviyenin girişine varılır.
 func dungeon_deeper() -> void:
 	if dungeon_run.is_empty():
 		return
-	dungeon_run["depth"] = int(dungeon_run["depth"]) + 1
-	dungeon_run["phase"] = "stage"
-	if get_total_quantity(ItemCatalog.TORCH) > 0:
-		remove_from_cargo_or_bags(ItemCatalog.TORCH, 1)
+	var level := int(dungeon_run["depth"])
+	if level >= DungeonCatalog.max_depth(String(dungeon_run["id"])):
+		return
+	dungeon_run["depth"] = level + 1
+	_dungeon_burn_light()
+	_dungeon_arrive(0)
 
-## Çıkış: en derin aşama deftere yazılır; kervan beklerken başına bir şey
-## gelmiş olabilir (kapı kartından sonra o kart gelir).
+func _dungeon_arrive(room_id: int) -> void:
+	var level := DungeonMap.level_of(dungeon_run)
+	dungeon_run["room"] = room_id
+	DungeonMap.reveal_around(level, room_id)
+	var here := DungeonMap.room(level, room_id)
+	var waiting := not bool(here.get("done", true)) and not String(here.get("card", "")).is_empty()
+	if not waiting:
+		here["done"] = true
+	dungeon_run["phase"] = "stage" if waiting else "map"
+
+## Koridorun ışığı: elde yanan meşale azalır, biterse yüktekinden biri yakılır.
+## Fener yanmaz (yağıyla gider); ikisi de yoksa karanlık.
+func _dungeon_burn_light() -> void:
+	var light := int(dungeon_run.get("light", 0))
+	if light > 0:
+		dungeon_run["light"] = light - 1
+	elif get_total_quantity(ItemCatalog.LANTERN) > 0:
+		return
+	elif get_total_quantity(ItemCatalog.TORCH) > 0:
+		remove_from_cargo_or_bags(ItemCatalog.TORCH, 1)
+		dungeon_run["light"] = DungeonMap.TORCH_STEPS - 1
+
+## Çıkış: en derin seviye deftere yazılır; kervan beklerken başına bir şey
+## gelmiş olabilir (çıkış kartından sonra o kart gelir).
 func dungeon_exit(forced: bool = false) -> void:
 	if dungeon_run.is_empty():
 		return
@@ -4350,22 +4402,43 @@ func dungeon_exit(forced: bool = false) -> void:
 	else:
 		dungeon_run = {}
 
-## Ekranın sıradaki kartı: aşama, kapı ya da kervanın başına gelen.
+## Haritadan önceki bir kayıtta süren iniş: o seviyenin girişinden haritaya döner.
+func _dungeon_migrate() -> void:
+	if dungeon_run.has("id") and not dungeon_run.has("map"):
+		var level := int(dungeon_run.get("depth", 1))
+		dungeon_run["map"] = DungeonMap.generate(String(dungeon_run["id"]), int(dungeon_run.get("visit", 0)))
+		dungeon_run["light"] = 0
+		dungeon_run["steps"] = 0
+		dungeon_run["depth"] = clampi(level, 1, DungeonCatalog.max_depth(String(dungeon_run["id"])))
+		_dungeon_arrive(0)
+
+## Ekranın sıradaki kartı: odanın kartı, çıkış kartı ya da kervanın başına
+## gelen. Haritadaysa boş: ekran haritayı açar.
 func dungeon_next_event() -> GameEvent:
 	if dungeon_run.is_empty():
 		return null
+	_dungeon_migrate()
 	match String(dungeon_run["phase"]):
 		"stage":
-			var id := String(dungeon_run["id"])
-			return EventCatalog.get_event(DungeonCatalog.stage_for(
-				id, int(dungeon_run["depth"]), int(dungeon_run["visit"]), dungeon_run["used"] as Array))
+			var here := DungeonMap.room(DungeonMap.level_of(dungeon_run), int(dungeon_run["room"]))
+			return EventCatalog.get_event(String(here.get("card", "")))
 		"gate":
-			var depth := int(dungeon_run["depth"])
-			return DungeonCatalog.gate_event(depth, depth >= DungeonCatalog.max_depth(String(dungeon_run["id"])), dungeon_has_light())
+			return DungeonCatalog.gate_event(int(dungeon_run["depth"]), dungeon_has_light(), int(dungeon_run["room"]))
 		"raid":
 			dungeon_run = {}
 			return EventCatalog.get_event("evt_dng_camp_raid")
 	return null
+
+## Haritada mı (oda kartı ya da çıkış kartı beklemiyor)?
+func dungeon_on_map() -> bool:
+	_dungeon_migrate()
+	return dungeon_run.has("map") and String(dungeon_run.get("phase", "")) == "map"
+
+## Savaşın ve keşfin arka planı: bulunulan seviyenin bölgesi.
+func dungeon_look() -> String:
+	if not dungeon_run.has("id"):
+		return ""
+	return DungeonMap.look(String(dungeon_run["id"]), int(dungeon_run.get("depth", 1)))
 
 ## Geçiş belgeleri (Y-C31): belge -> son geçerli gün. Kayıtta.
 var passes: Dictionary = {}

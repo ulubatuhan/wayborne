@@ -45,14 +45,13 @@ Lisans: https://creativecommons.org/licenses/by/4.0/ — giysiler oyunun bedenin
 | MPFB2 (MakeHuman) | gövde ve giysi üreteci | https://github.com/makehumancommunity/mpfb2 |
 | ambientCG | Bricks097, Fabric085, Ground106, Metal041B, Metal063, Paper005, PavingStones119, Planks037A, Plaster001, Rock064 (yalnızca renk haritaları) | https://ambientcg.com |
 
-- **Zindan savaş arka planları (geçici, Y-A07)** - `data/assets/backgrounds/dungeon/`, oyunun paletine gri tona
-  çevrilip 1920x1080'e kırpıldı. El çizimi gelince yerlerine konur.
-  - `eski_agiz.jpg`: "Cave Background (Horizontal Tiling)", Cal McEachern, OpenGameArt (CC0),
-    https://opengameart.org/node/159112
-  - `kemrug_yarigi.jpg`: "Seamless cave background", PWL, OpenGameArt (CC0),
-    https://opengameart.org/content/seamless-cave-background
-  - `kor_kazmalar.jpg`: "Seamless Parallax Cave Background", JonathanPalmerGD, OpenGameArt (CC0),
-    https://opengameart.org/content/seamless-parallax-cave-background
+- **Galeri ağızlarının bölge resimleri (Y-A07)** - `data/assets/backgrounds/dungeon/<ağız>_<bölge>.jpg`, Blender
+  Cycles ile `tools/dungeon/build_dungeon.py`'nin kurduğu sahnelerden render. Dokular ve modeller Poly Haven (CC0,
+  https://polyhaven.com), oyunun paletine solgunlaştırıldı; resimli duvarın freski `tools/dungeon/fresco.py`'nin
+  çizimi. Dokular: dark_rock, dark_rock_02, rock_face_03, quarry_wall_02, rocks_ground_02, rocky_trail,
+  rock_surface, concrete_wall_006, grey_plaster_02, worn_plaster_wall, bark_willow_02, brown_planks_03.
+  Modeller: namaqualand_boulder_02/03/05, rock_07, rock_09, stone_01, wooden_bucket_01, wooden_crate_01,
+  picke_dirty_01, wicker_basket_01, wooden_bowl_01. Kaynaklar depoda değil, `tools/dungeon/fetch_assets.py` indirir.
 
 ## Yazı tipleri (SIL OFL 1.1)
 

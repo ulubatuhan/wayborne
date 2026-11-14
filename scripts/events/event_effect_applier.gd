@@ -232,6 +232,8 @@ static func _apply_single(effect: EventEffect, session: GameSession, result: Res
 			session.dungeon_deeper()
 		EventEffect.Type.DUNGEON_EXIT:
 			session.dungeon_exit(false)
+		EventEffect.Type.DUNGEON_MOVE:
+			session.dungeon_move(effect.amount)
 		EventEffect.Type.DUNGEON_LOOT:
 			if not session.dungeon_run.is_empty() and session.dungeon_run.has("bag"):
 				session.dungeon_run["bag"] = int(session.dungeon_run["bag"]) + maxi(0, effect.amount)

@@ -174,7 +174,7 @@ Toplam: **15** görev. Belgeler `referans/belge_uret.py` ile `referans/gorevler.
 - **Durum:** test bekliyor · **Öncelik:** P2 · **Paket:** P11 · **Kim:** Claude yapar, kullanıcı görsel/tasarım onayı verir
 - **Ayrıntı ve geçmiş:** [referans/gorevler/13_yonetmen_onerileri.md](referans/gorevler/13_yonetmen_onerileri.md)
 - **Bağımlı:** Y-E06, Y-C01
-- **Son not:** docs/design_notes/zindanlar.md; uygulama onay ve lore sonrası. | 2026-10-19 karar: beklet: lore beklenecek. | 2026-11-13: tam sürüm oyunda (bkz. docs/design_notes/zindanlar.md Durum). Üç ağız Vorgat yolunda; 18 kart; kör dişler; ışık, sırt yükü, kervanın beklemesi, töre. Açık: zindan savaşının karanlık arka planı (çizim).
+- **Son not:** docs/design_notes/zindanlar.md; uygulama onay ve lore sonrası. | 2026-10-19 karar: beklet: lore beklenecek. | 2026-11-13: tam sürüm oyunda (bkz. docs/design_notes/zindanlar.md Durum). Üç ağız Vorgat yolunda; 18 kart; kör dişler; ışık, sırt yükü, kervanın beklemesi, töre. | 2026-11-14 derinleşme (kullanıcı): seviye seviye oda haritası (DungeonMap, DungeonMapPanel), galeride keşif görünümü (DungeonView), her ağzın üç bölgesi için Blender render'ı (tools/dungeon, Poly Haven CC0); savaş, kart ve keşif aynı bölge resmini okur.
 
 <details><summary>Görev metni</summary>
 

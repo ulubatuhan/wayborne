@@ -326,6 +326,8 @@ var _pending_combat_danger: float = 0.0
 ## önce oynar - bkz. CombatEncounter.ambushed.
 var _pending_combat_ambush: bool = false
 var _pre_combat_panel: PreCombatPanel = null
+var _dungeon_view: DungeonView = null
+var _dungeon_map_panel: DungeonMapPanel = null
 ## Bu savaşa gerçekten katılanlar (bkz. PreCombatPanel) - dışarıda
 ## kalanlar risk almadığı için ne XP alır ne düşme izi taşır.
 var _current_combat_party: Array[CharacterData] = []
@@ -593,6 +595,8 @@ func _ready() -> void:
 	_grade.set_scarcity(Scarcity.at(_nearest_place_id(), _session.total_days_elapsed))
 	get_viewport().size_changed.connect(_layout_panel)
 	_layout_panel()
+	# Galerinin ortasında kaydedilmiş bir sefer haritaya (ya da bekleyen karta) döner.
+	call_deferred("_continue_dungeon")
 
 ## Kullanıcı kararı (2026-10-18, işaretli ekran görüntüsü): sahnenin üstündeki
 ## boş gökyüzü şeridi kalkar, sahne o kadar yukarı kayar; altta açılan yer
@@ -738,6 +742,12 @@ func _build_world_layer() -> void:
 	var near_curtain := WeatherCurtain.new(WeatherCurtain.Depth.NEAR)
 	_world.add_child(near_curtain)
 	_curtains.append(near_curtain)
+
+	# Galeride kadro yolun yerine seviyenin bölge resminde durur (Y-A07);
+	# kart, harita ve savaş onun üstüne açılır.
+	_dungeon_view = DungeonView.new()
+	_dungeon_view.visible = false
+	_world.add_child(_dungeon_view)
 
 	# Savaş yolun *yerine* açılıyor: aynı çerçeve, aynı ekran alanı.
 	_combat_holder = VBoxContainer.new()
@@ -3672,6 +3682,29 @@ func _framed_text_key(event: GameEvent) -> String:
 	var framed := EventCatalog.get_culture_framed_text_key(event.event_id, culture_id)
 	return framed if not framed.is_empty() else event.text_key
 
+## Galeride kartın resmi bulunulan seviyenin bölgesi (Y-A07): yolun
+## manzarası değil, kadronun durduğu taş.
+func _dungeon_illustration() -> Control:
+	var look := _session.dungeon_look()
+	if look.is_empty():
+		return null
+	var path := CombatBackdrop.DUNGEON_DIR + look + ".jpg"
+	if not ResourceLoader.exists(path):
+		return null
+	var frame := Control.new()
+	frame.clip_contents = true
+	frame.custom_minimum_size = Vector2(CARD_WIDTH - 40.0, CARD_ILLUSTRATION_HEIGHT)
+	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var picture := TextureRect.new()
+	picture.texture = load(path)
+	picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	picture.set_anchors_preset(Control.PRESET_FULL_RECT)
+	picture.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	frame.add_child(picture)
+	CardDrift.attach(picture, UserSettings.reduce_motion)
+	return frame
+
 ## Kartın illüstrasyonu - `EVENT_CARD_ART`'ta yoksa `null` (kart resimsiz
 ## açılır, aynı `EVENT_ROAD_MARKER_KIND`'in eşlemede olmayan olayı hiç
 ## işaretlememesi gibi). Kare resim `STRETCH_KEEP_ASPECT_COVERED` ile
@@ -3679,6 +3712,9 @@ func _framed_text_key(event: GameEvent) -> String:
 ## kendi genişliğini dolduran geniş bir şerit, kareyi olduğu gibi basıp
 ## kartı ekrandan taşırmıyor.
 func _build_event_illustration(event_id: String) -> Control:
+	var cave := _dungeon_illustration()
+	if cave != null:
+		return cave
 	var file_name: String = EVENT_CARD_ART.get(event_id, "")
 	var path := "res://data/assets/ui/waybook/" + file_name
 	var look := _card_look()
@@ -4439,6 +4475,7 @@ func _has_open_panel() -> bool:
 		or _camp_panel != null
 		or _diary_panel != null
 		or _mercy_layer != null
+		or _dungeon_map_panel != null
 	)
 
 ## Yolun oyun içi menüsü: sefer sürerken elle kayıt kapalı (`setup(false)`),
@@ -4966,14 +5003,41 @@ func _flush_scribe() -> void:
 ## Galeri ağzının sıradaki kartı (Y-A07): aşama, kapı ya da kervanın başına
 ## gelen. Bir panel (savaş) açıksa o kapanınca yeniden çağrılır.
 func _continue_dungeon() -> void:
+	_sync_dungeon_view()
 	if _session.dungeon_run.is_empty() or _has_open_panel():
+		return
+	if _session.dungeon_on_map():
+		call_deferred("_open_dungeon_map")
 		return
 	var next := _session.dungeon_next_event()
 	if next != null:
 		call_deferred("_present_event", next)
 
-## Savaş arka planı: yolun o konumdaki resmi; galeri ağzında ağzın kendi resmi (Y-A07).
+## Galerinin haritası: oda seçimi, iniş, çıkış. Seçim kartların seçimi gibi
+## çözülür (`_on_choice_pressed`, kartsız).
+func _open_dungeon_map() -> void:
+	if _dungeon_map_panel != null or _has_open_panel() or not _session.dungeon_on_map():
+		return
+	_dungeon_map_panel = DungeonMapPanel.new()
+	add_child(_dungeon_map_panel)
+	_dungeon_map_panel.setup(_session)
+	_dungeon_map_panel.acted.connect(_on_dungeon_acted)
+	_refresh_state()
+
+func _on_dungeon_acted(choice: EventChoice) -> void:
+	if _dungeon_map_panel != null:
+		_dungeon_map_panel.queue_free()
+		_dungeon_map_panel = null
+	_current_event = null
+	_on_choice_pressed(choice)
+
+func _sync_dungeon_view() -> void:
+	if _dungeon_view != null:
+		_dungeon_view.show_for(_session.dungeon_look(), _session.get_party())
+
+## Savaş arka planı: yolun o konumdaki resmi; galeride bulunulan seviyenin
+## bölge resmi (Y-A07).
 func _combat_look() -> String:
 	if _session.dungeon_run.has("id"):
-		return CombatBackdrop.DUNGEON_PREFIX + String(_session.dungeon_run["id"])
+		return CombatBackdrop.DUNGEON_PREFIX + _session.dungeon_look()
 	return "" if _terrain == null else _terrain.look_at(_terrain_day())

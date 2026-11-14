@@ -1465,6 +1465,22 @@ derin değildir: birkaç yüz adım sonra göçükle, suyla ya da "kör hava"yla
 - **Madenciler neden inmez:** inen madencinin kazması ilk tünelde körleşir derler; asıl sebep kör havadır. Ocak
   beyleri ağızları kapalı tutmak ister ve kervanın inmesine göz yumar, çünkü kervan kaybolursa ocağın adamı kaybolmaz.
 
+- **İçeriden [Karar, 2026-11-14]:** her ağız aşağı indikçe aynı üç yerden geçer: madencinin ya da suyun açtığı
+  giriş, kaba kayanın birden düz kesilmiş taşa döndüğü geçit, ve kadimlerin kendi galerisi. Kadim taş harçsızdır,
+  derzleri kıl kadar, yüzü düzdür; madencilerin "kazmayla açılmamış" dediği budur.
+  - **Eski Ağız:** kuyunun dibi kaba kayadır; tepede kırık taş örtünün arasından gün ışığı süzülür, halat ve kova
+    hâlâ sarkar. Sonra madencilerin dikmeli tüneli, onun sonunda koyu, dümdüz bir yüz. En dipte iri bloklardan düz
+    tavanlı bir tünel ve üç kademeli çerçevesiyle taş levhayla örtülmüş bir kapı; önü göçük.
+  - **Kemrug Yarığı:** yarık ıslak ve karadır, tavanı yukarı doğru kapanmaz, zemini birikintilidir. Bir taş rafta
+    Kemruglular'ın bıraktığı ekmek durur. Aşağıda duvarın altı kesme taşa döner ve zeminde dümdüz oyulmuş bir kanaldan
+    ılık su akar; en dipte kare ayaklı bir salon, basamaklı taş havuzlar, havuzlardan buhar.
+  - **Kör Kazmalar'ın Alt Katı:** merdivenin dibinde kökler tavandan sarkar, merdivenin başından soğuk ışık düşer.
+    Altında duvarı boş nişlerle delik bir koridor; nişlerde ne yattığı bilinmez, hepsi boştur. En dipte sıvalı panolar
+    ve üstlerinde solmuş resimler: tarla biçenler, başında testiyle su taşıyanlar, bir sürü ve çobanı, bir dokuma
+    tezgâhı, bir sofra. Resimde savaş, kral ve tanrı yok.
+- **Madenci krokisi [Karar]:** ağza inen, geçtiği odaları taşa tebeşirle çizer; kervan defterine geçen kroki budur.
+  [Oyun] Galerinin haritası seviye seviye bu krokidir.
+
 ## 12. Yol: töre, tehlike, ad
 
 ### 12.1 Yolun töresi [Yazar, defter IV]

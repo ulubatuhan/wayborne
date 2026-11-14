@@ -756,3 +756,17 @@ Hâlâ kullanıcıda: Y-C31 geçiş belgesinin adları (SIDERIA'da yok), Y-A07 z
   Ekran: tests/screenshot_dungeon.gd. Savaş arka planı: üç geçici CC0 mağara resmi (ağız başına,
   `data/assets/backgrounds/dungeon/`), `CombatBackdrop` dokuyu `biome` atanırken yükler (`_draw` içinde
   ilk yükleme kareyi beyaz çiziyordu). El çizimi gelince aynı dosya adına konur.
+
+## Zindan haritası ve bölge resimleri (2026-11-14)
+
+- Kullanıcı: "seviye seviye map, arka plan seviyeye ve zindana göre, gerçekçi; girişler mağara, sonra kadim galeri".
+- `DungeonMap` (scripts/travel): seviye başına sütunlu oda ağı, oda türleri (giriş, geçit, savaş, hazine, dinlenme,
+  kalıntı, iniş, son), koridorun bedeli (ışık 3 koridor/meşale, 2 koridor 1 gün, stres 1/5, pusu %6/%22). Etki
+  `DUNGEON_MOVE`; kapı kartı artık yalnız çıkış (pay, paysız, vazgeç; derinden dönüş gün alır). Eski kayıtlar
+  `_dungeon_migrate` ile o seviyenin girişinden haritaya döner.
+- Ekran: `DungeonView` (yolun yerine bölge resmi ve kadro), `DungeonMapPanel` + `DungeonMapView` (tebeşir krokisi,
+  çizilen oda simgeleri). Kart resmi ve savaş arka planı `dungeon_look()` = `<ağız>_<bölge>`.
+- Render: `tools/dungeon/fetch_assets.py` (Poly Haven CC0, build/dungeon_src'ye), `build_dungeon.py` (9 sahne,
+  Cycles 56 örnek + gürültü giderme, ~8 dk/sahne, 4 çekirdek), `fresco.py` (Kör Kazmalar resimli duvarı). Blender:
+  `tools/figure_pipeline/setup_blender.sh` (Pillow eklendi). Geçici OpenGameArt resimleri silindi.
+- Lore: SIDERIA §11.7 "İçeriden" ve "Madenci krokisi" [Karar]. Ekran: tests/screenshot_dungeon.gd (DUNGEON=, NO_COMBAT=).
